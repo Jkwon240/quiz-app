@@ -7,50 +7,54 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;color:#d4e4f0;min-height:100vh;font-size:14px}
-.top{background:linear-gradient(135deg,#0d1f3c,#0a3060);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a4a80;gap:12px;flex-wrap:wrap}
+.top{background:linear-gradient(135deg,#0d1f3c,#0a3060);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a4a80;gap:12px;flex-wrap:wrap}
 .top-title{font-size:16px;font-weight:700;color:#4db8ff}
 .top-sub{font-size:11px;color:#5a85aa;margin-top:2px}
-.stats-row{display:flex;gap:10px}
-.stat{text-align:center;background:#111d30;border:1px solid #1a3a5c;border-radius:7px;padding:6px 14px;min-width:56px}
-.stat .n{font-size:18px;font-weight:700;color:#4db8ff}
+.stats-row{display:flex;gap:8px;flex-wrap:wrap}
+.stat{text-align:center;background:#111d30;border:1px solid #1a3a5c;border-radius:7px;padding:5px 12px;min-width:52px}
+.stat .n{font-size:17px;font-weight:700;color:#4db8ff}
 .stat .l{font-size:10px;color:#5a85aa}
-.sync-bar{background:#0a1a10;border-bottom:1px solid #1a4a30;padding:6px 24px;font-size:11px;color:#3a8a5a;display:flex;align-items:center;gap:8px}
+.sync-bar{background:#0a1a10;border-bottom:1px solid #1a4a30;padding:5px 24px;font-size:11px;color:#3a8a5a;display:flex;align-items:center;gap:8px}
 .sync-bar.error{background:#1a0a0a;border-color:#4a1a1a;color:#8a3a3a}
-.sync-bar.loading{color:#5a85aa;background:#0a0f1a}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
-.wrap{display:grid;grid-template-columns:230px 1fr;height:calc(100vh - 88px)}
+.sync-bar.loading{color:#5a85aa;background:#0a0f1a;border-color:#1a3355}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.wrap{display:grid;grid-template-columns:240px 1fr;height:calc(100vh - 84px)}
 .side{background:#0d1622;border-right:1px solid #1a3355;padding:14px;overflow-y:auto}
 .side-h{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#4a6a8a;margin-bottom:8px;margin-top:4px}
 .filter-btn{width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;background:#111d30;border:1px solid #1a3a5c;border-radius:6px;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s}
 .filter-btn:hover,.filter-btn.on{background:#0d3060;border-color:#4db8ff;color:#4db8ff}
 .filter-btn .cnt{float:right;opacity:.55;font-size:10px}
-.diff-row{display:flex;gap:5px;margin-bottom:10px}
-.diff-btn{flex:1;padding:6px 2px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;text-align:center;transition:.15s}
+.diff-row{display:flex;gap:5px;margin-bottom:8px}
+.diff-btn{flex:1;padding:5px 2px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;text-align:center;transition:.15s}
 .diff-btn:hover,.diff-btn.on{border-color:#4db8ff;color:#4db8ff;background:#0d2a4a}
-.divider{border-top:1px solid #1a3355;margin:12px 0}
+.sort-row{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.sort-btn{width:100%;padding:6px 10px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;text-align:left;transition:.15s}
+.sort-btn:hover,.sort-btn.on{border-color:#f39c12;color:#f39c12;background:#1a1000}
+.divider{border-top:1px solid #1a3355;margin:10px 0}
 .prog-label{font-size:11px;color:#5a85aa;margin-bottom:5px;display:flex;justify-content:space-between}
 .prog-track{background:#111d30;border-radius:4px;height:5px;overflow:hidden}
 .prog-fill{background:linear-gradient(90deg,#1a6ab0,#4db8ff);height:100%;transition:.4s;border-radius:4px;width:0%}
 .main{overflow-y:auto;padding:20px 24px}
-.controls{display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
-.search-box{flex:1;min-width:180px;padding:8px 12px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#d4e4f0;font-size:13px;outline:none}
+.controls{display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.search-box{flex:1;min-width:160px;padding:8px 12px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#d4e4f0;font-size:13px;outline:none}
 .search-box:focus{border-color:#4db8ff}
-.ctrl-btn{padding:8px 16px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s;white-space:nowrap}
+.ctrl-btn{padding:7px 14px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s;white-space:nowrap}
 .ctrl-btn:hover{border-color:#4db8ff;color:#4db8ff}
 .ctrl-btn.primary{background:#0d3a70;border-color:#4db8ff;color:#4db8ff;font-weight:700}
-.ctrl-btn.danger{border-color:#5c1a1a;color:#e05050}
-.ctrl-btn.danger:hover{border-color:#e05050;background:#1a0808}
 .qlist{display:flex;flex-direction:column;gap:12px}
-.qcard{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:18px}
+.qcard{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:16px;position:relative}
 .qcard.done-correct{border-color:#1a5c30;background:#0a1a10}
 .qcard.done-wrong{border-color:#5c1a1a;background:#1a0a0a}
-.qmeta{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.qcard.bookmarked{box-shadow:0 0 0 1px #b8860b inset}
+.qmeta{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
 .tag{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
 .tag.subj{background:#0d3060;color:#4db8ff}
 .tag.diff-easy{background:#0d3020;color:#2ecc71}
 .tag.diff-mid{background:#3a2500;color:#f39c12}
 .tag.diff-hard{background:#3a0d0d;color:#e74c3c}
 .tag.num{background:#1a2535;color:#5a85aa;font-weight:400}
+.tag.wrong-cnt{background:#3a1500;color:#e67e22;font-weight:700}
+.tag.bookmark-tag{background:#3a2e00;color:#f1c40f}
 .qtext{font-size:13px;line-height:1.75;color:#c8ddef;margin-bottom:14px;font-weight:500}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .opt{padding:9px 12px;border-radius:6px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;text-align:left;transition:.15s;line-height:1.45}
@@ -60,6 +64,12 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 .opt.wrong{border-color:#c0392b!important;background:#200808!important;color:#e74c3c!important}
 .exp{margin-top:10px;padding:10px 13px;background:#090f1e;border-left:3px solid #4db8ff;border-radius:0 5px 5px 0;font-size:12px;color:#7a9ab0;line-height:1.65;display:none}
 .exp.show{display:block}
+.card-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.act-btn{padding:5px 12px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;transition:.15s}
+.act-btn:hover{border-color:#4db8ff;color:#4db8ff}
+.act-btn.retry{border-color:#1a5a20;color:#2ecc71}
+.act-btn.retry:hover{background:#0a2010}
+.act-btn.bm-on{border-color:#b8860b;color:#f1c40f;background:#1a1400}
 .no-q{text-align:center;padding:60px 20px;color:#3a5a7a}
 .no-q .icon{font-size:40px;margin-bottom:12px}
 @media(max-width:700px){.wrap{grid-template-columns:1fr}.side{display:none}.opts{grid-template-columns:1fr}}
@@ -69,13 +79,14 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 <div class="top">
   <div>
     <div class="top-title">⚓ 스마트해상물류관리사 문제은행</div>
-    <div class="top-sub">전 과목 274문항 · 공식 모의고사 포함 · 풀이기록 자동저장</div>
+    <div class="top-sub">274문항 · 오답 횟수 추적 · 다시풀기 · 북마크 · DB 자동저장</div>
   </div>
   <div class="stats-row">
-    <div class="stat"><div class="n" id="sTotal">274</div><div class="l">전체</div></div>
+    <div class="stat"><div class="n" id="sTotal">-</div><div class="l">표시</div></div>
     <div class="stat"><div class="n" id="sDone">0</div><div class="l">완료</div></div>
     <div class="stat"><div class="n" id="sCorrect">0</div><div class="l">정답</div></div>
     <div class="stat"><div class="n" id="sRate">0%</div><div class="l">정답률</div></div>
+    <div class="stat"><div class="n" id="sWrongTop" style="color:#e67e22">0</div><div class="l">최다오답</div></div>
   </div>
 </div>
 <div class="sync-bar loading" id="syncBar">
@@ -85,14 +96,14 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 <div class="wrap">
 <div class="side">
   <div class="side-h">과목</div>
-  <button class="filter-btn on" onclick="setSubj('all',this)">전체 과목 <span class="cnt" id="cntAll">-</span></button>
+  <button class="filter-btn on" onclick="setSubj('all',this)">전체 <span class="cnt" id="cntAll">-</span></button>
   <button class="filter-btn" onclick="setSubj('해운',this)">해운론 <span class="cnt" id="cntHaeun">-</span></button>
   <button class="filter-btn" onclick="setSubj('항만',this)">항만물류 <span class="cnt" id="cntHangman">-</span></button>
   <button class="filter-btn" onclick="setSubj('무역',this)">무역실무 <span class="cnt" id="cntMuyeok">-</span></button>
-  <button class="filter-btn" onclick="setSubj('SCM',this)">SCM·물류관리 <span class="cnt" id="cntSCM">-</span></button>
-  <button class="filter-btn" onclick="setSubj('ICT',this)">ICT·디지털물류 <span class="cnt" id="cntICT">-</span></button>
-  <button class="filter-btn" onclick="setSubj('스마트',this)">스마트해상물류 <span class="cnt" id="cntSmart">-</span></button>
-  <button class="filter-btn" onclick="setSubj('모의',this)" style="color:#f39c12;border-color:#5a3a00">📋 공식 모의고사 <span class="cnt" id="cntMoui">-</span></button>
+  <button class="filter-btn" onclick="setSubj('SCM',this)">SCM·물류 <span class="cnt" id="cntSCM">-</span></button>
+  <button class="filter-btn" onclick="setSubj('ICT',this)">ICT·디지털 <span class="cnt" id="cntICT">-</span></button>
+  <button class="filter-btn" onclick="setSubj('스마트',this)">스마트해상 <span class="cnt" id="cntSmart">-</span></button>
+  <button class="filter-btn" onclick="setSubj('모의',this)" style="color:#f39c12;border-color:#5a3a00">📋 모의고사 <span class="cnt" id="cntMoui">-</span></button>
   <div class="divider"></div>
   <div class="side-h">난이도</div>
   <div class="diff-row">
@@ -102,11 +113,19 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
     <button class="diff-btn" onclick="setDiff('hard',this)">고급</button>
   </div>
   <div class="divider"></div>
+  <div class="side-h">보기 / 정렬</div>
+  <div class="sort-row">
+    <button class="sort-btn on" id="sortDefault" onclick="setSort('default',this)">📋 기본 순서</button>
+    <button class="sort-btn" id="sortWrong" onclick="setSort('wrong',this)">🔥 오답 많은 순</button>
+    <button class="sort-btn" id="sortBookmark" onclick="setSort('bookmark',this)">⭐ 북마크만 보기</button>
+    <button class="sort-btn" id="sortUnsolved" onclick="setSort('unsolved',this)">❓ 안 푼 문제만</button>
+  </div>
+  <div class="divider"></div>
   <div class="prog-label"><span>진도율</span><span id="progPct">0%</span></div>
   <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
   <div class="divider"></div>
-  <button class="filter-btn" style="color:#e05050;border-color:#4a1a1a" onclick="showWrong()">❌ 오답만 보기</button>
-  <button class="filter-btn" style="margin-top:4px;color:#e05050" onclick="resetAll()">🔄 전체 초기화</button>
+  <button class="filter-btn" style="color:#e67e22;border-color:#4a2a00" onclick="retryAllWrong()">🔄 오답 전체 다시풀기</button>
+  <button class="filter-btn" style="margin-top:4px;color:#e05050" onclick="resetAll()">🗑 전체 초기화</button>
 </div>
 <div class="main">
   <div class="controls">
@@ -117,93 +136,69 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
   <div class="qlist" id="qlist"></div>
 </div>
 </div>
+
 <script>
-// ===== SUPABASE CONFIG =====
+// ===== SUPABASE =====
 const SUPABASE_URL = 'https://pdoelwybbnrdyitoeqrb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI';
 
-// ===== DEVICE ID (브라우저 고유 ID) =====
 function getDeviceId(){
   let id = localStorage.getItem('quiz_device_id');
-  if(!id){
-    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
-    localStorage.setItem('quiz_device_id', id);
-  }
+  if(!id){ id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem('quiz_device_id',id); }
   return id;
 }
 const DEVICE_ID = getDeviceId();
 
-// ===== SUPABASE API HELPERS =====
-async function sbRequest(method, path, body=null){
-  const opts = {
-    method,
-    headers:{
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': method==='POST' ? 'resolution=merge-duplicates' : ''
-    }
-  };
-  if(body) opts.body = JSON.stringify(body);
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
-  if(!res.ok){
-    const err = await res.text();
-    throw new Error(err);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
+async function sbReq(method, path, body=null){
+  const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);
+  const text=await res.text();
+  return text?JSON.parse(text):[];
 }
 
 async function loadProgress(){
   setSyncStatus('loading','기록 불러오는 중...');
-  try {
-    const rows = await sbRequest('GET',
-      `quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`
-    );
-    rows.forEach(r => { state[r.question_index] = r.result; });
-    setSyncStatus('ok', `기록 불러옴 · 기기ID: ${DEVICE_ID.slice(0,16)}...`);
-  } catch(e){
-    setSyncStatus('error','DB 연결 실패 — 로컬에서만 저장됩니다');
-  }
-}
-
-async function saveAnswer(qi, result){
-  // 로컬 먼저 저장
-  const local = JSON.parse(localStorage.getItem('quiz_state')||'{}');
-  local[qi] = result;
-  localStorage.setItem('quiz_state', JSON.stringify(local));
-  // DB 저장
-  try {
-    await sbRequest('POST', 'quiz_progress', {
-      device_id: DEVICE_ID,
-      question_index: qi,
-      result: result
+  try{
+    const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`);
+    rows.forEach(r=>{
+      if(!state[r.question_index]) state[r.question_index]={};
+      // result 파싱: "correct", "wrong-N", "wrong-N:3" (횟수포함)
+      parseResult(r.question_index, r.result);
     });
-  } catch(e){
-    console.warn('DB save failed:', e);
+    setSyncStatus('ok','✓ 기록 불러옴 · ID: '+DEVICE_ID.slice(0,14)+'...');
+  }catch(e){ setSyncStatus('error','DB 연결 실패 — 로컬에서만 저장'); }
+}
+
+function parseResult(qi, result){
+  if(!state[qi]) state[qi]={lastResult:null, wrongCount:0, bookmarked:false};
+  if(result.startsWith('bookmark:')){
+    state[qi].bookmarked = result.includes('true');
+  } else if(result.startsWith('wrong')){
+    const parts = result.split(':');
+    state[qi].lastResult = 'wrong';
+    state[qi].wrongCount = parts[1] ? parseInt(parts[1]) : (state[qi].wrongCount||0)+1;
+  } else if(result === 'correct'){
+    state[qi].lastResult = 'correct';
   }
 }
 
-async function clearProgress(){
-  try {
-    await sbRequest('DELETE',
-      `quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}`
-    );
-    localStorage.removeItem('quiz_state');
-    setSyncStatus('ok','초기화 완료');
-  } catch(e){
-    console.warn('DB clear failed');
-  }
+async function saveToDb(qi, resultStr){
+  const local = JSON.parse(localStorage.getItem('quiz_state2')||'{}');
+  local[qi] = resultStr;
+  localStorage.setItem('quiz_state2', JSON.stringify(local));
+  try{
+    await sbReq('POST','quiz_progress',{device_id:DEVICE_ID, question_index:qi, result:resultStr});
+  }catch(e){ console.warn('DB save failed'); }
 }
 
-function setSyncStatus(type, msg){
-  const bar = document.getElementById('syncBar');
-  const txt = document.getElementById('syncMsg');
-  bar.className = 'sync-bar ' + (type==='error'?'error':type==='loading'?'loading':'');
-  txt.textContent = msg;
+function setSyncStatus(type,msg){
+  const bar=document.getElementById('syncBar');
+  bar.className='sync-bar '+(type==='error'?'error':type==='loading'?'loading':'');
+  document.getElementById('syncMsg').textContent=msg;
 }
 
-// ===== QUESTION DATA =====
+// ===== QUESTIONS =====
 const QS=[
 /* ===== 해운론 (1-35) ===== */
 {s:'해운',d:'easy',q:'정기선(Liner) 운송의 가장 큰 특징은?',o:['화주와 매 항해마다 개별 계약','정해진 항로·일정·요율로 운항','화주 전용 선박을 배선','운임이 수요공급에 따라 매일 변동'],a:1,e:'정기선은 특정 항로에 정해진 스케줄·공표운임(Tariff)으로 운항합니다. 반대 개념은 부정기선(Tramper)입니다.'},
@@ -504,10 +499,16 @@ const QS=[
 {s:'스마트',d:'hard',q:'해운 디지털 전환에서 "오픈 소스 선박 데이터 표준(NMEA 2000)"의 용도는?',o:['해운 운임 공시 표준','선박 내 항법·엔진·센서 장비 간 디지털 데이터 통신 표준 프로토콜','블록체인 기반 B/L 표준','AI 모델 공유 표준'],a:1,e:'NMEA 2000은 선박 내 GPS·레이더·엔진 제어기·연료계 등 다양한 항전 장비 간 디지털 통신을 위한 표준 프로토콜로, 선박 IoT 데이터 통합의 기초 인프라입니다.'}
 ];
 
-// ===== APP STATE =====
-let subjFilter='all', diffFilter='all', wrongMode=false;
-let state={};
+// ===== STATE =====
+// state[qi] = { lastResult: 'correct'|'wrong'|null, wrongCount: N, bookmarked: bool, retrying: bool }
+let state = {};
+let subjFilter='all', diffFilter='all', sortMode='default';
 let order=[...Array(QS.length).keys()];
+
+function getS(qi){
+  if(!state[qi]) state[qi]={lastResult:null,wrongCount:0,bookmarked:false,retrying:false};
+  return state[qi];
+}
 
 // ===== SIDEBAR COUNTS =====
 function updateSidebarCounts(){
@@ -523,9 +524,9 @@ function updateSidebarCounts(){
   document.getElementById('cntMoui').textContent=cnt['모의']||0;
 }
 
-// ===== FILTERS =====
+// ===== FILTERS & SORT =====
 function setSubj(v,btn){
-  subjFilter=v; wrongMode=false;
+  subjFilter=v;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on'); render();
 }
@@ -534,99 +535,162 @@ function setDiff(v,btn){
   document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on'); render();
 }
-function showWrong(){ wrongMode=true; render(); }
-async function resetAll(){
-  if(!confirm('모든 풀이 기록을 초기화합니까?\nDB에서도 삭제됩니다.')) return;
-  state={};
-  await clearProgress();
-  render(); updateStats();
+function setSort(v,btn){
+  sortMode=v;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); render();
 }
 function shuffle(){ order.sort(()=>Math.random()-.5); render(); }
 function expandAll(){ document.querySelectorAll('.exp').forEach(e=>e.classList.add('show')); }
 
 function filtered(){
   const kw=document.getElementById('searchBox').value.trim().toLowerCase();
-  return order.filter(i=>{
-    const q=QS[i];
-    if(subjFilter!=='all'&&q.s!==subjFilter) return false;
-    if(diffFilter!=='all'&&q.d!==diffFilter) return false;
-    if(wrongMode&&state[i]!=='wrong'&&!String(state[i]).startsWith('wrong-')) return false;
-    if(kw&&!q.q.toLowerCase().includes(kw)&&!q.o.join('').toLowerCase().includes(kw)) return false;
-    return true;
-  });
+  let ids=[...order];
+
+  // 과목 필터
+  if(subjFilter!=='all') ids=ids.filter(i=>QS[i].s===subjFilter);
+  // 난이도 필터
+  if(diffFilter!=='all') ids=ids.filter(i=>QS[i].d===diffFilter);
+  // 키워드
+  if(kw) ids=ids.filter(i=>QS[i].q.toLowerCase().includes(kw)||QS[i].o.join('').toLowerCase().includes(kw));
+
+  // 정렬/뷰 모드
+  if(sortMode==='wrong') ids=ids.filter(i=>getS(i).wrongCount>0).sort((a,b)=>getS(b).wrongCount-getS(a).wrongCount);
+  if(sortMode==='bookmark') ids=ids.filter(i=>getS(i).bookmarked);
+  if(sortMode==='unsolved') ids=ids.filter(i=>!getS(i).lastResult && !getS(i).retrying);
+
+  return ids;
 }
 
+// ===== RENDER =====
 function render(){
   const ids=filtered();
   document.getElementById('sTotal').textContent=ids.length;
   const list=document.getElementById('qlist');
   if(!ids.length){
     list.innerHTML='<div class="no-q"><div class="icon">🔍</div><div>조건에 맞는 문제가 없습니다</div></div>';
-    return;
+    updateStats(); return;
   }
+
   list.innerHTML=ids.map((i,idx)=>{
-    const q=QS[i]; const st=state[i];
+    const q=QS[i]; const s=getS(i);
     const diffCls={easy:'diff-easy',mid:'diff-mid',hard:'diff-hard'}[q.d];
     const diffLabel={easy:'기초',mid:'중급',hard:'고급'}[q.d];
-    const cardCls=st?(String(st).startsWith('correct')?'done-correct':'done-wrong'):'';
+    const answered = s.lastResult && !s.retrying;
+    const cardCls = answered ? (s.lastResult==='correct'?'done-correct':'done-wrong') : s.bookmarked?'bookmarked':'';
+
+    // 배지들
+    let badges='';
+    if(s.lastResult==='correct'&&!s.retrying) badges+='<span class="tag diff-easy">✓ 정답</span>';
+    if(s.lastResult==='wrong'&&!s.retrying) badges+='<span class="tag diff-hard">✗ 오답</span>';
+    if(s.wrongCount>0) badges+=`<span class="tag wrong-cnt">❌ ${s.wrongCount}회 틀림</span>`;
+    if(s.bookmarked) badges+='<span class="tag bookmark-tag">⭐ 북마크</span>';
+
+    // 선택지
     const opts=q.o.map((o,oi)=>{
       let cls='';
-      if(st){
-        if(oi===q.a) cls='correct';
-        else if(st==='wrong-'+oi) cls='wrong';
-      }
-      return `<button class="opt ${cls}" onclick="answer(${i},${oi})" ${st?'disabled':''}>` +
+      if(answered){ if(oi===q.a) cls='correct'; else if(s.wrongOptIdx===oi) cls='wrong'; }
+      return `<button class="opt ${cls}" onclick="answer(${i},${oi})" ${answered?'disabled':''}>` +
         ['①','②','③','④'][oi]+' '+o+'</button>';
     }).join('');
-    const badge = st==='correct'
-      ? '<span class="tag diff-easy">✓ 정답</span>'
-      : st ? '<span class="tag diff-hard">✗ 오답</span>' : '';
+
+    // 액션 버튼들
+    let actions='';
+    if(answered){
+      actions+=`<button class="act-btn retry" onclick="retryOne(${i})">🔄 다시 풀기</button>`;
+    }
+    const bmLabel = s.bookmarked ? '⭐ 북마크 해제' : '☆ 북마크';
+    const bmCls = s.bookmarked ? 'act-btn bm-on' : 'act-btn';
+    actions+=`<button class="${bmCls}" onclick="toggleBookmark(${i})">${bmLabel}</button>`;
+
     return `<div class="qcard ${cardCls}" id="qc${i}">
       <div class="qmeta">
         <span class="tag subj">${q.s}</span>
         <span class="tag ${diffCls}">${diffLabel}</span>
         <span class="tag num">Q${idx+1}</span>
-        ${badge}
+        ${badges}
       </div>
       <div class="qtext">${q.q}</div>
       <div class="opts">${opts}</div>
-      <div class="exp ${st?'show':''}" id="exp${i}">💡 ${q.e}</div>
+      <div class="exp ${answered?'show':''}" id="exp${i}">💡 ${q.e}</div>
+      <div class="card-actions">${actions}</div>
     </div>`;
   }).join('');
   updateStats();
 }
 
-async function answer(qi,oi){
-  if(state[qi]) return;
-  const q=QS[qi];
-  const result = oi===q.a ? 'correct' : 'wrong-'+oi;
-  state[qi] = result;
-
-  const card=document.getElementById('qc'+qi);
-  const exp=document.getElementById('exp'+qi);
-  card.querySelectorAll('.opt').forEach((btn,i)=>{
-    btn.disabled=true;
-    if(i===q.a) btn.classList.add('correct');
-    else if(i===oi) btn.classList.add('wrong');
-  });
-  exp.classList.add('show');
-  card.className='qcard '+(oi===q.a?'done-correct':'done-wrong');
-  updateStats();
-
-  // DB에 저장 (비동기, UI 블로킹 없음)
+// ===== ANSWER =====
+async function answer(qi, oi){
+  const s=getS(qi); const q=QS[qi];
+  if(s.lastResult && !s.retrying) return;
+  const correct = oi===q.a;
+  s.retrying=false;
+  if(correct){
+    s.lastResult='correct';
+  } else {
+    s.lastResult='wrong';
+    s.wrongCount=(s.wrongCount||0)+1;
+    s.wrongOptIdx=oi;
+  }
+  render();
+  // DB 저장
   setSyncStatus('loading','저장 중...');
-  await saveAnswer(qi, result);
-  setSyncStatus('ok','✓ 저장됨 · ' + new Date().toLocaleTimeString('ko-KR'));
+  const resultStr = correct ? 'correct' : `wrong-${oi}:${s.wrongCount}`;
+  await saveToDb(qi, resultStr);
+  setSyncStatus('ok','✓ 저장됨 · '+new Date().toLocaleTimeString('ko-KR'));
 }
 
+// ===== RETRY ONE =====
+function retryOne(qi){
+  const s=getS(qi);
+  s.retrying=true;
+  s.lastResult=null;
+  render();
+}
+
+// ===== RETRY ALL WRONG =====
+function retryAllWrong(){
+  let cnt=0;
+  Object.keys(state).forEach(qi=>{
+    if(state[qi] && state[qi].wrongCount>0){ state[qi].retrying=true; state[qi].lastResult=null; cnt++; }
+  });
+  if(cnt===0){ alert('오답 문제가 없습니다!'); return; }
+  setSort('wrong', document.getElementById('sortWrong'));
+}
+
+// ===== BOOKMARK =====
+async function toggleBookmark(qi){
+  const s=getS(qi);
+  s.bookmarked=!s.bookmarked;
+  render();
+  await saveToDb(qi+100000, 'bookmark:'+s.bookmarked); // bookmark용 별도 row
+  setSyncStatus('ok',s.bookmarked?'⭐ 북마크 추가됨':'북마크 해제됨');
+}
+
+// ===== RESET =====
+async function resetAll(){
+  if(!confirm('모든 풀이 기록을 초기화합니까?\nDB에서도 삭제됩니다.')) return;
+  state={};
+  try{
+    await sbReq('DELETE',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}`);
+    localStorage.removeItem('quiz_state2');
+    setSyncStatus('ok','초기화 완료');
+  }catch(e){ console.warn('DB clear failed'); }
+  render(); updateStats();
+}
+
+// ===== STATS =====
 function updateStats(){
-  const done=Object.keys(state).length;
-  const correct=Object.values(state).filter(v=>v==='correct').length;
+  const all=Object.values(state);
+  const done=all.filter(s=>s&&s.lastResult&&!s.retrying).length;
+  const correct=all.filter(s=>s&&s.lastResult==='correct'&&!s.retrying).length;
   const pct=done?Math.round(correct/done*100):0;
   const prog=Math.round(done/QS.length*100);
+  const maxWrong=Math.max(0,...Object.values(state).map(s=>s?s.wrongCount||0:0));
   document.getElementById('sDone').textContent=done;
   document.getElementById('sCorrect').textContent=correct;
   document.getElementById('sRate').textContent=pct+'%';
+  document.getElementById('sWrongTop').textContent=maxWrong;
   document.getElementById('progFill').style.width=prog+'%';
   document.getElementById('progPct').textContent=prog+'%';
 }
@@ -634,12 +698,12 @@ function updateStats(){
 // ===== INIT =====
 async function init(){
   updateSidebarCounts();
-  // 로컬 캐시 먼저 적용 (빠른 초기 렌더)
-  const local = JSON.parse(localStorage.getItem('quiz_state')||'{}')
+  // 로컬 캐시 먼저
+  const local=JSON.parse(localStorage.getItem('quiz_state2')||'{}')
 ;
-  Object.assign(state, local);
+  Object.entries(local).forEach(([qi,result])=>parseResult(parseInt(qi),result));
   render();
-  // DB에서 최신 데이터 로드
+  // DB 로드
   await loadProgress();
   render();
 }
