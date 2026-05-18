@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스마트해상물류관리사 문제은행</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;color:#d4e4f0;min-height:100vh;font-size:14px}
+.top{background:linear-gradient(135deg,#0d1f3c,#0a3060);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a4a80;gap:12px;flex-wrap:wrap}
+.top-title{font-size:16px;font-weight:700;color:#4db8ff}
+.top-sub{font-size:11px;color:#5a85aa;margin-top:2px}
+.stats-row{display:flex;gap:10px}
+.stat{text-align:center;background:#111d30;border:1px solid #1a3a5c;border-radius:7px;padding:6px 14px;min-width:56px}
+.stat .n{font-size:18px;font-weight:700;color:#4db8ff}
+.stat .l{font-size:10px;color:#5a85aa}
+.sync-bar{background:#0a1a10;border-bottom:1px solid #1a4a30;padding:6px 24px;font-size:11px;color:#3a8a5a;display:flex;align-items:center;gap:8px}
+.sync-bar.error{background:#1a0a0a;border-color:#4a1a1a;color:#8a3a3a}
+.sync-bar.loading{color:#5a85aa;background:#0a0f1a}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.wrap{display:grid;grid-template-columns:230px 1fr;height:calc(100vh - 88px)}
+.side{background:#0d1622;border-right:1px solid #1a3355;padding:14px;overflow-y:auto}
+.side-h{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#4a6a8a;margin-bottom:8px;margin-top:4px}
+.filter-btn{width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;background:#111d30;border:1px solid #1a3a5c;border-radius:6px;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s}
+.filter-btn:hover,.filter-btn.on{background:#0d3060;border-color:#4db8ff;color:#4db8ff}
+.filter-btn .cnt{float:right;opacity:.55;font-size:10px}
+.diff-row{display:flex;gap:5px;margin-bottom:10px}
+.diff-btn{flex:1;padding:6px 2px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;text-align:center;transition:.15s}
+.diff-btn:hover,.diff-btn.on{border-color:#4db8ff;color:#4db8ff;background:#0d2a4a}
+.divider{border-top:1px solid #1a3355;margin:12px 0}
+.prog-label{font-size:11px;color:#5a85aa;margin-bottom:5px;display:flex;justify-content:space-between}
+.prog-track{background:#111d30;border-radius:4px;height:5px;overflow:hidden}
+.prog-fill{background:linear-gradient(90deg,#1a6ab0,#4db8ff);height:100%;transition:.4s;border-radius:4px;width:0%}
+.main{overflow-y:auto;padding:20px 24px}
+.controls{display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+.search-box{flex:1;min-width:180px;padding:8px 12px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#d4e4f0;font-size:13px;outline:none}
+.search-box:focus{border-color:#4db8ff}
+.ctrl-btn{padding:8px 16px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s;white-space:nowrap}
+.ctrl-btn:hover{border-color:#4db8ff;color:#4db8ff}
+.ctrl-btn.primary{background:#0d3a70;border-color:#4db8ff;color:#4db8ff;font-weight:700}
+.ctrl-btn.danger{border-color:#5c1a1a;color:#e05050}
+.ctrl-btn.danger:hover{border-color:#e05050;background:#1a0808}
+.qlist{display:flex;flex-direction:column;gap:12px}
+.qcard{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:18px}
+.qcard.done-correct{border-color:#1a5c30;background:#0a1a10}
+.qcard.done-wrong{border-color:#5c1a1a;background:#1a0a0a}
+.qmeta{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.tag{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.tag.subj{background:#0d3060;color:#4db8ff}
+.tag.diff-easy{background:#0d3020;color:#2ecc71}
+.tag.diff-mid{background:#3a2500;color:#f39c12}
+.tag.diff-hard{background:#3a0d0d;color:#e74c3c}
+.tag.num{background:#1a2535;color:#5a85aa;font-weight:400}
+.qtext{font-size:13px;line-height:1.75;color:#c8ddef;margin-bottom:14px;font-weight:500}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.opt{padding:9px 12px;border-radius:6px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;text-align:left;transition:.15s;line-height:1.45}
+.opt:hover:not(:disabled){border-color:#4db8ff;color:#c8ddef;background:#0d2a4a}
+.opt:disabled{cursor:default}
+.opt.correct{border-color:#27ae60!important;background:#0a2010!important;color:#2ecc71!important}
+.opt.wrong{border-color:#c0392b!important;background:#200808!important;color:#e74c3c!important}
+.exp{margin-top:10px;padding:10px 13px;background:#090f1e;border-left:3px solid #4db8ff;border-radius:0 5px 5px 0;font-size:12px;color:#7a9ab0;line-height:1.65;display:none}
+.exp.show{display:block}
+.no-q{text-align:center;padding:60px 20px;color:#3a5a7a}
+.no-q .icon{font-size:40px;margin-bottom:12px}
+@media(max-width:700px){.wrap{grid-template-columns:1fr}.side{display:none}.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <div class="top-title">⚓ 스마트해상물류관리사 문제은행</div>
+    <div class="top-sub">전 과목 274문항 · 공식 모의고사 포함 · 풀이기록 자동저장</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="n" id="sTotal">274</div><div class="l">전체</div></div>
+    <div class="stat"><div class="n" id="sDone">0</div><div class="l">완료</div></div>
+    <div class="stat"><div class="n" id="sCorrect">0</div><div class="l">정답</div></div>
+    <div class="stat"><div class="n" id="sRate">0%</div><div class="l">정답률</div></div>
+  </div>
+</div>
+<div class="sync-bar loading" id="syncBar">
+  <div class="sync-dot"></div>
+  <span id="syncMsg">기록 불러오는 중...</span>
+</div>
+<div class="wrap">
+<div class="side">
+  <div class="side-h">과목</div>
+  <button class="filter-btn on" onclick="setSubj('all',this)">전체 과목 <span class="cnt" id="cntAll">-</span></button>
+  <button class="filter-btn" onclick="setSubj('해운',this)">해운론 <span class="cnt" id="cntHaeun">-</span></button>
+  <button class="filter-btn" onclick="setSubj('항만',this)">항만물류 <span class="cnt" id="cntHangman">-</span></button>
+  <button class="filter-btn" onclick="setSubj('무역',this)">무역실무 <span class="cnt" id="cntMuyeok">-</span></button>
+  <button class="filter-btn" onclick="setSubj('SCM',this)">SCM·물류관리 <span class="cnt" id="cntSCM">-</span></button>
+  <button class="filter-btn" onclick="setSubj('ICT',this)">ICT·디지털물류 <span class="cnt" id="cntICT">-</span></button>
+  <button class="filter-btn" onclick="setSubj('스마트',this)">스마트해상물류 <span class="cnt" id="cntSmart">-</span></button>
+  <button class="filter-btn" onclick="setSubj('모의',this)" style="color:#f39c12;border-color:#5a3a00">📋 공식 모의고사 <span class="cnt" id="cntMoui">-</span></button>
+  <div class="divider"></div>
+  <div class="side-h">난이도</div>
+  <div class="diff-row">
+    <button class="diff-btn on" onclick="setDiff('all',this)">전체</button>
+    <button class="diff-btn" onclick="setDiff('easy',this)">기초</button>
+    <button class="diff-btn" onclick="setDiff('mid',this)">중급</button>
+    <button class="diff-btn" onclick="setDiff('hard',this)">고급</button>
+  </div>
+  <div class="divider"></div>
+  <div class="prog-label"><span>진도율</span><span id="progPct">0%</span></div>
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+  <div class="divider"></div>
+  <button class="filter-btn" style="color:#e05050;border-color:#4a1a1a" onclick="showWrong()">❌ 오답만 보기</button>
+  <button class="filter-btn" style="margin-top:4px;color:#e05050" onclick="resetAll()">🔄 전체 초기화</button>
+</div>
+<div class="main">
+  <div class="controls">
+    <input class="search-box" id="searchBox" placeholder="🔍 키워드 검색..." oninput="render()">
+    <button class="ctrl-btn primary" onclick="shuffle()">🔀 랜덤</button>
+    <button class="ctrl-btn" onclick="expandAll()">📋 해설 전체보기</button>
+  </div>
+  <div class="qlist" id="qlist"></div>
+</div>
+</div>
+<script>
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://pdoelwybbnrdyitoeqrb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI';
+
+// ===== DEVICE ID (브라우저 고유 ID) =====
+function getDeviceId(){
+  let id = localStorage.getItem('quiz_device_id');
+  if(!id){
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
+    localStorage.setItem('quiz_device_id', id);
+  }
+  return id;
+}
+const DEVICE_ID = getDeviceId();
+
+// ===== SUPABASE API HELPERS =====
+async function sbRequest(method, path, body=null){
+  const opts = {
+    method,
+    headers:{
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method==='POST' ? 'resolution=merge-duplicates' : ''
+    }
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+  if(!res.ok){
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+async function loadProgress(){
+  setSyncStatus('loading','기록 불러오는 중...');
+  try {
+    const rows = await sbRequest('GET',
+      `quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`
+    );
+    rows.forEach(r => { state[r.question_index] = r.result; });
+    setSyncStatus('ok', `기록 불러옴 · 기기ID: ${DEVICE_ID.slice(0,16)}...`);
+  } catch(e){
+    setSyncStatus('error','DB 연결 실패 — 로컬에서만 저장됩니다');
+  }
+}
+
+async function saveAnswer(qi, result){
+  // 로컬 먼저 저장
+  const local = JSON.parse(localStorage.getItem('quiz_state')||'{}');
+  local[qi] = result;
+  localStorage.setItem('quiz_state', JSON.stringify(local));
+  // DB 저장
+  try {
+    await sbRequest('POST', 'quiz_progress', {
+      device_id: DEVICE_ID,
+      question_index: qi,
+      result: result
+    });
+  } catch(e){
+    console.warn('DB save failed:', e);
+  }
+}
+
+async function clearProgress(){
+  try {
+    await sbRequest('DELETE',
+      `quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}`
+    );
+    localStorage.removeItem('quiz_state');
+    setSyncStatus('ok','초기화 완료');
+  } catch(e){
+    console.warn('DB clear failed');
+  }
+}
+
+function setSyncStatus(type, msg){
+  const bar = document.getElementById('syncBar');
+  const txt = document.getElementById('syncMsg');
+  bar.className = 'sync-bar ' + (type==='error'?'error':type==='loading'?'loading':'');
+  txt.textContent = msg;
+}
+
+// ===== QUESTION DATA =====
+const QS=[
+/* ===== 해운론 (1-35) ===== */
+{s:'해운',d:'easy',q:'정기선(Liner) 운송의 가장 큰 특징은?',o:['화주와 매 항해마다 개별 계약','정해진 항로·일정·요율로 운항','화주 전용 선박을 배선','운임이 수요공급에 따라 매일 변동'],a:1,e:'정기선은 특정 항로에 정해진 스케줄·공표운임(Tariff)으로 운항합니다. 반대 개념은 부정기선(Tramper)입니다.'},
+{s:'해운',d:'easy',q:'선하증권(B/L)의 3가지 기능으로 올바른 것은?',o:['수령증·물권증권·유가증권','보험증권·수령증·환어음','계약서·운임영수증·수령증','신용장·물권증권·보험증권'],a:0,e:'B/L은 ①화물 수령증(Receipt), ②운송계약 증거(Evidence of Contract), ③유통가능 권리증권(Document of Title) 역할을 합니다.'},
+{s:'해운',d:'easy',q:'TEU(Twenty-foot Equivalent Unit)는 무엇을 나타내는 단위인가?',o:['선박 톤수','컨테이너 수량 단위','항만 처리 능력(시간당)','운임 산정 단위'],a:1,e:'TEU는 20피트(6m) 표준 컨테이너 1개를 기준으로 한 컨테이너 수량 단위입니다. 40피트 컨테이너 1개 = 2TEU.'},
+{s:'해운',d:'easy',q:'선박을 빌리는 계약 형태 중 "나용선(Bareboat Charter)"의 특징은?',o:['선원만 제공','선박만 제공, 선원·비용은 용선자 부담','항해 단위로 계약','선원·항해 비용 모두 선주 부담'],a:1,e:'나용선(Demise/Bareboat Charter): 선체만 임대. 선원 고용·연료·항만비 등 모든 비용을 용선자가 부담합니다.'},
+{s:'해운',d:'easy',q:'Dirty B/L(사고 선하증권)이 발행되는 경우는?',o:['운임이 선불(Prepaid)인 경우','화물 상태에 이상이 있는 경우','목적항이 여러 곳인 경우','수하인이 불명확한 경우'],a:1,e:'화물에 파손·부족 등 이상이 있을 때 선사가 Remarks를 기재한 B/L을 발행합니다. 신용장 결제에서는 일반적으로 Clean B/L이 요구됩니다.'},
+{s:'해운',d:'mid',q:'운임 산정 방식 중 W/M(Weight or Measurement) 기준에 대한 설명으로 옳은 것은?',o:['항상 중량 기준으로만 산정','항상 부피 기준으로만 산정','중량 운임과 용적 운임 중 높은 쪽 적용','선사가 임의로 선택'],a:2,e:'W/M은 1R/T(Revenue Ton) 기준으로, 1MT(1,000kg)와 1CBM 중 운임이 높게 나오는 쪽을 적용합니다.'},
+{s:'해운',d:'mid',q:'해상화물운송에서 GRI(General Rate Increase)란?',o:['선사가 유류할증료를 부과하는 것','선사들이 기본 운임을 일괄 인상하는 것','항만사용료 인상','환율변동에 따른 운임 조정'],a:1,e:'GRI는 해운사들이 특정 시점에 기본 운임을 일정액 인상하는 것으로, 보통 사전 공지 후 시행됩니다. PSS(Peak Season Surcharge)와 구분해야 합니다.'},
+{s:'해운',d:'mid',q:'Port of Loading(POL)과 Port of Discharge(POD)의 의미로 옳은 것은?',o:['POL=목적항, POD=출발항','POL=출발항, POD=목적항','POL=환적항, POD=최종목적지','POL=내륙기지, POD=항구'],a:1,e:'POL(Port of Loading)은 화물을 선박에 적재하는 출발 항구, POD(Port of Discharge)는 화물을 내리는 목적 항구입니다.'},
+{s:'해운',d:'mid',q:'선박의 총톤수(GT; Gross Tonnage)는 무엇을 기준으로 산정하나?',o:['화물 적재 중량','선체 전체 용적을 기준으로 산정','연료 소비량','선박 무게'],a:1,e:'GT(Gross Tonnage)는 선박의 총 내부 용적을 기반으로 하며, 항만세·도선료 등 각종 요금 산정 기준이 됩니다.'},
+{s:'해운',d:'mid',q:'용선계약(Charter Party)에서 Laytime이란?',o:['항해 총 소요시간','화물 선적·양하에 허용된 정박시간','선박 임대 기간','운임 지급 기한'],a:1,e:'Laytime은 용선계약상 무료로 허용된 선적·양하 작업 시간입니다. 초과 시 Demurrage(체선료), 부족 시 Despatch(조출료)가 발생합니다.'},
+{s:'해운',d:'mid',q:'컨테이너 화물의 CY(Container Yard)와 CFS(Container Freight Station)의 차이는?',o:['CY=소량화물, CFS=대량화물','CY=FCL 화물 처리, CFS=LCL 화물 혼재','CY=항공화물, CFS=해상화물','CY=수입전용, CFS=수출전용'],a:1,e:'CY는 FCL(Full Container Load) 전용 컨테이너를 보관·인도하는 장소이고, CFS는 LCL(Less than Container Load) 소량화물을 혼재(Consolidation)하는 장소입니다.'},
+{s:'해운',d:'mid',q:'Surrender B/L(권리포기 선하증권)의 특징은?',o:['화물 도착 전 원본 B/L 제시 필요','원본 B/L 없이도 수하인이 화물 수령 가능','선주가 화물 권리 포기','운임 미납 시 발행'],a:1,e:'Surrender B/L은 출발지에서 선사가 원본 B/L을 회수(Surrender)하고, 목적지에서 수하인이 원본 없이 화물을 찾을 수 있게 합니다. 단기 항로에서 많이 사용됩니다.'},
+{s:'해운',d:'hard',q:'선박 안전관리 국제협약 ISM Code(국제안전관리규약)의 핵심 요소가 아닌 것은?',o:['안전관리시스템(SMS) 구축','지정된 책임자(DPA) 지정','선박 건조 기준 강화','사고 조사 및 예방 절차'],a:2,e:'ISM Code는 선사의 안전관리시스템(SMS) 구축, DPA(Designated Person Ashore) 지정, 내부 감사, 사고 보고·예방 등을 요구합니다. 선박 건조 기준은 SOLAS 협약 대상입니다.'},
+{s:'해운',d:'hard',q:'운임선물거래에서 FFA(Forward Freight Agreement)에 대한 설명으로 틀린 것은?',o:['운임 변동 리스크를 헤징하는 파생상품','실제 선박 용선이 이루어지는 계약','Baltic Exchange 운임지수 기반','선주와 용선자 모두 활용 가능'],a:1,e:'FFA는 현물 화물을 실제로 선적하지 않고 운임지수의 차이를 결제하는 금융 파생상품입니다. 실제 운송 계약이 아닌 헤징·투기 목적의 거래입니다.'},
+{s:'해운',d:'hard',q:'SOLAS 협약상 VGM(Verified Gross Mass) 제출 의무와 관련된 내용으로 옳은 것은?',o:['선사가 자체적으로 측정하여 제출','화주가 컨테이너 총중량을 검증·제출할 의무','항만이 모든 컨테이너를 계중','수하인이 도착 후 확인'],a:1,e:'2016년부터 SOLAS 협약에 의해 화주(Shipper)는 선적 전 컨테이너의 검증된 총중량(VGM)을 선사와 터미널에 제출해야 합니다. SI 제출 시 VGM도 함께 제출하는 것이 일반적입니다.'},
+{s:'해운',d:'hard',q:'컨테이너 화물의 SI(Shipping Instruction)에 반드시 포함되어야 하는 필수 항목이 아닌 것은?',o:['화주(Shipper) 정보','화물 품목·중량·용적','목적항(POD)','화물 보험 가입 내용'],a:3,e:'SI는 B/L 작성의 기초 자료로, Shipper·Consignee·품목·중량·용적·POL/POD·컨테이너 번호·VGM 등이 필요합니다. 보험은 화주가 별도로 처리하며 SI 필수 항목이 아닙니다.'},
+/* ===== 항만물류 (36-65) ===== */
+{s:'항만',d:'easy',q:'컨테이너 터미널에서 안벽(Berth)의 기능은?',o:['화물 보관','선박 접안 및 하역 작업','세관 검사','트럭 대기 장소'],a:1,e:'안벽(Quay/Berth)은 선박이 접안하는 구조물로, 안벽 크레인(QC, Quay Crane)을 이용해 컨테이너를 선박과 야드 간에 이동합니다.'},
+{s:'항만',d:'easy',q:'CFS(Container Freight Station)에서 주로 처리하는 화물 유형은?',o:['FCL(Full Container Load)','LCL(Less than Container Load)','Bulk 화물','냉동 화물'],a:1,e:'CFS에서는 여러 화주의 소량 화물을 한 컨테이너에 혼재(Consolidation)하거나, 도착 LCL 화물을 분류(Deconsolidation)합니다.'},
+{s:'항만',d:'easy',q:'항만에서 D/O(Delivery Order)란?',o:['수출 신고서','화물 인도 지시서','운임 청구서','선박 입항 신청서'],a:1,e:'D/O(Delivery Order)는 수하인이 원본 B/L 또는 Surrender 확인 후 선사로부터 받는 화물 인도 지시서입니다. 터미널/CY에 제출 후 화물을 찾습니다.'},
+{s:'항만',d:'easy',q:'항만 하역 장비 중 QC(Quay Crane)의 역할은?',o:['야드 내 컨테이너 이동','선박↔안벽 간 컨테이너 적·양하','CFS 내 화물 분류','창고 내 포크리프트 작업'],a:1,e:'QC(Quay Crane, 또는 Ship-to-Shore Crane)는 안벽에 설치된 대형 크레인으로 선박과 안벽 사이에서 컨테이너를 하역합니다.'},
+{s:'항만',d:'mid',q:'RTGC(Rubber Tyred Gantry Crane)와 RMGC(Rail Mounted Gantry Crane)의 차이점은?',o:['RTGC=고정식, RMGC=이동식','RTGC=타이어, RMGC=레일 이동','RTGC=수출전용, RMGC=수입전용','RTGC=대형, RMGC=소형'],a:1,e:'RTGC는 고무 타이어로 이동하여 유연성이 높고, RMGC는 레일 위를 이동하여 자동화에 적합합니다. 자동화 터미널에서는 ARMGC(자동화 RMGC)를 많이 사용합니다.'},
+{s:'항만',d:'mid',q:'항만 체선(Congestion)이 발생하는 주요 원인과 영향으로 틀린 것은?',o:['하역 생산성 저하로 선박 대기 증가','항만 체선료(Port Congestion Surcharge) 발생','화물 흐름 속도 증가','공급망 지연 및 비용 상승'],a:2,e:'항만 체선은 하역 속도 저하·선박 집중·인프라 부족이 원인이며, 화물 흐름 속도 감소, 체선할증료 부과, 공급망 전반에 지연을 초래합니다.'},
+{s:'항만',d:'mid',q:'항만 자동화 시스템에서 AGV(Automated Guided Vehicle)의 역할은?',o:['안벽 크레인 자동 조작','야드 내 컨테이너 수평 이송','선박 내 자동 선적','세관 자동 통관'],a:1,e:'AGV는 자동화 컨테이너 터미널에서 QC와 야드 크레인 사이에서 컨테이너를 수평 이송하는 무인 운반차량입니다.'},
+{s:'항만',d:'mid',q:'컨테이너 터미널 운영의 핵심 지표인 생산성 지표로 가장 적합한 것은?',o:['선박 총 GRT','시간당 처리 컨테이너 수(Moves/Hour)','야드 면적','직원 수'],a:1,e:'터미널 하역 생산성은 시간당 처리 컨테이너 수(Moves/Crane Hour, Berth Productivity)로 측정합니다.'},
+{s:'항만',d:'mid',q:'항만의 피더 서비스(Feeder Service)란?',o:['대형 선박의 간선항로 운항','소형 선박으로 허브항과 거점항 연결','항만 내 화물 운반 차량 서비스','화물 보험 서비스'],a:1,e:'피더 서비스는 소형 선박이 허브(Hub) 항과 인근 소규모 항(Spoke) 사이를 연결하는 서비스입니다. 부산항↔속초·군산 등이 예시입니다.'},
+{s:'항만',d:'hard',q:'항만국통제(PSC; Port State Control) 제도에서 선박이 결함(Deficiency)으로 억류(Detention)되는 조건은?',o:['선박 도색 상태 불량','선원 자격증명 위조 또는 SOLAS 중대 위반','항만사용료 미납','화물량 초과적재 신고 없이 입항'],a:1,e:'PSC는 입항 외국 선박의 안전·환경 협약 준수 여부를 점검합니다. SOLAS·MARPOL·STCW 등 협약의 중대 위반 시 억류 조치됩니다.'},
+{s:'항만',d:'hard',q:'항만배후단지(Hinterland Free Zone)의 주요 기능이 아닌 것은?',o:['물류가공·조립 등 부가가치 활동','관세 유예 혜택','선박 건조 및 수리','수출입 물류 집배송 기능'],a:2,e:'항만배후단지는 물류·가공·조립·보관·유통 기능을 담당하며 세제 혜택이 주어집니다. 선박 건조·수리는 조선소(Shipyard) 기능입니다.'},
+/* ===== 무역실무 (66-100) ===== */
+{s:'무역',d:'easy',q:'인코텀즈 2020(Incoterms 2020)에서 신설된 조건은?',o:['DAP','DPU','FCA','CIF'],a:1,e:'DPU(Delivered at Place Unloaded)는 Incoterms 2020에서 DAT(Delivered at Terminal)를 대체하여 신설되었습니다. 도착지에서 양하(Unloading)까지 매도인 부담입니다.'},
+{s:'무역',d:'easy',q:'신용장(L/C)에서 Sight L/C와 Usance L/C의 차이점은?',o:['Sight=장기 결제, Usance=즉시 결제','Sight=서류 제시 즉시 결제, Usance=일정 기간 후 결제','Sight=취소 가능, Usance=취소 불가','Sight=무역보험 필요, Usance=불필요'],a:1,e:'Sight L/C는 선적서류 제시 즉시 대금을 지급하는 일람출급, Usance L/C는 30·60·90일 등 일정 기간 후에 지급합니다.'},
+{s:'무역',d:'easy',q:'수출입 통관에서 HS코드(Harmonized System Code)의 역할은?',o:['선박 식별 번호','화물의 국제 표준 분류 코드','수입 허가 번호','검역 증명서 번호'],a:1,e:'HS코드는 세계관세기구(WCO)가 제정한 국제 통일 상품 분류 코드로, 관세율 결정과 무역 통계 기준이 됩니다.'},
+{s:'무역',d:'easy',q:'FOB(Free On Board) 조건에서 위험과 비용의 이전 시점은?',o:['선박이 목적항에 도착했을 때','화물이 수출국 본선에 선적되었을 때','화물이 수출국 항만에 도착했을 때','수하인이 화물을 수령했을 때'],a:1,e:'FOB 조건에서 매도인의 위험·비용 부담은 화물이 수출항에서 본선(On Board) 선적 완료 시점까지입니다.'},
+{s:'무역',d:'mid',q:'CIF 조건과 CIP 조건의 차이는?',o:['CIF=항공, CIP=해상','CIF=해상·내수로 운송에만 적용, CIP=모든 운송에 적용','CIF=매수인 보험 부담, CIP=매도인 보험 없음','CIF=도착지 관세 포함, CIP=미포함'],a:1,e:'CIF(Cost, Insurance & Freight)는 해상·내수로 전용이고, CIP(Carriage and Insurance Paid to)는 복합운송 포함 모든 운송 방식에 사용합니다. 보험 최소 담보 조건도 다릅니다(CIF=ICC C, CIP=ICC A).'},
+{s:'무역',d:'mid',q:'포페이팅(Forfaiting)에 대한 설명으로 옳은 것은?',o:['매도인이 매수인에게 신용 제공','수출업자가 중장기 채권을 금융기관에 소구권 없이 매각','단기 운전자금 대출','수입업자의 대금 지급 보증'],a:1,e:'포페이팅은 수출업자가 중장기(180일~7년) 연불 수출채권을 소구권(Recourse) 없이 할인 매각하는 무역금융 기법입니다.'},
+{s:'무역',d:'mid',q:'팩토링(Factoring)과 포페이팅(Forfaiting)의 주요 차이점은?',o:['팩토링=소구권 없음, 포페이팅=소구권 있음','팩토링=단기·반복 거래, 포페이팅=중장기 일회성 거래','팩토링=해상운송 전용','포페이팅=신용장 필수'],a:1,e:'팩토링은 단기(180일 이내) 반복 매출채권을 소구권 있게 매각하고, 포페이팅은 중장기(보통 180일 초과) 일회성 채권을 소구권 없이 매각합니다.'},
+{s:'무역',d:'mid',q:'수출 Pack List(포장명세서)에 반드시 기재해야 하는 항목이 아닌 것은?',o:['화물 품목명·모델','각 박스별 수량·중량·용적','HS코드','화물 포장 방법 및 박스 번호'],a:2,e:'Pack List에는 품목명·수량·단위·포장방법·박스별 Net/Gross Weight·Measurement 등을 기재합니다. HS코드는 인보이스나 신고서에 기재되며 Pack List 필수 항목은 아닙니다.'},
+{s:'무역',d:'hard',q:'UCP 600(신용장통일규칙 제6차 개정)의 주요 내용 중 서류 검토 기간은?',o:['서류 접수 후 3은행영업일','서류 접수 후 5은행영업일','서류 접수 후 7역일','서류 접수 후 14역일'],a:1,e:'UCP 600 제14조에 따라 지정은행·확인은행·개설은행은 서류 접수 후 최대 5은행영업일(Banking Days) 이내에 수리 또는 거절 통보를 해야 합니다.'},
+{s:'무역',d:'hard',q:'CISG(국제물품매매계약에 관한 유엔협약)의 적용 범위로 옳은 것은?',o:['소비자 구매계약도 적용','체약국 상인 간 국제 물품 매매계약에 적용','서비스 계약에도 적용','부동산 매매에 적용'],a:1,e:'CISG는 체약국(Contracting State) 사업자 간 국제 물품 매매계약에 적용됩니다. 소비자 구매, 서비스, 유가증권·선박·항공기 매매는 제외됩니다.'},
+{s:'무역',d:'hard',q:'수출입 안전관리 우수업체(AEO) 제도의 주요 혜택이 아닌 것은?',o:['세관 검사 축소','통관 절차 간소화','무역 상대국과 상호인정협정(MRA) 시 혜택','국내 관세율 자동 인하'],a:3,e:'AEO 공인업체는 세관 검사 축소, 우선 통관, MRA 체결국에서의 상호 혜택, C/O(원산지증명) 절차 간소화 등의 혜택이 있습니다. 관세율은 AEO와 무관합니다.'},
+{s:'무역',d:'hard',q:'규칙적 무역에서 "Drawback(관세환급)"의 의미는?',o:['수출 시 부과되는 추가 관세','수출 원재료에 납부한 관세를 수출 후 환급','수입 금지 품목에 대한 예외 허가','관세 납부 유예 제도'],a:1,e:'관세환급(Drawback)은 수입 원재료에 납부한 관세를 이를 사용한 제품 수출 시 환급받는 제도로, 수출 경쟁력 제고를 위한 무역 지원책입니다.'},
+/* ===== SCM·물류 (101-130) ===== */
+{s:'SCM',d:'easy',q:'공급망(Supply Chain)의 기본 흐름 순서로 옳은 것은?',o:['소비자→유통→제조→공급자','공급자→제조→유통→소비자','제조→공급자→유통→소비자','유통→공급자→제조→소비자'],a:1,e:'공급망은 원자재 공급자(Supplier)→제조(Manufacturer)→유통(Distributor)→소비자(Consumer) 방향으로 흐릅니다. 역방향은 역물류(Reverse Logistics)입니다.'},
+{s:'SCM',d:'easy',q:'3PL(Third Party Logistics)의 정의는?',o:['화주가 직접 물류 처리','제3자 물류 전문업체에 물류 아웃소싱','정부 주도 물류 표준화','3개 이상의 운송수단 복합'],a:1,e:'3PL은 화주가 운송·보관·하역·포장 등 물류 기능의 전부 또는 일부를 외부 물류 전문업체에 위탁하는 것입니다.'},
+{s:'SCM',d:'easy',q:'채찍효과(Bullwhip Effect)란?',o:['공급망 상류로 갈수록 수요 변동이 축소되는 현상','공급망 상류로 갈수록 수요 변동이 증폭되는 현상','재고가 소비자 방향으로 쌓이는 현상','운송 지연이 체계적으로 축소되는 현상'],a:1,e:'채찍효과(Bullwhip Effect)는 소비자 수요의 작은 변동이 공급망 상류(공급자 방향)로 갈수록 증폭·왜곡되는 현상입니다. 정보 공유와 VMI로 완화할 수 있습니다.'},
+{s:'SCM',d:'mid',q:'VMI(Vendor Managed Inventory)의 주요 특징은?',o:['소비자가 재고를 직접 관리','공급자(Vendor)가 고객 재고를 대신 관리','정부가 핵심 품목 재고 통제','창고 자동화 시스템'],a:1,e:'VMI는 공급업체(Vendor)가 고객사의 재고 수준을 직접 모니터링하고 보충하는 협력 재고 관리 방식입니다. 채찍효과 감소에 효과적입니다.'},
+{s:'SCM',d:'mid',q:'물류 KPI 중 "Perfect Order Rate(완벽 주문율)"의 구성 요소가 아닌 것은?',o:['정시 배송(On-time)','완전 배송(Complete)','손상 없는 배송(Damage-free)','최저 운임 달성'],a:3,e:'완벽 주문율 = (정시×완전×손상없음×정확한 서류) 비율입니다. 운임 수준은 KPI 구성 요소가 아닙니다.'},
+{s:'SCM',d:'mid',q:'Cross-docking의 특징으로 옳은 것은?',o:['장기 보관 후 배송','입고 화물을 보관 없이 즉시 분류·출고','재고 확충을 위한 대량 보관','수입 통관 후 창고 보관'],a:1,e:'Cross-docking은 물류센터에서 입고 화물을 거의 보관하지 않고 즉시 행선지별로 분류하여 출고하는 방식으로, 재고 최소화와 신속 배송에 유리합니다.'},
+{s:'SCM',d:'mid',q:'EOQ(경제적 주문량) 모델의 목적은?',o:['최대 재고량 결정','주문비용과 재고유지비용의 합을 최소화하는 주문량 산출','최소 주문 빈도 결정','공급업체 수 최적화'],a:1,e:'EOQ(Economic Order Quantity)는 주문비용(Ordering Cost)과 재고유지비용(Holding Cost)의 합을 최소화하는 최적 주문량을 계산하는 모델입니다.'},
+{s:'SCM',d:'hard',q:'공급망 리스크 관리(SCRM)에서 "공급망 가시성(Supply Chain Visibility)"이 중요한 이유는?',o:['비용 절감을 위해','실시간 정보 공유로 리스크 조기 감지 및 대응','재고 무한 확충','법적 규제 준수'],a:1,e:'공급망 가시성은 공급망 전체의 상태를 실시간으로 파악하여 수요 변동, 공급 차질, 운송 지연 등 리스크를 조기에 감지하고 신속히 대응할 수 있게 합니다.'},
+{s:'SCM',d:'hard',q:'S&OP(Sales and Operations Planning)의 주요 목적은?',o:['영업과 생산계획을 통합·조정','재무 예산 수립','마케팅 전략 수립','IT 시스템 도입 계획'],a:0,e:'S&OP는 영업(수요)계획과 운영(공급·생산)계획을 주기적(보통 월 1회)으로 검토·조정하여 수요-공급 균형을 맞추는 경영 프로세스입니다.'},
+{s:'SCM',d:'hard',q:'CPFR(Collaborative Planning, Forecasting, and Replenishment)에 대한 설명으로 옳은 것은?',o:['단일 기업 내부 재고 관리','소매업자와 공급자가 수요예측·보충을 공동으로 계획','정부와 민간의 물류 협력','소비자 직접 구독 서비스'],a:1,e:'CPFR은 소매업자(Retailer)와 공급자(Supplier)가 판매 데이터, 수요예측, 재고 보충 계획을 공동으로 수립하고 공유하는 협력 프로세스입니다.'},
+/* ===== ICT·디지털물류 (131-165) ===== */
+{s:'ICT',d:'easy',q:'EDI(Electronic Data Interchange)의 주요 기능은?',o:['종이 서류의 전자 전송','선박 자동화','항만 크레인 제어','위성 위치추적'],a:0,e:'EDI는 표준화된 전자 형식으로 기업 간 상거래 문서(주문서·송장·선하증권 등)를 자동으로 교환하는 시스템입니다.'},
+{s:'ICT',d:'easy',q:'RFID(Radio Frequency Identification)의 물류 활용 용도로 가장 적합한 것은?',o:['선박 엔진 제어','화물·자산 비접촉 자동 인식 및 추적','항만 세관 심사','운임 자동 계산'],a:1,e:'RFID는 전파를 이용해 태그(Tag)의 정보를 비접촉으로 읽어 물류센터 입출고, 컨테이너 추적, 재고 관리 등에 활용합니다.'},
+{s:'ICT',d:'easy',q:'IoT(Internet of Things, 사물인터넷)의 핵심 개념은?',o:['인터넷으로만 연결된 PC 네트워크','물리적 사물에 센서를 부착해 네트워크로 연결·데이터 수집','로봇끼리만 통신하는 시스템','클라우드 데이터 저장'],a:1,e:'IoT는 센서가 부착된 물리적 사물이 인터넷을 통해 서로 데이터를 송수신하는 개념으로, 물류에서는 화물 위치·온도·충격 모니터링 등에 활용됩니다.'},
+{s:'ICT',d:'easy',q:'클라우드 컴퓨팅의 물류 도입 효과로 틀린 것은?',o:['IT 인프라 투자비 절감','언제 어디서나 데이터 접근','초기 설치 비용 대폭 증가','시스템 확장성 향상'],a:2,e:'클라우드는 자체 서버 구축 불필요로 초기비용을 낮추고, 탄력적 확장, 원격 접근이 가능합니다. 초기 설치 비용이 대폭 증가하는 것은 온-프레미스(On-premise)의 특징입니다.'},
+{s:'ICT',d:'mid',q:'블록체인(Blockchain) 기술의 물류 적용 사례로 가장 적합한 것은?',o:['야드 크레인 자동화','선박 엔진 출력 최적화','수출입 서류의 위·변조 방지 및 실시간 추적','물류센터 조명 제어'],a:2,e:'블록체인은 분산 원장으로 데이터를 위·변조하기 어렵게 만들어, 선하증권·원산지증명·통관 서류의 진위 확인과 공급망 가시성 확보에 활용됩니다.'},
+{s:'ICT',d:'mid',q:'빅데이터(Big Data)의 3V 특성은?',o:['속도(Velocity)·정확도(Validity)·가시성(Visibility)','규모(Volume)·속도(Velocity)·다양성(Variety)','규모(Volume)·가치(Value)·정확도(Validity)','다양성(Variety)·가시성(Visibility)·가치(Value)'],a:1,e:'빅데이터의 3V는 Volume(규모), Velocity(생성 속도), Variety(데이터 종류 다양성)입니다. 이후 Veracity(정확성), Value(가치)가 추가된 5V로 확장되기도 합니다.'},
+{s:'ICT',d:'mid',q:'AI/머신러닝이 물류에서 활용되는 사례가 아닌 것은?',o:['수요 예측 정확도 향상','최적 배송 경로 탐색','선박 연료 효율 최적화','선원 자격 시험 자동 채점(현재 실용화된 주요 물류 활용은 아님)'],a:3,e:'AI/ML은 수요예측, 경로 최적화, 선박 예측 정비, 항만 크레인 자동화 등에 활용됩니다. 선원 자격 시험 채점은 현재 물류 AI의 주요 적용 사례가 아닙니다.'},
+{s:'ICT',d:'mid',q:'디지털 트윈(Digital Twin)의 물류 활용 개념은?',o:['실물 대신 디지털 상품 유통','물리적 시스템의 가상 복제본을 만들어 시뮬레이션·분석','종이 서류 전자화','전자상거래 플랫폼'],a:1,e:'디지털 트윈은 항만·선박·물류센터의 실시간 데이터를 기반으로 가상 복제본을 구축, 운영 시나리오를 시뮬레이션하고 예측 유지보수·최적화에 활용합니다.'},
+{s:'ICT',d:'mid',q:'WMS(Warehouse Management System)의 핵심 기능은?',o:['선박 운항 관리','창고 내 입출고·재고·작업 관리','해상 운임 협상','세관 신고 자동화'],a:1,e:'WMS는 창고의 입고·보관·피킹·출고·재고 현황을 통합 관리하는 시스템으로, RFID·바코드와 연동하여 정확도와 효율을 높입니다.'},
+{s:'ICT',d:'mid',q:'TMS(Transportation Management System)와 WMS의 주요 차이점은?',o:['TMS=창고, WMS=운송','TMS=운송 계획·실행 관리, WMS=창고 내 작업 관리','TMS=무역서류, WMS=항만관리','둘 다 동일한 기능'],a:1,e:'TMS는 운송 계획, 배차, 화물 추적, 운임 정산 등 운송 프로세스를 관리하고, WMS는 창고 내 입출고·재고 등을 관리합니다. 통합 운영 시 높은 시너지가 납니다.'},
+{s:'ICT',d:'hard',q:'플랫폼 경제(Platform Economy)에서 "디지털 물류 플랫폼"의 핵심 가치는?',o:['화주와 선사의 정보 비대칭 심화','화주·선사·포워더를 연결하여 거래 효율화 및 가격 투명성 제고','정부 규제 강화','전통 포워더의 수익 보호'],a:1,e:'디지털 물류 플랫폼(예: Flexport, Maersk Spot)은 화주·선사·포워더를 연결하여 운임 투명성, 견적 속도, 공간 예약 효율을 높이는 마켓플레이스 역할을 합니다.'},
+{s:'ICT',d:'hard',q:'사이버보안(Cybersecurity)이 해운·물류에서 중요한 이유로 틀린 것은?',o:['항만 운영 시스템 해킹 시 대규모 물류 마비','선박 GPS 스푸핑으로 항로 조작 가능','개인정보 보호법 위반 위험','IT 시스템 도입 비용 절감'],a:3,e:'해운물류의 사이버 위협에는 항만 시스템 랜섬웨어 공격(NotPetya 사례), 선박 GPS/AIS 스푸핑, 화물 정보 해킹 등이 있습니다. IT 비용 절감은 사이버보안과 무관합니다.'},
+{s:'ICT',d:'hard',q:'5G 통신이 스마트 항만에 기여하는 핵심 역할은?',o:['항만 세금 납부 자동화','초저지연 대용량 데이터 전송으로 AGV·크레인 자동화 지원','항만 직원 급여 지급','선박 건조 기간 단축'],a:1,e:'5G는 초저지연(1ms 이하)·초고속·다연결 특성으로 항만의 AGV, 자동화 크레인, 디지털 트윈, 실시간 영상 분석 등 스마트 항만 핵심 인프라를 지원합니다.'},
+{s:'ICT',d:'hard',q:'해상물류에서 API(Application Programming Interface) 연동의 주요 이점은?',o:['시스템 간 수동 데이터 입력 증가','선사·포워더·화주 시스템 간 실시간 자동 데이터 교환','IT 비용 무한 증가','보안 취약성 증가'],a:1,e:'API 연동은 선사의 스케줄·운임·예약 데이터를 포워더·화주 시스템에 실시간 자동으로 전달하여 수작업을 줄이고 오류를 최소화합니다.'},
+/* ===== 스마트해상물류 (166-200) ===== */
+{s:'스마트',d:'easy',q:'자율운항선박(MASS; Maritime Autonomous Surface Ship)의 특징은?',o:['무조건 무인으로 운항','인간의 개입 없이 또는 최소화하여 자율적으로 운항하는 선박','수중 무인잠수함','AI 없이 자동화된 화물선'],a:1,e:'MASS는 AI·센서·통신 기술을 이용해 인간의 개입 없이 또는 최소한의 개입으로 자율 운항하는 선박의 개념으로, IMO에서 규제 프레임워크를 개발 중입니다.'},
+{s:'스마트',d:'easy',q:'스마트 항만(Smart Port)의 핵심 특징이 아닌 것은?',o:['IoT 기반 실시간 모니터링','자동화 크레인·AGV 운영','수작업 서류 기반 통관','디지털 트윈 기반 운영'],a:2,e:'스마트 항만은 자동화, IoT, AI, 빅데이터, 디지털 트윈 등 첨단 기술로 운영 효율을 높이는 항만입니다. 수작업 서류 기반 통관은 스마트화의 반대 개념입니다.'},
+{s:'스마트',d:'easy',q:'해운 탈탄소화를 위해 IMO가 설정한 2050년 목표는?',o:['CO2 배출량 현재 대비 50% 증가','선박 탄소 배출 넷제로(Net-zero) 달성','화석연료 사용 50% 유지','2030년까지 완전 전동화'],a:1,e:'IMO는 2023년 개정 GHG 전략에서 2050년경 넷제로 달성을 목표로 설정하였습니다. 2030년 20~30% 감소, 2040년 70~80% 감소가 중간 목표입니다.'},
+{s:'스마트',d:'easy',q:'선박에서 사용 가능한 친환경 대체연료로 가장 주목받고 있는 것들은?',o:['석탄·중유','LNG·암모니아·메탄올·수소','가솔린·경유','핵연료·태양열'],a:1,e:'IMO 탈탄소 목표에 따라 LNG(단기), 메탄올, 암모니아, 수소(장기)가 선박 대체연료로 주목받고 있습니다. Maersk는 메탄올 추진 선박을 도입하였습니다.'},
+{s:'스마트',d:'mid',q:'AIS(Automatic Identification System)의 주요 용도는?',o:['화물 중량 자동 측정','선박의 위치·속도·항로 정보를 자동 송수신','연료 효율 계산','선원 신분 인증'],a:1,e:'AIS는 선박이 자신의 식별정보·위치·속도·항로 등을 VHF 주파수로 자동 송수신하여 충돌 방지, 항만 교통관제(VTS), 선박 추적에 활용됩니다.'},
+{s:'스마트',d:'mid',q:'해운 분야 디지털화의 핵심 과제인 전자 선하증권(e-B/L)의 장점으로 틀린 것은?',o:['종이 B/L 우편 발송 시간 절약','위·변조 방지','분실 위험 감소','국제 법적 효력 완전 통일(현재 진행 중)'],a:3,e:'e-B/L은 발행 즉시 전달, 위변조 방지, 분실 위험 감소 등의 장점이 있습니다. 다만 국제 법적 효력의 완전 통일은 국가별 법률 차이로 아직 진행 중인 과제입니다.'},
+{s:'스마트',d:'mid',q:'선박 예측 정비(Predictive Maintenance)에서 AI 활용의 핵심 개념은?',o:['고장 발생 후 수리','정해진 일정에 따른 정기 수리','센서 데이터 분석으로 고장 전 이상 징후 감지','수작업 점검'],a:2,e:'예측 정비(PdM)는 엔진·기기에 부착된 센서의 실시간 데이터를 AI가 분석하여 고장을 사전에 예측·예방하는 방식으로, 운영 비용 절감과 안전성 향상에 기여합니다.'},
+{s:'스마트',d:'mid',q:'해양 빅데이터를 활용한 최적 항로 계획(Voyage Optimization)의 효과는?',o:['연료 소비 증가','기상·해류·항로 데이터 분석으로 연료 절감 및 안전 운항','선박 속도 무조건 최대화','항만 입항 절차 생략'],a:1,e:'Voyage Optimization은 기상(풍파·조류)·해류·항로·연료 가격 데이터를 AI로 분석하여 최적 항로와 속도를 도출, 연료비 5~15% 절감과 탄소 감축 효과가 있습니다.'},
+{s:'스마트',d:'mid',q:'그린 해운(Green Shipping)에서 "슬로우 스티밍(Slow Steaming)"의 효과는?',o:['빠른 운송으로 연료 절감','선박 속도를 낮추어 연료 소비 및 CO2 배출 감소','항만 처리량 증가','운임 자동 하락'],a:1,e:'슬로우 스티밍은 선박 운항 속도를 설계 속도보다 낮게 유지하여 연료 소비와 CO2 배출을 줄이는 방법입니다. 속도를 10% 낮추면 연료 소비는 약 27% 감소합니다.'},
+{s:'스마트',d:'hard',q:'IMO의 CII(탄소집약도지수) 규제에서 선박 등급 A~E에 대한 설명으로 옳은 것은?',o:['E등급 선박은 즉시 운항 정지','D등급이 3년 연속이면 개선 계획 제출 의무','A등급은 연간 추가 세금 부과','B등급은 운항 금지'],a:1,e:'IMO CII 규제(2023년 시행)에서 D등급 3년 연속 또는 E등급 1년이면 개선 계획(Corrective Action Plan)을 제출해야 합니다. 등급 자체가 운항을 금지하지는 않습니다.'},
+{s:'스마트',d:'hard',q:'스마트 항만의 TOS(Terminal Operating System) 고도화가 필요한 이유는?',o:['종이 서류 증가','크레인·AGV·야드 등 복잡한 자동화 장비의 통합 제어 및 최적화','선원 급여 관리','항만 세금 납부'],a:1,e:'TOS는 항만 내 모든 작업(선석 배정, 야드 플래닝, 크레인·AGV 제어, 게이트 관리)을 통합 제어합니다. 자동화 장비가 늘수록 실시간 최적화 알고리즘의 중요성이 커집니다.'},
+{s:'스마트',d:'hard',q:'해운동맹(Shipping Alliance)이 디지털 전환에 미치는 영향으로 옳은 것은?',o:['데이터 공유 거부로 디지털화 방해','선사 간 데이터·시스템 공유로 운항 효율화 가능','해운 동맹은 디지털화와 무관','각국 규제로 해운 동맹 해체 가속'],a:1,e:'2M·THE Alliance·Ocean Alliance 등 해운 동맹은 공동 배선과 데이터 공유로 스케줄 안정성·효율을 높이며, 디지털 플랫폼 공동 개발로 디지털 전환에도 협력하고 있습니다.'},
+{s:'스마트',d:'hard',q:'해운·물류 분야 탄소국경조정제도(CBAM)의 도입이 물류에 미치는 영향은?',o:['물류 비용과 무관','수입 제품의 탄소 배출량에 따라 추가 비용 부과→물류 탄소 측정·관리 중요성 증가','수출 촉진 효과','모든 수입품에 일괄 세금'],a:1,e:'EU의 CBAM은 수입 제품의 생산 과정 탄소 배출량에 따라 비용을 부과합니다. 이에 따라 물류 공급망의 탄소 배출 측정·공개와 저탄소 물류 선택의 중요성이 높아집니다.'},
+{s:'스마트',d:'hard',q:'스마트 해운에서 "디지털 선박 이력(Digital Ship Record)"의 의미와 활용은?',o:['선원 개인 디지털 일기','선박의 설계·수리·검사·운항 이력을 디지털로 통합 관리','선박 광고 자료','연료 영수증 보관'],a:1,e:'디지털 선박 이력은 선박의 건조·수리·검사·인증·운항 데이터를 단일 디지털 플랫폼에 통합 관리하여 선박 자산 가치 평가, 금융, 보험, 중고 거래에 활용합니다.'},
+{s:'스마트',d:'hard',q:'해상 사이버 보안 지침 MSC-FAL.1/Circ.3에서 요구하는 사항은?',o:['모든 선박에 첨단 AI 설치 의무','SMS(안전관리시스템)에 사이버 리스크 관리 통합','선원의 소셜미디어 금지','위성통신 완전 차단'],a:1,e:'IMO MSC-FAL.1/Circ.3는 선박의 SMS(Safety Management System)에 사이버 리스크 관리 절차를 통합하도록 요구하며, 2021년부터 적용됩니다.'},
+/* ===== 해운론 추가 (79-98) ===== */
+{s:'해운',d:'easy',q:'다음 중 컨테이너 화물에서 FCL(Full Container Load)의 의미는?',o:['한 화주의 화물이 컨테이너 한 개를 가득 채운 경우','여러 화주의 화물을 한 컨테이너에 혼재한 경우','컨테이너 없이 선적하는 화물','냉동 컨테이너 전용 화물'],a:0,e:'FCL은 단일 화주의 화물이 컨테이너 1개 이상을 채우는 형태입니다. 반대 개념은 LCL(Less than Container Load)로 여러 화주 화물을 CFS에서 혼재합니다.'},
+{s:'해운',d:'easy',q:'해상화물 운송장(Sea Waybill)이 B/L과 다른 가장 큰 차이점은?',o:['운송 계약 증거 기능 없음','유통 불가능(Non-negotiable) 서류로 원본 제시 없이 수령 가능','보험 증권 역할','항공 화물에만 사용'],a:1,e:'Sea Waybill은 권리증권이 아닌 비유통 서류로, 수하인이 원본 제출 없이 신분 확인만으로 화물을 수령할 수 있습니다. 신속한 화물 인도가 필요한 단거리 항로에 적합합니다.'},
+{s:'해운',d:'easy',q:'정기선 운항에서 얼라이언스(Alliance)를 구성하는 주된 이유는?',o:['운임 담합을 위해','선박·항로 공유로 비용 절감 및 서비스 범위 확대','정부 보조금 수령','선박 공동 건조'],a:1,e:'해운 얼라이언스는 선사들이 선복(Slot)을 교환하고 항로를 공동 운영하여 운항 비용을 줄이고, 기항지와 서비스 빈도를 늘리는 협력체입니다.'},
+{s:'해운',d:'easy',q:'선박의 흘수(Draft)란?',o:['선박의 전체 높이','수면에서 선저(배 밑바닥)까지의 깊이','선박 최대 적재량','선박 연료 탱크 용량'],a:1,e:'흘수(Draft)는 수면에서 선박의 용골(Keel, 배 밑바닥)까지의 수직 거리입니다. 항만 입출항 시 수심과 흘수를 비교해 좌초 여부를 확인합니다.'},
+{s:'해운',d:'mid',q:'용선계약에서 NYPE(New York Produce Exchange Form)는 어떤 용선에 주로 사용되는 표준 계약서인가?',o:['항해용선(Voyage Charter)','기간용선(Time Charter)','나용선(Bareboat Charter)','운송 주선 계약'],a:1,e:'NYPE는 기간용선(Time Charter) 계약에 사용되는 대표적인 표준 양식입니다. 항해용선은 Gencon, 나용선은 Barecon 양식을 주로 사용합니다.'},
+{s:'해운',d:'mid',q:'Detention(억류료)과 Demurrage(체선료)의 차이는?',o:['동일한 개념','Demurrage=선박 지체, Detention=화주가 컨테이너를 반납 기한 초과 보유 시 부과','Demurrage=항공, Detention=해상','Detention=항만 수수료'],a:1,e:'Demurrage는 지정된 Laytime을 초과하여 선박이 항구에 정박할 때 발생하는 비용이고, Detention은 화주가 컨테이너를 약정 Free Time 이후에도 반납하지 않을 때 부과되는 비용입니다.'},
+{s:'해운',d:'mid',q:'Baltic Dry Index(BDI)는 무엇을 나타내는 지수인가?',o:['컨테이너 운임 지수','건화물(Dry Bulk) 해상 운임 종합 지수','유조선 운임 지수','LNG 운반선 운임 지수'],a:1,e:'BDI(Baltic Dry Index)는 Baltic Exchange가 발표하는 건화물선(철광석·석탄·곡물 등) 운임 지수로, 세계 경기와 원자재 수요의 선행지표로 활용됩니다.'},
+{s:'해운',d:'mid',q:'On Deck B/L(갑판적 선하증권) 발행 시 화주가 주의해야 할 점은?',o:['운임이 더 저렴하다','신용장에서 갑판적을 명시적으로 허용하지 않으면 하자 서류가 될 수 있다','신선도 유지에 유리하다','보험료가 낮아진다'],a:1,e:'화물을 선창이 아닌 갑판 위에 적재할 경우 On Deck B/L이 발행됩니다. UCP 600에 따라 신용장이 갑판적을 금지하거나 허용을 명시하지 않으면 하자 서류로 처리될 수 있습니다.'},
+{s:'해운',d:'mid',q:'선박의 DWT(Deadweight Tonnage, 재화중량톤수)의 정의는?',o:['선박 자체 무게','선박이 안전하게 운반할 수 있는 최대 화물+연료+선원+물 등의 총 중량','선박 전체 내부 용적','항만 입출항 기준 톤수'],a:1,e:'DWT는 선박이 안전하게 탑재할 수 있는 최대 중량(화물+연료+청수+선원+식량 등의 합)으로, 선박의 실질적 운송 능력을 나타내는 중요한 지표입니다.'},
+{s:'해운',d:'hard',q:'해상보험에서 ICC(A), ICC(B), ICC(C) 조건의 담보 범위 차이는?',o:['A=최소, C=최대','A=전위험담보(최대), B=중간, C=열거위험담보(최소)','모두 동일','A=항공, B=해상, C=육상 전용'],a:1,e:'ICC(A)는 면책사항을 제외한 모든 위험을 담보하는 최대 담보 조건이고, ICC(C)는 화재·폭발·침몰 등 열거된 위험만 담보하는 최소 조건입니다. ICC(B)는 중간 수준입니다.'},
+{s:'해운',d:'hard',q:'MARPOL 73/78 협약의 Annex VI에서 규제하는 내용은?',o:['선박 평형수 관리','선박으로부터의 대기오염(NOx, SOx, ODS 등) 규제','선박 폐수 처리','해양 투기 금지'],a:1,e:'MARPOL Annex VI는 선박 엔진의 NOx(질소산화물), 연료의 SOx(황산화물), ODS(오존층 파괴물질), 이산화탄소 등 대기오염물질 배출을 규제합니다. 2020년부터 황 함유량 0.5% 이하 규제가 시행됩니다.'},
+{s:'해운',d:'hard',q:'선박금융에서 선박 저당권(Ship Mortgage)에 대한 설명으로 옳은 것은?',o:['선박을 담보로 채권자에게 설정되는 물권','선원 급여 우선권','항만 사용료 미납 시 자동 설정','화물 손해 배상 청구권'],a:0,e:'선박 저당권은 선박을 담보로 설정되는 물적 담보권으로, 금융기관이 선박 건조·매입 자금을 대출할 때 주로 활용됩니다. 채무 불이행 시 선박을 경매에 부칠 수 있습니다.'},
+{s:'해운',d:'hard',q:'Hague-Visby Rules(헤이그-비스비 규칙)에서 선사의 책임 한도액 계산 기준은?',o:['화물 총 가액의 10%','포장당 또는 중량(kg)당 SDR 기준 중 높은 금액','B/L 기재 가액 전액','선박 보험금액 기준'],a:1,e:'Hague-Visby Rules에서 선사 책임은 포장(Package)당 666.67 SDR 또는 kg당 2 SDR 중 높은 금액으로 제한됩니다. SDR은 IMF 특별인출권(Special Drawing Rights)입니다.'},
+{s:'해운',d:'easy',q:'해운에서 "Transshipment(환적)"의 의미는?',o:['직항 운송','출발항과 목적항 사이에 다른 항구에서 선박을 갈아타는 것','컨테이너를 해체하는 것','화물을 분할 선적하는 것'],a:1,e:'환적(Transshipment)은 화물이 출발항에서 목적항까지 직항하지 않고, 중간 허브항에서 다른 선박으로 옮겨 타는 운송 방식입니다. 부산항은 동북아 주요 환적 허브입니다.'},
+{s:'해운',d:'mid',q:'해운에서 PSS(Peak Season Surcharge)가 부과되는 시기와 이유는?',o:['비수기에 선복 부족 보전','성수기(특히 3~4분기)에 수요 급증으로 선복 부족 시 임시 할증료 부과','연중 고정 부과','항만 혼잡 시만 부과'],a:1,e:'PSS는 미국·유럽 수출 성수기(보통 7~10월, 연말 등)에 화물 수요가 급증하여 선복이 부족할 때 선사들이 임시로 부과하는 성수기 할증료입니다.'},
+{s:'해운',d:'mid',q:'선하증권의 기재사항 중 "Notify Party"란?',o:['화물 수령인(Consignee)','선박 도착 시 통지를 받을 당사자','운임 지급 보증인','선박 대리점'],a:1,e:'Notify Party는 선박이 목적항에 도착할 때 연락을 받는 당사자로, 통상 수하인이나 현지 포워더·에이전트를 기재합니다. Consignee와 다를 수 있습니다.'},
+{s:'해운',d:'hard',q:'해운 기업의 얼라이언스 참여가 EU 경쟁법상 허용되는 근거로 사용되었던 제도는?',o:['해운 카르텔 전면 허용','컨소시엄 블록 면제(Block Exemption for Liner Shipping Consortia)','운임 담합 예외 조항','국가 보조금 허용'],a:1,e:'EU는 정기선 해운 컨소시엄이 운항 효율화를 위해 협력하는 경우 경쟁법 위반 면제(Block Exemption)를 부여해왔습니다. 다만 운임 공표(Conference) 관련 면제는 2008년 폐지됐습니다.'},
+{s:'해운',d:'easy',q:'운임 선불(Freight Prepaid)과 운임 후불(Freight Collect)의 차이는?',o:['선불=도착 후 지급, 후불=출발 전 지급','선불=수출자가 선적 시 지급, 후불=수하인이 목적지에서 지급','선불=선사, 후불=화주','선불=싸고, 후불=비싸다'],a:1,e:'Freight Prepaid는 수출자(Shipper)가 선적 전·시에 운임을 지급하고, Freight Collect는 수하인(Consignee)이 목적항에서 화물 수령 전 운임을 지급하는 방식입니다.'},
+{s:'해운',d:'mid',q:'컨테이너 번호 체계(ISO 6346)에서 소유자 코드(Owner Code)는 몇 자리인가?',o:['2자리 영문','3자리 영문+1자리 장비식별코드','4자리 숫자','6자리 영숫자'],a:1,e:'ISO 6346에 따라 컨테이너 번호는 소유자 코드 3자리(영문)+장비식별코드 1자리(U=일반, J=탈착가능장비, Z=트레일러)+일련번호 6자리+검사번호 1자리로 구성됩니다.'},
+{s:'해운',d:'hard',q:'선박 배출가스 규제 EEDI(에너지효율설계지수)의 적용 대상과 의미는?',o:['운항 중인 모든 선박의 연간 에너지 소비','신조 선박 설계 단계에서 에너지 효율을 수치화한 지수','선원의 에너지 절약 실적','항만의 전력 사용량'],a:1,e:'EEDI(Energy Efficiency Design Index)는 신조 선박의 설계 효율을 측정하는 지수로, CO2 g/톤·마일로 표현합니다. IMO는 단계적으로 기준을 강화하여 2025년부터 기준선 대비 30% 개선을 요구합니다.'},
+/* ===== 항만물류 추가 (99-117) ===== */
+{s:'항만',d:'easy',q:'항만에서 VTS(Vessel Traffic Service)의 역할은?',o:['화물 통관 심사','선박 입출항 교통 관제 및 안전 지원','컨테이너 야드 관리','선원 출입국 심사'],a:1,e:'VTS(선박교통관제서비스)는 항만 및 연안에서 레이더·AIS·CCTV 등을 이용해 선박 교통을 감시·조정하고, 충돌·좌초 사고를 예방하는 시스템입니다.'},
+{s:'항만',d:'easy',q:'컨테이너 야드에서 마샬링(Marshalling)이란?',o:['컨테이너 세관 검사','선적 계획에 따라 컨테이너를 선박 옆에 배치하는 작업','컨테이너 중량 측정','화물 보험 처리'],a:1,e:'마샬링(Marshalling)은 선적 전 컨테이너를 베이 플랜(Bay Plan)에 따라 선박 옆 적절한 위치에 미리 배치하여 크레인 작업 효율을 높이는 작업입니다.'},
+{s:'항만',d:'easy',q:'항만에서 "선석(Berth)"의 의미는?',o:['화물을 보관하는 창고','선박이 접안하여 하역 작업을 수행하는 안벽 구역','세관 검사 장소','컨테이너 쌓는 블록'],a:1,e:'선석(Berth)은 항만에서 선박이 접안하여 화물을 싣고 내리는 안벽(Quay)의 특정 구역을 말합니다. 선석 수는 항만 처리 용량을 결정하는 핵심 요소입니다.'},
+{s:'항만',d:'mid',q:'항만의 처리 용량(Capacity)을 결정하는 주요 요인이 아닌 것은?',o:['선석 수·길이·수심','크레인 생산성','항만 배후 도로·철도 연결','항만 직원 식당 규모'],a:3,e:'항만 처리 용량은 선석 수·수심, 크레인 수·생산성, 야드 면적·스택 높이, 게이트 처리 능력, 배후 교통 인프라 등에 의해 결정됩니다.'},
+{s:'항만',d:'mid',q:'항만 내 게이트(Gate) 자동화 시스템(OCR Gate)의 주요 기능은?',o:['선원 신분 확인','트럭 진출입 시 컨테이너 번호·차량 번호 자동 인식 및 기록','화물 중량 측정','관세 자동 납부'],a:1,e:'OCR(광학문자인식) 게이트는 트럭이 게이트를 통과할 때 카메라로 컨테이너 번호·봉인(Seal) 번호·차량 번호를 자동 인식하여 TOS에 기록, 수작업을 대체합니다.'},
+{s:'항만',d:'mid',q:'항만의 에너지 효율화를 위한 "콜드 아이어닝(Cold Ironing, 육상전원공급)"이란?',o:['선박 냉동 컨테이너 전원 차단','정박 중 선박 엔진을 끄고 육상 전력으로 전원 공급','항만 냉동창고 운영','겨울철 항만 결빙 방지'],a:1,e:'Cold Ironing(OPS, On-shore Power Supply)은 선박이 항만에 정박하는 동안 보조 엔진 대신 항만 육상 전력을 공급받아 대기오염과 소음을 줄이는 친환경 기술입니다.'},
+{s:'항만',d:'mid',q:'항만 물류에서 "배후단지(Back Hinterland)"의 주요 기능은?',o:['선박 수리 및 건조','물류·가공·제조 기능으로 항만 부가가치 창출','세관 검사 전용 구역','여객 터미널 운영'],a:1,e:'항만 배후단지는 수출입 화물의 보관·가공·조립·포장·분류 등 부가가치 물류(Value Added Logistics) 기능을 수행하며, 외국인 투자 유치와 일자리 창출에 기여합니다.'},
+{s:'항만',d:'mid',q:'컨테이너 터미널의 야드(Yard) 점유율이 높아질수록 나타나는 현상은?',o:['하역 생산성 향상','야드 크레인 이동 거리 증가로 처리 효율 저하','선박 대기 시간 감소','운임 자동 하락'],a:1,e:'야드 점유율(Yard Utilization)이 높아지면 컨테이너 재배치(Reshuffling) 빈도가 늘고 크레인 이동 거리가 증가하여 전체 터미널 생산성이 저하됩니다. 일반적으로 80% 이상이면 혼잡 위험이 높습니다.'},
+{s:'항만',d:'hard',q:'항만 보안 국제협약인 ISPS Code(국제선박항만보안규약)의 주요 요구사항은?',o:['항만 직원 급여 기준','선박·항만시설의 보안 등급 설정 및 보안 계획 수립','화물 보험 의무화','항만 환경 기준'],a:1,e:'ISPS Code(2004년 발효)는 선박과 항만시설에 보안 등급(1~3)을 설정하고, 보안 계획(SSP/PFSP)을 수립·시행할 것을 요구합니다. 선사와 항만 모두 보안 책임자(CSO/PFSO)를 지정해야 합니다.'},
+{s:'항만',d:'hard',q:'항만 운영에서 "선석 생산성(Berth Productivity)"을 높이기 위한 방법으로 가장 효과적인 것은?',o:['선박 대기 시간 연장','크레인 동시 투입 수 증가 및 야드-안벽 연계 최적화','야드 면적 축소','게이트 수 감소'],a:1,e:'선석 생산성은 크레인 수·속도, 야드 트럭/AGV와의 연계 최적화, 선적 계획(Bay Plan) 정교화, 마샬링 효율화 등을 통해 향상됩니다.'},
+{s:'항만',d:'hard',q:'자유무역항(Free Port)과 자유무역지역(FTZ)의 차이점은?',o:['동일한 개념','자유무역항=항만 전체 관세 면제 구역, FTZ=항만 내 특정 지정 구역에서 관세 유예·면제','자유무역항=수출 전용','FTZ=항공화물 전용'],a:1,e:'자유무역항은 항만 전체를 관세 면제 지역으로 운영하는 개념이고, FTZ(Free Trade Zone)는 항만·공항 인근 특정 지역에서 관세 유예·면제와 각종 행정 특례를 제공하는 구역입니다.'},
+{s:'항만',d:'mid',q:'항만에서 "소석(Lay-up)"의 의미는?',o:['화물을 야드에 임시 보관','선박이 경기 침체 시 운항을 중단하고 일시 계류하는 것','컨테이너를 적층 보관','화물 손상 시 보상'],a:1,e:'Lay-up은 해운 불황기에 선사가 경제성이 없는 선박의 운항을 임시 중단하고 항구에 계류시키는 것입니다. 항만이나 만(Bay)에 선박을 정박시켜 유지비를 최소화합니다.'},
+{s:'항만',d:'easy',q:'항만 하역 요금 중 "THC(Terminal Handling Charge)"란?',o:['선박 연료비','터미널에서 컨테이너 처리에 드는 비용','세관 검사 수수료','선박 도선 요금'],a:1,e:'THC는 컨테이너 터미널이 화주에게 청구하는 터미널 내 하역·이동·보관 처리 비용입니다. 수출입 각각 부과되며, 선사가 화주로부터 징수하여 터미널에 지급하는 구조입니다.'},
+{s:'항만',d:'hard',q:'항만 Green Port 정책의 핵심 요소가 아닌 것은?',o:['LNG 연료 선박 입항 인센티브','육상전원공급(OPS) 시설 설치','항만 처리 물동량 인위적 감소','대기오염 배출 선박 입항 규제'],a:2,e:'Green Port 정책은 LNG 인센티브, OPS, 저황유 사용 장려, 배출 규제, 전기 장비 도입, 신재생에너지 사용 등을 포함합니다. 물동량을 인위적으로 줄이는 것은 Green Port 정책이 아닙니다.'},
+{s:'항만',d:'mid',q:'항만 물류 서비스에서 "One-stop Service"의 의미는?',o:['선박이 항구를 한 번만 기항','통관·하역·보관·배송 등 물류 전 과정을 한 곳에서 처리','컨테이너 1개 단위 서비스','하루 안에 모든 처리 완료'],a:1,e:'항만의 원스톱 서비스는 수출입 화물의 통관, 하역, 보관, 내륙 운송 등 전 물류 프로세스를 단일 창구나 단지에서 처리함으로써 화주의 편의성과 처리 속도를 높이는 개념입니다.'},
+{s:'항만',d:'easy',q:'수출 컨테이너 화물의 일반적인 터미널 반입 마감(CY Cut-off)의 의미는?',o:['수입 화물 찾는 마감일','선박 출항 전 컨테이너를 터미널에 반입해야 하는 최종 시한','운임 지급 마감일','B/L 발행 마감일'],a:1,e:'CY Cut-off는 선박 출항 전 수출 컨테이너를 CY에 반입해야 하는 마감 시한입니다. 일반적으로 출항 1~2일 전이며, 이후 반입은 다음 선박으로 넘어갑니다.'},
+/* ===== 무역실무 추가 (118-140) ===== */
+{s:'무역',d:'easy',q:'수출입 거래에서 "Proforma Invoice(견적송장)"의 용도는?',o:['최종 대금 청구 문서','거래 조건 확인·신용장 개설·수입허가 신청 등에 활용되는 사전 견적 서류','세관 신고서','선하증권 대체 문서'],a:1,e:'Proforma Invoice는 정식 계약 전 매도인이 발행하는 견적 송장으로, 매수인이 신용장 개설, 수입 허가 신청, 거래 조건 확인에 활용합니다.'},
+{s:'무역',d:'easy',q:'원산지증명서(Certificate of Origin)의 주요 역할은?',o:['화물 중량 증명','화물의 생산·제조 국가를 공식 증명하여 관세 혜택·수입 제한 적용에 활용','선박 항로 증명','포장 상태 증명'],a:1,e:'C/O(원산지증명서)는 화물이 특정 국가에서 생산됐음을 증명하는 공식 서류로, FTA 특혜 관세 적용, 수입국의 원산지 규정 충족 여부 확인에 필수입니다.'},
+{s:'무역',d:'easy',q:'D/P(Documents against Payment)와 D/A(Documents against Acceptance)의 차이는?',o:['D/P=서류 인수 후 결제, D/A=결제 후 서류 인수','D/P=서류와 동시에 대금 지급, D/A=환어음 인수 후 서류 인수(외상)','D/P=신용장 필요, D/A=불필요','D/P=수입 전용, D/A=수출 전용'],a:1,e:'D/P는 수입상이 대금을 즉시 지급해야 서류를 받는 방식이고, D/A는 기한부 어음(Usance Draft)을 인수(Accept)하면 서류를 먼저 받고 만기일에 대금을 지급하는 외상 거래입니다.'},
+{s:'무역',d:'easy',q:'수출신고 수리 후 발급되는 서류는?',o:['선하증권(B/L)','수출신고필증(Export Declaration Certificate)','원산지증명서','포장명세서'],a:1,e:'수출신고가 수리되면 세관에서 수출신고필증이 발급됩니다. 이 서류는 수출 실적 증명, 관세 환급, 외환 수취 등에 활용됩니다.'},
+{s:'무역',d:'mid',q:'FTA(자유무역협정)에서 원산지 결정 기준 중 "실질적 변형 기준(Substantial Transformation)"의 대표적인 방법은?',o:['제조국 기준','세번변경기준(CTH/CTSH)·부가가치기준(RVC)·가공공정기준','최저 가격 기준','포장 기준'],a:1,e:'실질적 변형 기준은 세번변경기준(HS코드가 일정 단위 이상 변경), 부가가치기준(일정 비율 이상 국내 부가가치 발생), 특정 가공공정 기준 등으로 원산지를 판정합니다.'},
+{s:'무역',d:'mid',q:'수출입 거래에서 환율 리스크를 헤징하는 방법으로 가장 일반적인 것은?',o:['거래 포기','선물환(Forward Exchange) 계약 또는 통화옵션','모든 거래를 자국 통화로만','환율 변동 무시'],a:1,e:'선물환 계약은 미래의 특정 시점에 미리 정한 환율로 외환을 매매하기로 하는 계약으로, 환율 변동에 따른 수출입 대금 손실을 방지하는 가장 대표적인 헤징 수단입니다.'},
+{s:'무역',d:'mid',q:'수입 통관 시 "과세가격(Customs Value)"의 결정 방법으로 가장 우선하는 방식은?',o:['수입국 시장 가격','거래가격 방법(Transaction Value Method) - 실제 지급 가격 기준','수출국 생산 원가','임의 산정'],a:1,e:'WTO 관세평가협정에 따라 수입 물품의 과세가격은 1순위로 실제 지급 또는 지급할 가격인 거래가격(Transaction Value) 방법을 적용합니다. CIF 조건인지 FOB 조건인지에 따라 산입 항목이 달라집니다.'},
+{s:'무역',d:'mid',q:'전자무역(e-Trade)에서 "싱글 윈도우(Single Window)" 시스템의 의미는?',o:['하나의 창구에서 모든 수출입 신고를 일괄 처리하는 정보 플랫폼','단일 해운사만 이용','하나의 통관 서류만 제출','수입만 처리하는 시스템'],a:0,e:'싱글 윈도우는 수출입 통관, 검역, 외환 신고 등 여러 기관에 분산된 신고를 단일 전자 플랫폼에서 한 번에 처리할 수 있게 하는 시스템으로, 한국의 uTradeHub가 대표 사례입니다.'},
+{s:'무역',d:'mid',q:'수출 보험에서 "수출 신용보증(Export Credit Guarantee)"의 주요 기능은?',o:['수출 물품 운송 중 손해 보상','수출 대금 미회수 위험을 정부 기관이 보증','수입업자에게 신용 제공','운임 변동 위험 보장'],a:1,e:'수출 신용보증은 수출업자의 대금 미회수 위험을 한국무역보험공사(K-sure) 등 정부 기관이 보증·보험하여 수출 활성화를 지원하는 정책금융 상품입니다.'},
+{s:'무역',d:'hard',q:'인코텀즈 2020에서 FCA 조건의 B/L "On Board" 표기 특약의 의미는?',o:['FCA에서 B/L 발행 불필요','신용장 사용 시 화주가 선사에게 On Board B/L 발행을 요청할 수 있는 특약이 신설됨','FCA는 항공에만 적용','선사가 의무적으로 발행'],a:1,e:'Incoterms 2020 FCA 조건에서 신용장 결제 시 매수인이 선사에게 On Board 표기 B/L을 발행하도록 지시할 수 있는 당사자 간 특약 조항이 추가됐습니다.'},
+{s:'무역',d:'hard',q:'수출입 거래에서 "Back-to-Back L/C(보조신용장)"의 활용 상황은?',o:['B/L 분실 시 사용','중개무역에서 중간 상인이 원신용장을 담보로 공급자에게 새 신용장 개설 시','분할 선적 시 사용','운임 후불 시 사용'],a:1,e:'Back-to-Back L/C는 중개 무역업자가 수입상으로부터 받은 마스터 L/C를 담보로 실제 공급자에게 별도의 신용장을 개설하는 방식으로, 자금 없이 중개 거래를 성사시키는 수단입니다.'},
+{s:'무역',d:'hard',q:'반덤핑 관세(Anti-Dumping Duty)가 부과되는 조건은?',o:['수입품 가격이 너무 높을 때','수출국에서 정상 가격 이하로 수출하여 수입국 산업에 피해를 줄 때','수입량이 많을 때','수입국 정부가 임의로 결정'],a:1,e:'반덤핑 관세는 외국 기업이 자국 시장가격보다 낮은 가격(덤핑)으로 수출하여 수입국 동종 산업에 실질적 피해가 발생하거나 발생할 우려가 있을 때 부과됩니다.'},
+{s:'무역',d:'easy',q:'신용장(L/C)에서 "확인신용장(Confirmed L/C)"의 특징은?',o:['개설은행만 지급 확약','개설은행+확인은행이 이중으로 지급 보증','화주가 직접 보증','수입상이 추가 보증'],a:1,e:'확인신용장은 개설은행의 신용도가 낮거나 정치적 리스크가 있을 때, 수출국의 확인은행(Confirming Bank)이 추가로 지급을 보증하는 신용장입니다.'},
+{s:'무역',d:'mid',q:'수출입에서 "관세유보(Duty Suspension)"와 "관세환급(Drawback)"의 차이는?',o:['동일한 제도','관세유보=수입 시 관세 납부를 유예, 관세환급=납부 후 수출 시 환급','관세유보=영구 면제','관세환급=전액 면제'],a:1,e:'관세유보는 수입 시 관세를 처음부터 유예(보세구역 활용)하는 방식이고, 관세환급(Drawback)은 관세를 먼저 납부 후 가공·제조하여 수출한 뒤 납부한 관세를 돌려받는 방식입니다.'},
+{s:'무역',d:'hard',q:'무역 분쟁 해결에서 ICC 국제중재재판소 중재의 특징은?',o:['소송보다 느리고 비쌈','당사자 합의로 중재지·준거법 선택 가능, 판정 집행력 강함(뉴욕협약)','국내 소송과 동일','판정에 불복 시 항소 가능'],a:1,e:'ICC 중재는 당사자가 중재지, 언어, 준거법을 자유롭게 선택할 수 있고, 1958년 뉴욕협약에 따라 160개국 이상에서 강제 집행이 가능합니다. 비공개성과 전문성도 장점입니다.'},
+{s:'무역',d:'easy',q:'수출 계약에서 "분할선적(Partial Shipment)"과 "환적(Transshipment)"을 허용(Allowed)하는 조건은?',o:['신용장에 Prohibited로 명시된 경우','신용장에 별도 조건이 없으면 UCP 600상 허용이 기본 원칙','항상 금지','화주 임의 결정'],a:1,e:'UCP 600 제19~20조에 따르면 신용장에 별도로 금지(Prohibited)를 명시하지 않는 한 분할선적과 환적은 허용됩니다.'},
+{s:'무역',d:'mid',q:'수입 물품의 HS코드를 잘못 신고하면 발생할 수 있는 문제는?',o:['B/L 재발행','과부족 관세 납부, 세관 조사, 과태료 부과','운임 재산정','신용장 취소'],a:1,e:'HS코드 오류는 관세 과소·과다 납부, 수출입 요건(검역·허가) 위반, 세관 조사 대상이 될 수 있습니다. 의도적 허위 신고는 관세법 위반으로 처벌받을 수 있습니다.'},
+{s:'무역',d:'hard',q:'RCEP(역내 포괄적 경제동반자협정)의 의의와 특징은?',o:['EU와 아시아 간 협정','아세안 10개국+한·중·일·호주·뉴질랜드 15개국 간 세계 최대 규모 FTA','미국·유럽 중심 협정','서비스 무역만 다룸'],a:1,e:'RCEP는 2022년 발효된 아세안 10개국, 한국, 중국, 일본, 호주, 뉴질랜드 등 15개국이 참여하는 세계 최대 규모의 FTA로, 전 세계 GDP의 약 30%, 무역의 약 28%를 차지합니다.'},
+/* ===== SCM 추가 (141-155) ===== */
+{s:'SCM',d:'easy',q:'JIT(Just In Time) 생산 방식의 핵심 원칙은?',o:['최대 재고 보유','필요한 것을 필요한 때에 필요한 만큼만 공급','대량 생산 후 보관','수요 예측 없이 생산'],a:1,e:'JIT(적시 생산)는 도요타가 개발한 방식으로, 재고를 최소화하고 필요한 시점에 필요한 수량만 공급하여 낭비를 없애는 린(Lean) 생산 철학의 핵심입니다.'},
+{s:'SCM',d:'easy',q:'물류 비용의 트레이드오프(Trade-off) 관계 예시로 옳은 것은?',o:['재고 증가→운송비 감소 (트레이드오프 없음)','재고 증가→재고비 증가, 재고 감소→결품 위험 증가','운송비 증가→재고비 증가','모든 비용은 동시에 감소'],a:1,e:'물류에서 재고 증가는 보관비를 높이지만 결품 리스크를 낮추고, 재고 감소는 보관비를 낮추지만 결품 위험이 높아집니다. 이처럼 한 비용 개선이 다른 비용 악화를 초래하는 관계가 트레이드오프입니다.'},
+{s:'SCM',d:'mid',q:'물류센터에서 ABC 분석(ABC Analysis)을 적용하는 목적은?',o:['직원 성과 평가','재고 품목을 매출 기여도 기준으로 A/B/C 등급 분류하여 차별적 관리','창고 온도 관리','운반 경로 최적화'],a:1,e:'ABC 분석은 파레토(80/20) 법칙에 기반하여 품목을 매출·수량·가치 기준으로 A(상위 20%, 매출 80%), B, C로 분류하고 A 등급에 집중 관리 자원을 투입하는 재고 관리 기법입니다.'},
+{s:'SCM',d:'mid',q:'4PL(Fourth Party Logistics)과 3PL의 차이는?',o:['4PL=더 많은 차량 보유','4PL=자산 없이 여러 3PL을 통합 관리하는 공급망 통합 컨설팅·조율 역할','4PL=정부 기관','3PL=디지털, 4PL=아날로그'],a:1,e:'4PL은 자체 물류 자산 없이 여러 3PL 업체를 통합 관리하고 공급망 전체를 최적화하는 컨설팅·조율 역할을 합니다. 화주의 공급망 아웃소싱 파트너 역할을 하는 개념입니다.'},
+{s:'SCM',d:'mid',q:'안전재고(Safety Stock)를 결정하는 주요 요인은?',o:['창고 면적','수요 변동성·리드타임 변동성·서비스 수준 목표','직원 수','운송 수단'],a:1,e:'안전재고는 수요의 불확실성(표준편차), 리드타임의 변동성, 목표 서비스 수준(주문충족률)을 기반으로 계산합니다. 서비스 수준이 높을수록 안전재고는 증가합니다.'},
+{s:'SCM',d:'hard',q:'공급망에서 "탄력성(Resilience)"을 높이기 위한 전략이 아닌 것은?',o:['복수 공급자 확보(Multi-Sourcing)','전략적 재고 보유','공급망 가시성 향상','단일 공급자 의존도 극대화'],a:3,e:'공급망 탄력성(Resilience)은 중단 위험 분산을 위해 복수 공급자 확보, 전략적 재고 유지, 가시성 향상, 지역별 분산 생산 등을 요구합니다. 단일 공급자 집중은 리스크를 높입니다.'},
+{s:'SCM',d:'hard',q:'녹색물류(Green Logistics)에서 "탄소발자국(Carbon Footprint)" 측정의 목적은?',o:['직원 건강 관리','물류 활동에서 발생하는 온실가스 배출량을 정량화하여 감축 목표 설정','운임 산정','창고 면적 계산'],a:1,e:'탄소발자국 측정은 운송·보관·포장 등 물류 전 과정에서 발생하는 CO2 등 온실가스를 CO2 환산 톤수(tCO2e)로 정량화하여 감축 목표를 설정하고 ESG 경영에 활용합니다.'},
+{s:'SCM',d:'mid',q:'공급망 관리에서 "Tier 1, Tier 2 공급자"의 의미는?',o:['Tier 1=품질 최하, Tier 2=최상','Tier 1=최종 제조사에 직접 납품하는 공급자, Tier 2=Tier 1에 납품하는 공급자','Tier 1=국내, Tier 2=해외','동일한 의미'],a:1,e:'Tier 1 공급자는 완성품 제조사에 직접 부품·소재를 납품하고, Tier 2는 Tier 1에 납품하는 방식으로 공급망 단계를 구분합니다. 공급망 리스크 관리에서 Tier 2 이하까지 가시성 확보가 중요합니다.'},
+{s:'SCM',d:'easy',q:'물류 용어 중 "Drayage"의 의미는?',o:['장거리 해상 운송','항만·터미널·철도역 등 지근 거리 내 컨테이너 트럭 운송','항공 화물 운송','냉장 화물 배송'],a:1,e:'Drayage는 항만·철도 터미널과 인근 CFS·창고·공장 사이 단거리 컨테이너 트럭 운송을 말합니다. 내륙 장거리 운송(Over the Road)과 구분됩니다.'},
+/* ===== ICT·디지털 추가 (156-176) ===== */
+{s:'ICT',d:'easy',q:'바코드와 QR코드의 가장 큰 차이점은?',o:['QR코드가 더 크다','QR코드는 2차원으로 더 많은 정보를 저장 가능','바코드가 더 정확하다','QR코드는 해상 전용'],a:1,e:'전통 바코드는 1차원(선형)으로 제한된 정보만 저장하지만, QR코드는 2차원 매트릭스로 수천 자의 텍스트, URL, 제품 정보 등을 담을 수 있습니다.'},
+{s:'ICT',d:'easy',q:'ERP(Enterprise Resource Planning)가 물류 기업에 도입됐을 때의 핵심 효과는?',o:['부서별 개별 시스템 유지','영업·구매·재고·회계 등 전사 데이터를 통합하여 실시간 정보 공유','IT 비용 무한 증가','직원 수 증가'],a:1,e:'ERP는 기업의 재무·인사·구매·생산·물류 등 전 부문 데이터를 단일 플랫폼에 통합하여 실시간 의사결정을 지원하고, 중복 입력과 정보 단절을 없애는 기간 시스템입니다.'},
+{s:'ICT',d:'mid',q:'LBS(위치기반서비스)가 물류에서 활용되는 대표적인 사례는?',o:['창고 온도 관리','차량·화물의 실시간 위치 추적 및 배송 경로 최적화','선원 식단 관리','항만 세관 신고'],a:1,e:'LBS는 GPS·셀룰러·WiFi 등을 이용해 차량·컨테이너·배송원의 실시간 위치를 파악하고, 최적 경로 안내, 도착 예정 시간(ETA) 제공, 이탈 감지 등에 활용됩니다.'},
+{s:'ICT',d:'mid',q:'해운물류에서 "API First" 전략의 의미는?',o:['구형 EDI 시스템 유지','모든 데이터·기능을 API로 먼저 설계하여 외부 시스템과 즉시 연동 가능하게 구축','종이 서류 우선 처리','데이터 공유 금지'],a:1,e:'API First는 서비스·데이터를 API(Application Programming Interface)로 먼저 설계하여 선사·포워더·화주 시스템이 실시간으로 연동될 수 있게 하는 디지털 아키텍처 전략입니다.'},
+{s:'ICT',d:'mid',q:'SaaS(Software as a Service) 방식으로 물류 소프트웨어를 도입할 때의 장점은?',o:['서버를 직접 구축해야 함','초기 투자 최소화, 구독 방식으로 최신 버전 자동 업데이트','유연성 감소','데이터 보안 향상만 가능'],a:1,e:'SaaS는 소프트웨어를 클라우드에서 구독 방식으로 이용하여 초기 구축 비용이 낮고, 버전 업데이트가 자동으로 이루어지며 어디서나 접근 가능한 장점이 있습니다.'},
+{s:'ICT',d:'mid',q:'물류 자동화에서 협동로봇(Cobot, Collaborative Robot)의 특징은?',o:['인간 없이 단독 운영','안전 장치를 갖추고 인간 작업자와 같은 공간에서 협력하는 로봇','무한 하중 처리 가능','완전 자율 의사결정'],a:1,e:'협동로봇(Cobot)은 사람과 같은 작업 공간에서 안전하게 협력하도록 설계된 로봇으로, 물류센터 피킹·포장·팔레타이징 등에서 작업자 부담을 줄이는 데 활용됩니다.'},
+{s:'ICT',d:'hard',q:'해상물류에서 "데이터 사일로(Data Silo)" 문제란?',o:['데이터가 너무 많아 처리 불가','각 기업·시스템이 데이터를 내부에만 보유하고 공유하지 않아 공급망 전체 최적화가 어려운 문제','데이터 저장 공간 부족','인터넷 속도 문제'],a:1,e:'데이터 사일로는 선사·항만·포워더·세관 등이 각자의 데이터를 외부와 공유하지 않고 독립적으로 관리하여, 공급망 전체의 가시성 확보와 협력 최적화가 어려워지는 문제입니다.'},
+{s:'ICT',d:'hard',q:'머신러닝에서 "지도학습(Supervised Learning)"의 물류 적용 사례는?',o:['레이블 없는 데이터로 패턴 발견','정답이 있는 과거 데이터로 모델 훈련 후 수요 예측·이상 탐지에 활용','강화학습으로 경로 최적화','GAN으로 이미지 생성'],a:1,e:'지도학습은 과거 수요·날씨·프로모션 데이터(입력)와 실제 판매량(정답)으로 모델을 훈련하여 미래 수요를 예측하거나, 정상 패턴을 학습해 화물 이상을 탐지하는 데 활용됩니다.'},
+{s:'ICT',d:'mid',q:'컨테이너 화물 추적에서 "Milestone Event(마일스톤 이벤트)"란?',o:['운임 변경 시점','화물의 주요 이동 단계별 상태 업데이트(출고·적재·출항·입항·반출 등)','선박 엔진 점검 기록','직원 업무 체크리스트'],a:1,e:'마일스톤은 화물의 수명주기에서 중요한 상태 변화 시점(공장 출고, CY 반입, 선박 적재, 출항, 목적항 입항, 세관 통관, 최종 배송 등)으로, 화주에게 실시간 가시성을 제공합니다.'},
+{s:'ICT',d:'hard',q:'물류 분야에서 RPA(Robotic Process Automation)의 대표적인 활용 사례는?',o:['물리적 로봇이 화물을 이동','선박 자동 운항','반복적인 데이터 입력·처리 업무(운임 조회·B/L 데이터 입력·서류 발행 등) 자동화','창고 물리적 자동화'],a:2,e:'RPA는 사람이 반복적으로 수행하는 컴퓨터 작업(데이터 입력, 이메일 분류, 시스템 간 데이터 이동 등)을 소프트웨어 봇이 자동으로 처리하는 기술입니다. 물류에서는 B/L 초안 작성, 운임 비교, 관세 계산 자동화에 활용됩니다.'},
+{s:'ICT',d:'easy',q:'GPS(Global Positioning System)가 물류에서 활용되는 핵심 기능은?',o:['데이터 암호화','위성을 이용한 차량·선박·화물의 정확한 위치 파악','운임 자동 계산','창고 재고 관리'],a:1,e:'GPS는 위성 신호를 이용해 차량·컨테이너·선박의 실시간 위치를 파악하고, 배송 경로 추적, ETA 제공, 지오펜싱(특정 구역 진입 감지) 등에 활용됩니다.'},
+/* ===== 스마트해상물류 추가 (177-200) ===== */
+{s:'스마트',d:'easy',q:'스마트 물류센터에서 "자동화 피킹 시스템(Automated Picking)"의 예시가 아닌 것은?',o:['GTP(Goods-to-Person) 시스템','AutoStore 큐브 스토리지','수작업 종이 피킹리스트','Voice Picking 시스템'],a:2,e:'자동화 피킹에는 GTP(선반이 사람에게 이동), AutoStore, 컨베이어 기반 자동 분류, Voice Picking(음성 안내), 비전 시스템 등이 포함됩니다. 종이 피킹리스트는 비자동화 방식입니다.'},
+{s:'스마트',d:'easy',q:'해운에서 "탄소중립 연료(Carbon-Neutral Fuel)"로 분류되는 조건은?',o:['연소 시 CO2가 전혀 발생하지 않음','연료 생산부터 연소까지 생애주기 전체에서 탄소 순배출이 0에 가까운 연료','연료 탱크가 없어도 됨','엔진 없이 운항'],a:1,e:'탄소중립 연료는 연료의 생산(Well-to-Wake)부터 연소까지 전 과정의 순 탄소 배출이 제로에 가까운 연료입니다. 그린 수소·그린 암모니아·e-메탄올 등이 대표적입니다.'},
+{s:'스마트',d:'mid',q:'해운 분야 ESG 경영에서 "S(Social)" 측면의 주요 과제는?',o:['탄소 배출 감축','선원 노동권·안전·복지 및 지역사회 영향','재무 투명성','이사회 구성'],a:1,e:'해운 ESG의 Social 항목에는 선원 노동권(MLC 2006 준수), 안전(사고 예방), 다양성·포용성, 지역사회 기여, 공급망 인권 등이 포함됩니다.'},
+{s:'스마트',d:'mid',q:'해운·물류의 디지털 전환에서 "레거시 시스템(Legacy System)"이 걸림돌이 되는 이유는?',o:['최신 기술이라 호환 안 됨','구형 기술 기반으로 새로운 디지털 시스템과 통합·연계가 어려움','클라우드 전용 시스템','보안이 너무 강해 접근 불가'],a:1,e:'레거시 시스템은 오래된 기술 기반(메인프레임, 구형 EDI 등)으로 구축되어 최신 API·클라우드·AI 기술과 통합이 어렵고 유지보수 비용이 높아 디지털 전환의 장벽이 됩니다.'},
+{s:'스마트',d:'mid',q:'스마트 해운에서 "해사 빅데이터(Maritime Big Data)"의 주요 원천(소스)이 아닌 것은?',o:['AIS 선박 위치 데이터','기상·해양 데이터','항만 입출항 데이터','선원 개인 일기'],a:3,e:'해사 빅데이터의 주요 소스는 AIS(위치·속도), IoT 센서(엔진·기상), 항만 TOS(입출항·하역), 위성 이미지, 운임 지수 데이터 등입니다. 선원 개인 일기는 빅데이터 소스가 아닙니다.'},
+{s:'스마트',d:'hard',q:'해운에서 "EU ETS(탄소배출권거래제)" 적용이 해운 기업에 미치는 직접적 영향은?',o:['운항 속도 무조건 증가','2024년부터 EU 항로 운항 선박은 탄소 배출량에 따라 ETS 비용 부담','모든 화물 운임 자동 하락','선박 크기 제한'],a:1,e:'EU ETS는 2024년부터 EU 항로를 운항하는 선박(5,000GT 이상)에 탄소 배출권(EUA) 구매를 의무화합니다. 선사는 탄소 비용 절감을 위해 연료 효율 개선, 친환경 연료 전환, 슬로우 스티밍을 추진합니다.'},
+{s:'스마트',d:'hard',q:'자율운항선박의 IMO MASS 단계 중 "3단계(Remotely Controlled Ship without Seafarers)"의 의미는?',o:['승선 선원이 보조 역할','선박에 선원이 없고 육상에서 원격으로 완전 제어','AI가 단독 결정','GPS만으로 운항'],a:1,e:'IMO MASS 3단계는 선박에 선원이 탑승하지 않고 육상의 원격운항센터(ROC)에서 선박을 완전히 제어하는 단계입니다. 4단계는 육상 개입 없이 선박이 완전 자율 판단하는 단계입니다.'},
+{s:'스마트',d:'hard',q:'해운 Net Zero 달성을 위한 "Well-to-Wake(WtW)" 접근법이란?',o:['선박 연료 탱크에서 배기까지만 측정','연료 생산(원료 채굴)부터 선박 배기(Exhaust)까지 전체 생애주기 탄소 배출 측정','항만 전력만 측정','선박 건조 탄소만 측정'],a:1,e:'WtW(Well-to-Wake)는 연료의 원료 추출부터 생산·운반·연소까지 전 과정의 탄소 배출을 합산하는 방식으로, 연소 시점만 보는 Tank-to-Wake(TtW)보다 포괄적인 탄소 측정 방법입니다.'},
+{s:'스마트',d:'mid',q:'스마트 해상물류에서 "포트 커뮤니티 시스템(PCS, Port Community System)"의 역할은?',o:['항만 직원 급여 관리','항만 관련 모든 이해관계자(선사·하역사·세관·화주 등)가 정보를 공유하는 중립적 전자 플랫폼','선박 엔진 제어','컨테이너 제조'],a:1,e:'PCS는 항만 생태계의 선사·터미널·포워더·세관·검역 등 모든 주체가 화물·선박 정보를 단일 중립 플랫폼에서 교환하여 통관·하역·반출 프로세스를 통합·자동화하는 시스템입니다.'},
+{s:'스마트',d:'mid',q:'해운 물류 스타트업이 등장하며 전통 포워더가 직면한 가장 큰 위협은?',o:['선박 부족','디지털 플랫폼으로 운임 투명화, 예약 자동화되어 중간 마진 압박','항만 폐쇄','관세 증가'],a:1,e:'Flexport·Freightos 등 디지털 포워딩 플랫폼이 운임 비교·온라인 예약·추적 자동화를 제공하면서, 정보 비대칭에 의존하던 전통 포워더의 마진이 압박받고 있습니다.'},
+{s:'스마트',d:'hard',q:'해운 분야 "Green Corridor(녹색 항로)"의 개념은?',o:['환경 규제가 없는 특별 항로','특정 항로에서 탄소 배출 제로를 목표로 친환경 연료·기술을 집중 적용하는 시범 항로','태양광만 사용하는 항로','화물 없이 운항하는 빈 항로'],a:1,e:'Green Corridor는 두 항만을 연결하는 특정 항로에서 정부·선사·항만·화주가 협력하여 친환경 연료 공급망 구축, 탄소 중립 운항을 시범 실증하는 개념입니다. 한-호주, 한-중 간 녹색항로 구축이 논의되고 있습니다.'},
+{s:'스마트',d:'easy',q:'선박의 AMP(Alternative Maritime Power, 육상전원공급) 사용 시 가장 큰 환경적 효과는?',o:['연료 절감','정박 중 보조 엔진 가동 중단으로 항만 지역 대기오염(NOx·SOx·PM) 감소','선박 속도 향상','화물 처리 증가'],a:1,e:'AMP(육상전원공급)는 정박 중 선박의 보조 엔진(APU) 대신 항만 육상 전력을 사용하여 선박 배기가스(NOx·SOx·PM2.5)를 항만 지역에서 거의 제로화하는 효과가 있습니다.'},
+{s:'스마트',d:'mid',q:'해상 물류에서 "화물 가시성(Cargo Visibility)"을 높이기 위한 기술 조합으로 가장 효과적인 것은?',o:['팩스+전화','IoT 센서+위성 추적+블록체인+API 연동','종이 서류+EDI','수동 보고서'],a:1,e:'화물 가시성 극대화는 IoT 센서(위치·상태 실시간 감지), 위성 추적(AIS·GPS), 블록체인(서류 위변조 방지), API(시스템 간 자동 데이터 연동)를 결합할 때 가장 효과적입니다.'},
+{s:'스마트',d:'hard',q:'국제해사기구(IMO)의 "e-Navigation" 전략의 핵심 목표는?',o:['선박 속도 향상','디지털 기술로 해상 항법·통신·운항 정보를 표준화·통합하여 안전·효율 향상','연료 의무 교체','선원 수 감축 법제화'],a:1,e:'IMO e-Navigation은 선박·항만·해안국 간의 항법·통신 데이터를 디지털로 표준화·통합하여 해양 사고 예방, 운항 효율 향상, 해사 서비스 개선을 목표로 하는 전략 계획입니다.'},
+{s:'스마트',d:'mid',q:'해운 물류에서 "디지털 선적 주문(Digital Booking)" 플랫폼의 화주 입장 장점은?',o:['운임 상승','전화 없이 온라인으로 선복 조회·예약·서류 관리 가능','환적 증가','B/L 발행 지연'],a:1,e:'디지털 부킹 플랫폼은 화주가 전화·팩스 없이 온라인으로 실시간 운임 조회, 선복 예약, 선하증권 발행, 화물 추적까지 원스톱으로 처리할 수 있게 합니다.'},
+/* ===== 추가 균형 문항 ===== */
+{s:'해운',d:'easy',q:'해상운송에서 "기항(Port Call)"의 의미는?',o:['선박이 출항지를 떠나는 것','선박이 항로 중 특정 항구에 들르는 것','화물을 전량 양하하는 것','선박이 항구에 영구 정박하는 것'],a:1,e:'기항(Port Call)은 선박이 항해 중 화물 적·양하, 연료 보급, 선원 교대 등을 위해 특정 항구에 들르는 것을 말합니다.'},
+{s:'해운',d:'mid',q:'선박 보험에서 P&I(Protection and Indemnity) 클럽이 담보하는 주요 내용은?',o:['선체 파손 손해','제3자에 대한 배상책임(충돌·오염·선원재해·화물클레임 등)','화물 손해 전액','운임 손실'],a:1,e:'P&I 클럽은 선주의 제3자 배상책임(화물주 클레임, 충돌 책임, 해양오염, 선원 부상·사망 등)을 상호공제 방식으로 담보합니다. 선체 손해는 Hull & Machinery 보험이 별도로 담보합니다.'},
+{s:'해운',d:'hard',q:'UN 해양법협약(UNCLOS)에서 "배타적 경제수역(EEZ)"의 범위는?',o:['기선으로부터 12해리','기선으로부터 200해리','기선으로부터 24해리','공해 전체'],a:1,e:'UNCLOS에 따라 EEZ는 기선(Baseline)으로부터 200해리까지로, 연안국은 이 구역 내 어업·자원 탐사·환경 보호에 대한 주권적 권리를 갖습니다. 영해는 12해리, 접속수역은 24해리입니다.'},
+{s:'해운',d:'mid',q:'선박의 만재흘수선(Plimsoll Mark)이 표시하는 의미는?',o:['연료 최대 용량','계절·수역별 최대 허용 적재 흘수 표시','선박 건조 연도','선원 정원'],a:1,e:'만재흘수선(Load Line, Plimsoll Mark)은 선박이 안전하게 항해할 수 있는 최대 흘수를 계절(하계·동계·열대 등)과 수역(담수·열대·하계·동계·북대서양 동계)에 따라 표시한 선입니다.'},
+{s:'SCM',d:'mid',q:'물류 아웃소싱 결정 시 "코어 역량(Core Competency)" 관점에서 고려할 사항은?',o:['모든 기능을 외부에 위탁','핵심 경쟁 우위와 직결된 기능은 내부화, 비핵심 물류 기능은 아웃소싱 검토','물류는 항상 내부화','비용만 고려'],a:1,e:'코어 역량 관점에서 기업은 제품 개발·고객 관계 등 핵심 역량에 집중하고, 비핵심 물류 기능(창고·배송·통관 등)은 전문 3PL에 아웃소싱하여 비용·유연성을 최적화합니다.'},
+{s:'SCM',d:'easy',q:'풀(Pull) 방식 공급망과 푸시(Push) 방식의 차이는?',o:['Pull=예측 기반 대량 생산 선행, Push=실수요 기반','Pull=실제 수요(주문)에 의해 공급 시작, Push=수요 예측으로 미리 생산·공급','Pull=수입, Push=수출','동일한 개념'],a:1,e:'Pull 방식은 실제 고객 주문이 발생하면 그때 생산·공급이 시작되어 재고가 적습니다(JIT). Push 방식은 수요 예측에 따라 미리 생산·재고를 확보합니다. 현실은 Push-Pull 혼합입니다.'},
+{s:'SCM',d:'hard',q:'공급망 디지털 전환에서 "통제탑(Control Tower)"의 역할은?',o:['물류센터 조명 제어','공급망 전체의 데이터를 실시간 집계·분석하여 이상 감지 및 의사결정 지원','화물 물리적 이동 지시','직원 근태 관리'],a:1,e:'Supply Chain Control Tower는 공급망 전 단계(조달·생산·물류·판매)의 데이터를 실시간으로 집계·시각화하여 이상 징후를 조기 감지하고 경영진의 신속한 의사결정을 지원하는 디지털 허브입니다.'},
+{s:'ICT',d:'easy',q:'물류에서 "Track & Trace(추적조회)" 시스템의 기본 개념은?',o:['운임 자동 계산','화물의 현재 위치와 상태를 실시간으로 확인하는 시스템','선박 연료 관리','창고 직원 위치 파악'],a:1,e:'Track & Trace는 화물이 출발지에서 목적지까지 이동하는 동안 각 단계의 위치와 상태를 실시간으로 조회할 수 있게 하는 시스템으로, 고객 서비스와 공급망 가시성의 핵심입니다.'},
+{s:'ICT',d:'mid',q:'해운물류에서 "오픈 API(Open API)"를 제공하는 선사의 이점은?',o:['데이터 보안 약화','포워더·화주 시스템과 직접 연동되어 예약·추적·운임 조회 자동화로 고객 편의 향상','운임 상승','선박 자동화'],a:1,e:'오픈 API를 제공하는 선사는 포워더·화주의 TMS·ERP 시스템과 직접 연동되어 수동 작업을 없애고, 더 빠르고 정확한 서비스를 제공하여 고객 충성도와 디지털 경쟁력을 높입니다.'},
+{s:'ICT',d:'hard',q:'스마트 물류에서 "엣지 컴퓨팅(Edge Computing)"이 필요한 이유는?',o:['클라우드만으로 충분함','현장 IoT 기기에서 발생하는 대용량 데이터를 클라우드 전송 없이 현장에서 즉시 처리하여 지연 최소화','인터넷 연결 불필요','보안 강화 불필요'],a:1,e:'엣지 컴퓨팅은 공장·항만·선박 등 데이터 발생 현장에서 직접 데이터를 처리하여 클라우드 전송 지연(Latency) 없이 실시간 판단이 필요한 자동화 장비·안전 시스템에 적합합니다.'},
+{s:'무역',d:'mid',q:'수입 통관 시 "관세사(Customs Broker)"의 역할은?',o:['선박 운항','화주를 대신하여 세관 신고·통관 절차를 대행하는 전문 자격자','B/L 발행','항만 하역'],a:1,e:'관세사는 수출입 화물의 세관 신고, 관세율 분류(HS코드), 세금 납부, 원산지 증명, AEO 컨설팅 등 통관 전반을 화주를 대신하여 처리하는 법정 자격 전문가입니다.'},
+{s:'무역',d:'easy',q:'무역 계약에서 "Offer(청약)"와 "Acceptance(승낙)"의 효력 발생 시점은?',o:['청약=수락 후, 승낙=발신 즉시','청약=상대방 도달 시, 승낙=발신(또는 도달) 시 계약 성립','청약=발신 즉시, 승낙=수령 후','둘 다 공증 후'],a:1,e:'청약(Offer)은 상대방에게 도달해야 효력이 생기고, 승낙(Acceptance)은 발신 시 효력이 발생하는 "발신주의"(우편 규칙)와 도달주의 중 준거법에 따라 다릅니다. CISG는 도달주의를 따릅니다.'},
+{s:'항만',d:'mid',q:'컨테이너 터미널에서 "Bay Plan(베이 플랜)"의 용도는?',o:['항만 운영 예산 계획','선박 내 컨테이너 적재 위치를 Row·Bay·Tier로 나타낸 배치도','직원 배치 계획','야드 구획 지도'],a:1,e:'Bay Plan은 선박의 컨테이너 적재 구조를 3차원(Bay=선수미 방향·Row=좌우·Tier=높이)으로 표시한 도면으로, 효율적인 하역 계획과 선박 복원성(Stability) 계산에 활용됩니다.'},
+{s:'스마트',d:'mid',q:'스마트 선박에서 "연료 모니터링 시스템(FMS)"의 주요 기능은?',o:['선원 위치 파악','실시간 연료 소비량 측정·분석으로 에너지 효율 최적화 및 탄소 배출 보고 지원','화물 온도 관리','선박 속도 강제 제한'],a:1,e:'FMS는 선박의 연료 소비를 실시간으로 측정·기록하여 항로별 효율 분석, CII 규제 대응, 탄소 배출 보고(MRV), 비용 최적화에 활용됩니다.'},
+{s:'해운',d:'easy',q:'해상 화물의 일반적인 운송 흐름으로 올바른 순서는?',o:['공장→CFS→CY→선적→해상운송→입항→D/O→화주','공장→선적→CY→해상운송→D/O→CFS→화주','CY→공장→선적→D/O→CFS','선적→공장→CY→CFS→D/O'],a:0,e:'수출 화물은 공장→(CFS 혼재 또는 직접) CY→터미널→선적→해상운송→목적항 입항→통관→D/O 발급→화주 수령 순서로 흐릅니다.'},
+{s:'SCM',d:'mid',q:'물류에서 "허브 앤 스포크(Hub & Spoke)" 네트워크의 특징은?',o:['모든 지점 간 직접 연결','중앙 허브를 거쳐 지선(Spoke) 거점으로 배분하는 방식으로 운송 효율화','무조건 비용 증가','소규모 네트워크 전용'],a:1,e:'허브 앤 스포크는 중심 허브에 화물을 집결시킨 후 각 목적지(스포크)로 분배하는 방식으로, 직항 대비 운송 빈도·탑재율을 높여 비용을 절감합니다. 택배·항공·해운 모두에 적용됩니다.'},
+{s:'항만',d:'hard',q:'항만의 "Dwell Time(체류시간)"이 길어질 때 발생하는 문제점은?',o:['항만 수익 증가','야드 혼잡으로 처리 효율 저하, 선박 대기 증가, 화주 비용 상승','화물 안전성 향상','컨테이너 상태 개선'],a:1,e:'화물의 Dwell Time(항만 도착부터 반출까지의 체류시간)이 길어지면 야드 점유율이 높아져 크레인 효율이 떨어지고, 선박 대기로 체선료가 발생하며, 화주는 보관료 부담이 커집니다.'},
+{s:'ICT',d:'mid',q:'물류 IT 시스템에서 "인터페이스(Interface)"란?',o:['사용자 화면만을 의미','서로 다른 시스템 간에 데이터를 교환하는 연결 방식 또는 접점','하드웨어 부품','데이터베이스 저장 공간'],a:1,e:'인터페이스는 서로 다른 소프트웨어 시스템(ERP·WMS·TMS 등) 사이에서 데이터를 자동으로 송수신하는 연결 지점으로, EDI·API·파일 전송 등이 대표적인 방법입니다.'},
+{s:'스마트',d:'hard',q:'국제해사기구(IMO)의 "탄소세(Carbon Levy)" 도입 논의에서 주요 쟁점은?',o:['선박 건조 기준 강화','선진국과 개발도상국 간 부담 형평성, 세수 활용처(탈탄소 기금 등)','선원 급여 기준','항만 수수료'],a:1,e:'IMO의 탄소 가격 메커니즘 논의에서 선진국은 빠른 도입을, 도서국·개도국은 세수의 기후 취약국 지원 활용을 요구하는 등 형평성 문제가 핵심 쟁점입니다.'},
+{s:'무역',d:'hard',q:'트럼프 행정부의 관세 정책(2025년)이 글로벌 공급망에 미친 영향으로 가장 적절한 것은?',o:['공급망 단순화','중국 의존도 축소·생산기지 다변화(China+1) 가속 및 무역 비용 증가','수입 급증','물류 비용 하락'],a:1,e:'2025년 미국의 고관세 정책은 기업들의 중국 공장 의존도를 줄이고 베트남·멕시코·인도 등으로 생산을 이전하는 China+1 전략을 가속화했으며, 글로벌 물류 경로와 비용 구조에도 큰 변화를 가져왔습니다.'},
+{s:'항만',d:'easy',q:'항만에서 "도선사(Pilot)"의 역할은?',o:['화물 검사관','항만의 좁은 수로·입출항 구간에서 선박을 안전하게 안내하는 전문가','선박 수리 기술자','세관 검사관'],a:1,e:'도선사(Marine Pilot)는 항만 및 연안 수로에 대한 전문 지식을 갖추고, 대형 선박이 항만에 입출항할 때 선교에 탑승하여 조타를 안내하는 항만 전문가입니다.'},
+{s:'SCM',d:'hard',q:'순환경제(Circular Economy)가 물류에 미치는 영향으로 옳은 것은?',o:['물류 수요 감소','반품·재사용·재활용을 위한 역물류(Reverse Logistics) 중요성 증대','포장재 무제한 사용','공급망 단순화'],a:1,e:'순환경제는 제품·소재를 최대한 오래 사용하고 재활용하는 경제 모델로, 반품 물류, 재제조, 재활용 회수 등 역물류(Reverse Logistics) 네트워크의 설계와 운영이 핵심 물류 과제가 됩니다.'},
+{s:'해운',d:'mid',q:'선사의 "얼라이언스 선복 교환(Slot Exchange)"이 화주에게 미치는 영향은?',o:['운임이 무조건 하락','다양한 선사 서비스를 선택하면서도 더 많은 기항지와 높은 출항 빈도 이용 가능','화물 추적 불가','직항만 가능'],a:1,e:'얼라이언스 선복 교환으로 화주는 한 선사를 통해 파트너 선사의 광범위한 항로·스케줄을 이용할 수 있어 선택지가 넓어지지만, 여러 선사의 시스템이 혼재하여 화물 추적이 복잡해질 수 있습니다.'},
+{s:'ICT',d:'hard',q:'해운물류에서 "스마트 컨테이너(Smart Container)"의 기능으로 옳은 것은?',o:['더 무거운 화물 적재 가능','IoT 센서로 위치·온도·습도·충격·문 개폐 등을 실시간 모니터링','연료 절감','자동 하역'],a:1,e:'스마트 컨테이너는 GPS, 온도·습도·충격 센서, 도어 개폐 감지 등 IoT 장치가 내장되어 화물 상태와 위치를 실시간으로 모니터링하고 이상 발생 시 즉시 경보를 발송합니다.'},
+{s:'스마트',d:'easy',q:'해운 분야에서 "MRV(Monitoring, Reporting, Verification)" 규정의 대상은?',o:['선원 건강 모니터링','선박의 CO2 배출량을 모니터링·보고·검증하는 제도','화물 중량 모니터링','운임 보고'],a:1,e:'EU MRV(2018년~) 및 IMO DCS(Data Collection System)는 일정 규모 이상의 선박이 EU 항구를 이용하거나 국제 항해 시 연료 소비량과 CO2 배출량을 매년 모니터링·보고·검증하도록 의무화하는 제도입니다.'},
+{s:'항만',d:'mid',q:'항만 물류에서 보세구역(Bonded Area)의 의미는?',o:['세관이 없는 지역','통관이 완료되지 않은 외국 화물을 관세 납부 없이 임시 보관할 수 있는 세관 관리 구역','항만 직원 전용 구역','컨테이너 수리 구역'],a:1,e:'보세구역은 수입 신고·관세 납부 전 외국 화물을 세관 감독 하에 보관·가공할 수 있는 구역입니다. 보세창고·보세공장·보세전시장 등이 있으며, 관세 납부 전 화물 처리가 가능합니다.'},
+{s:'무역',d:'mid',q:'수출입에서 "검역(Quarantine)"이 필요한 품목의 예시로 적절한 것은?',o:['완성 자동차·전자제품','동식물·축산물·목재 포장재·생물체','철강·화학원료','의류·잡화'],a:1,e:'검역은 해외 병해충·전염병의 국내 유입을 방지하기 위해 동식물, 축산물, 목재 포장재(IPPC 기준 처리 필요), 생물체 등 특정 품목에 대해 입항 시 시행하는 공식 위생 검사입니다.'},
+{s:'SCM',d:'easy',q:'물류에서 "Lead Time(리드타임)"의 정의는?',o:['물류 비용','주문 발주부터 화물 수령까지의 총 소요 시간','선박 운항 거리','창고 면적'],a:1,e:'리드타임(Lead Time)은 고객이 주문을 넣은 시점부터 실제로 상품을 받는 시점까지 걸리는 총 시간입니다. 공급망 관리에서 리드타임 단축은 재고 감소와 고객 서비스 향상으로 이어집니다.'},
+{s:'ICT',d:'mid',q:'드론(Drone) 물류의 현재 적용 분야와 한계로 올바른 것은?',o:['무제한 장거리·대용량 화물 운송 가능','의약품·소형화물 긴급 배송 등 특수 목적에 활용, 배터리·적재량·규제가 한계','화물선 대체 가능','비용이 가장 저렴'],a:1,e:'드론은 의약품·혈액 긴급 배송(의료), 도서·산간 지역 소형 화물 등에 활용되지만, 배터리 용량(짧은 비행 시간), 적재 중량 제한, 날씨 영향, 항공 규제(BVLOS 등)가 상용화의 주요 장벽입니다.'},
+{s:'해운',d:'easy',q:'복합운송(Multimodal Transport)의 정의는?',o:['같은 운송수단을 두 번 이용','단일 계약하에 두 가지 이상의 운송수단(선박+트럭+철도 등)을 결합한 운송','항공과 해상만의 결합','컨테이너만 이용하는 운송'],a:1,e:'복합운송은 단일 운송인(MTO; Multimodal Transport Operator)이 단일 운임·단일 서류로 두 가지 이상의 운송 수단을 결합하여 화물을 운송하는 방식입니다.'},
+{s:'SCM',d:'mid',q:'재고 회전율(Inventory Turnover)의 의미와 높을수록 좋은 이유는?',o:['재고가 많을수록 좋음','일정 기간 재고가 판매·소비된 횟수로, 높을수록 자금 묶임이 적고 효율적','낮을수록 효율적','매출과 무관'],a:1,e:'재고 회전율 = 매출원가 ÷ 평균재고로, 재고 회전율이 높을수록 재고가 빠르게 소진되어 보관비·자금 묶임이 줄고 진부화 위험이 낮아 재고 관리 효율이 높음을 나타냅니다.'},
+{s:'스마트',d:'mid',q:'선박의 "디지털 로그북(Electronic Log Book)"의 장점은?',o:['종이보다 기록 분실 위험 높음','자동 데이터 기록으로 오류 감소, 검사·분석 용이, 원격 접근 가능','규정상 불인정','선원 부담 증가'],a:1,e:'전자 로그북은 선박의 항해·기관 데이터를 자동 기록하여 수기 오류를 방지하고, 검사관이 원격으로 접근할 수 있으며 빅데이터 분석의 원천 데이터로 활용됩니다. IMO도 전자 로그북을 점차 인정하는 방향입니다.'},
+{s:'무역',d:'mid',q:'무역 대금결제에서 "T/T(Telegraphic Transfer, 전신환 송금)"의 특징은?',o:['은행이 결제를 보증','화주가 은행을 통해 수출자에게 직접 외화를 송금하는 방식으로 신용장 없이 처리 가능','서류 교환 필수','장기 외상 전용'],a:1,e:'T/T는 수입자가 수출자에게 전신(전자)으로 외화를 직접 송금하는 방식으로, 신용장에 비해 절차가 간단하고 비용이 낮지만 선지급(Advance)이면 수입자 위험, 후지급(Deferred)이면 수출자 위험이 있습니다.'},
+/* ===== 공식 모의고사 문제 (국제물류거래 1~5) ===== */
+{s:'모의',d:'mid',q:'[국제물류거래] 인코텀즈에 대한 설명으로 옳지 않은 것은?',o:['국제상업회의소에서는 1936년에 인코텀즈를 최초로 제정하였다.','인코텀즈는 무역거래조건에 관한 국제규칙이며 국제법과 같은 강제성을 지니고 있다.','인코텀즈는 거래당사자의 합의에 따라 자율적으로 적용된다.','무역계약 시 매매당사자는 계약조건의 해석기준으로 인코텀즈를 채택한다는 내용을 계약서에 포함하는 것이 합리적이다.'],a:1,e:'인코텀즈는 ICC(국제상업회의소)가 제정한 국제 무역거래 조건의 해석 규칙으로, 법적 강제성이 없습니다. 당사자가 계약서에 채택 의사를 명시해야 효력이 발생하는 임의 규정입니다.'},
+{s:'모의',d:'mid',q:'[국제물류거래] 수출입물류 흐름에 대한 설명으로 옳지 않은 것은?',o:['무역계약서 작성 시 분쟁 및 사기를 예방하기 위해 상사중재 조항을 삽입하는 것이 필요하다.','선하증권은 단순한 선적을 증명하는 서류로서 계약이행 시 소유권과 관련된 서류의 역할은 하지 않는다.','결제방식이 신용장 방식일 경우, 모든 서류는 신용장 내용과 엄밀하게 일치해야 한다.','해외거래상대방과 거래할 때 발생할 수 있는 위험에 대비해 수출보험 등을 활용하는 것이 바람직하다.'],a:1,e:'선하증권(B/L)은 단순 선적 증명을 넘어 화물에 대한 권리증권(Document of Title) 역할을 합니다. B/L 소지인은 화물에 대한 소유권을 주장할 수 있으며, 이를 담보로 금융도 가능합니다.'},
+{s:'모의',d:'hard',q:'[국제물류거래] 인코텀즈 2020의 CIF 조건에 대한 설명으로 옳지 않은 것은?',o:['CFR조건에 매도인이 해상보험계약을 체결해야 하는 의무가 추가된 것이다.','매도인은 목적지까지 운송계약과 보험계약을 체결하고 운임 및 보험료를 지급해야 한다.','보험금액은 매매계약에서 약정한 금액의 기대수익 10%를 추가한 110%로 한다.','보험조건과 관련해서는 협회적하약관 B로 규정되어 있다.'],a:3,e:'CIF 조건에서 매도인이 부보해야 하는 최소 보험 조건은 ICC(C)(협회적하약관 C)입니다. ICC(B)가 아닙니다. 보험금액은 송장 금액의 110%(원가+기대이익 10%)가 최소 기준입니다.'},
+{s:'모의',d:'mid',q:'[국제물류거래] 해상운임 산정의 기초가 되는 서류는?',o:['중량 및 용적증명서','해상운송서류','복합운송서류','상업송장'],a:0,e:'해상운임은 화물의 중량(Weight)과 용적(Measurement)을 기준으로 산정(W/M)하며, 이를 공식적으로 증명하는 중량 및 용적증명서(Weight & Measurement Certificate)가 운임 산정의 기초 서류입니다.'},
+{s:'모의',d:'mid',q:'[국제물류거래] 수입화물 통관 절차 중에서 가장 먼저 수행하는 단계는?',o:['물품을 보세구역에 반입','관세액 결정','수입검사','수출신고'],a:0,e:'수입 통관 절차: ①화물 보세구역 반입 → ②수입신고 → ③서류심사/물품검사 → ④관세 등 세금 납부 → ⑤수입신고 수리 → ⑥화물 반출 순서입니다.'},
+/* ===== 공식 모의고사 (해운물류론 1~5) ===== */
+{s:'모의',d:'hard',q:'[해운물류론] 컨테이너 코드 중 장비식별 기호가 아닌 것은?',o:['U: 컨테이너','J: 분리 가능한 컨테이너 관련 장비','G: 친환경 장비','Z: 트레일러 또는 섀시'],a:2,e:'ISO 6346 장비식별 기호: U=일반 컨테이너, J=탈착 가능한 컨테이너 관련 장비, Z=트레일러·섀시입니다. G는 장비식별 기호가 아니며, 친환경 장비를 나타내는 공식 코드가 아닙니다.'},
+{s:'모의',d:'hard',q:'[해운물류론] 컨테이너 하역 방식이 아닌 것은?',o:['LO/LO 방식','TO/TO 방식','RO/RO 방식','FO/FO 방식'],a:1,e:'컨테이너 하역 방식: LO/LO(Lift On/Lift Off, 크레인 사용), RO/RO(Roll On/Roll Off, 자력 주행), FO/FO(Float On/Float Off, 반잠수 방식)입니다. TO/TO 방식은 존재하지 않습니다.'},
+{s:'모의',d:'hard',q:'[해운물류론] 컨테이너 운송형태 중 FCL 화물에는 적용되지 않는 방식은?',o:['CY/CFS','CFS/CY','CFS/CFS','CY/CY'],a:2,e:'CFS/CFS(혼재→혼재)는 LCL 화물에만 적용되며 FCL에는 적용되지 않습니다. FCL 운송은 CY/CY(Door-to-Door), CY/CFS(수출FCL→수입LCL 분류), CFS/CY(수출LCL 혼재→수입FCL)가 가능합니다.'},
+{s:'모의',d:'hard',q:'[해운물류론] 컨테이너 코드 "2 4 R1"의 크기·형태·특성을 바르게 나타낸 것은?',o:['20ft 컨테이너 / 8.6ft / 일반 컨테이너','40ft 컨테이너 / 9.6ft / 오픈톱 컨테이너','20ft 컨테이너 / 8.6ft / 냉동·냉장 컨테이너','40ft 컨테이너 / 9.6ft / 탱크 컨테이너'],a:2,e:'ISO 6346 코드에서 Length "2"=20ft, Height "4"=8.6ft(표준), Characteristics "R1"=냉동·냉장(Refrigerated) 컨테이너를 의미합니다.'},
+{s:'모의',d:'hard',q:'[해운물류론] 정기용선 계약서의 주요 사항으로 짝지어지지 않은 것은?',o:['선박의 인도(Delivery)와 반선(Redelivery), 재용선 권리(Liberty to Sublet)','선박의 명세(Description of The Ship), 안전한 항구와 부두(Safe Ports and Berths)','항행 구역(Trading Limits), 정박 기간(Laytime)','용선료, 용선료 지급 중지(Off-Hire)'],a:2,e:'Laytime(정박기간)은 항해용선(Voyage Charter)의 핵심 조항으로, 정기용선 계약서의 주요 사항이 아닙니다. 정기용선은 용선기간 동안 선박을 임대하는 계약으로 Trading Limits(항행구역)는 포함되지만 Laytime은 해당 없습니다.'},
+/* ===== 공식 모의고사 (ICT요소기술개론 1~5) ===== */
+{s:'모의',d:'mid',q:'[ICT요소기술] VTS(Vessel Traffic Service)에 대한 설명으로 옳은 것은?',o:['센서·장치·장비를 네트워크로 연결하여 데이터 수집·모니터링·제어를 가능하게 하는 기술(IoT)','항구 내 시설물 및 선박의 상황을 모니터링하는 시스템','자동식별시스템으로서 선박의 위치·속도·방향 등의 정보를 교환하는 시스템(AIS)','선박 운항 상황·위치·해양환경을 모니터링하고 선박 간 충돌을 예방하며 안전 항해를 돕기 위해 다양한 정보를 제공하는 시스템'],a:3,e:'VTS(선박교통관제서비스)는 항만·연안에서 레이더·AIS·CCTV 등으로 선박 교통을 감시·조정하고 안전 정보를 제공합니다. ①IoT, ③AIS에 대한 설명입니다.'},
+{s:'모의',d:'hard',q:'[ICT요소기술] OSI 7계층 모델에서 코드 간의 번역·암호화 등의 동작이 수행되는 계층은?',o:['2계층(데이터링크)','3계층(네트워크)','5계층(세션)','6계층(표현)'],a:3,e:'OSI 6계층(표현 계층, Presentation Layer)은 데이터의 형식 변환(코드 번역), 암호화/복호화, 압축/해제를 담당합니다. 2계층=MAC주소·오류검출, 3계층=IP라우팅, 5계층=세션관리입니다.'},
+{s:'모의',d:'hard',q:'[ICT요소기술] 빅데이터에 대한 설명으로 옳지 않은 것은?',o:['데이터는 다양한 방법으로 수집된 여러 형태의 집합이지만 빅데이터는 비정형 데이터에 초점을 맞춘다.','수집된 빅데이터는 장기간 활용하는 것보다 단기간 활용하는 데 초점을 맞추고 있다.','기존 프로그램으로는 분석할 수 없고 병렬처리를 위한 컴퓨터 시스템이 필요할 정도의 큰 데이터 집합이다.','단순히 데이터만으로는 의미가 없고 분석을 통해 가치를 창출하는 것에 의의가 있다.'],a:1,e:'빅데이터의 특성은 장기간에 걸쳐 지속적으로 수집·축적하고 반복적으로 분석·활용하는 것입니다. 단기간 활용에만 초점을 맞춘다는 설명은 옳지 않습니다.'},
+{s:'모의',d:'hard',q:'[ICT요소기술] "고정된 테이블 스키마가 필요하지 않고 조인 연산을 사용할 수 없으며 수평적으로 확장이 가능한 DBMS"에 해당하는 빅데이터 저장 기술은?',o:['병렬 DBMS','데이터베이스 클러스터','NoSQL','클라우드 파일 저장 시스템'],a:2,e:'NoSQL(Not Only SQL) DBMS는 고정 스키마 없이 다양한 구조의 데이터를 저장하고, 수평 확장(Scale-out)이 용이합니다. 조인 연산이 제한적이며 MongoDB·Cassandra·Redis 등이 대표적입니다.'},
+{s:'모의',d:'hard',q:'[ICT요소기술] "신뢰성과 관련된 특성으로 데이터를 분석해서 나온 일정한 패턴을 신뢰할 수 있다"는 빅데이터의 특성은?',o:['진실성(Veracity)','다양성(Variety)','정확성(Validity)','가치(Value)'],a:2,e:'Validity(정확성)는 분석 결과의 패턴을 신뢰할 수 있는 정확성을 의미합니다. Veracity(진실성)는 데이터 자체의 진위 여부와 노이즈를 의미하며, 정확성(Validity)과 구분됩니다.'},
+/* ===== 공식 모의고사 (스마트해상물류기술개론 1~5) ===== */
+{s:'모의',d:'mid',q:'[스마트물류기술] "IoT로 설비를 연결하여 설비 운용 정보를 수집·분석하고 최적의 설비 운용 계획을 수립하여 최적의 의사결정을 지원한다"는 스마트 해상물류의 특징은?',o:['자동화','지능화','최적화','정보화'],a:2,e:'최적화(Optimization)는 수집된 데이터를 분석하여 가장 효율적인 운영 방안을 도출하고 의사결정을 지원합니다. 자동화=반복 작업 자동, 지능화=AI 학습·판단, 정보화=데이터 디지털 전환입니다.'},
+{s:'모의',d:'hard',q:'[스마트물류기술] "해상교통의 안전·효율성을 증진하고 해양환경과 해양시설을 보호하기 위해 선박의 위치를 탐지하고 선박과 통신할 수 있는 설비를 설치·운영하는 시스템"은?',o:['GICOMS','VTS','TOS','GNSS'],a:1,e:'VTS(Vessel Traffic Service, 선박교통관제서비스)는 레이더·AIS 등으로 선박을 감시하고 안전 정보를 제공합니다. GICOMS=해양종합정보시스템, TOS=터미널운영시스템, GNSS=위성항법시스템입니다.'},
+{s:'모의',d:'hard',q:'[스마트물류기술] 수출화물 반입/장치 업무에서 선사가 터미널에 입력하는 "COLDLT"에 해당하는 EDI 문서는?',o:['컨테이너 하역결과서','본선적부도','컨테이너 선적예정목록','선적예정물량 통보서'],a:2,e:'COLDLT(Container Load List, 컨테이너 선적예정목록)는 선사가 터미널에 컨테이너 반입 예정 정보를 통보하는 EDI 문서입니다. COPINO=컨테이너 반출입계, CODECO=반출입결과, MOVINS=적부지시서입니다.'},
+{s:'모의',d:'hard',q:'[스마트물류기술] PLISM에서 제공하지 않는 정보는?',o:['실시간 화물 및 선적 확인 정보 등의 물류 Visibility','통합화물진행정보(적하목록·수출입화물·통관 등)','컨테이너별 이동 현황 및 반출/반입지 연계 정보','항만시설 사용 신청 및 신고'],a:3,e:'PLISM(Port Logistics Information System Management)은 화물 가시성, 통합 화물진행정보, 컨테이너 이동 현황 등을 제공합니다. 항만시설 사용 신청·신고는 Port-MIS(항만운영정보시스템) 기능입니다.'},
+{s:'모의',d:'hard',q:'[스마트물류기술] "해상운송 부문에서 화물운송을 위한 운송 위치 및 컨테이너의 선적·양하·선내 이적과 관련된 지시와 운송 내용 정보"를 담은 EDI 문서명은?',o:['COPINO','COLDLT','CODECO','MOVINS'],a:3,e:'MOVINS(Move Instructions)는 터미널에 컨테이너의 선적·양하·선내 이적 등 하역 작업 지시를 담은 EDI 문서입니다. COPINO=반출입계, COLDLT=선적예정목록, CODECO=반출입결과입니다.'},
+/* ===== 공식 모의고사 (해상물류·정보통신법규 1~5) ===== */
+{s:'모의',d:'hard',q:'[법규] 「물류정책기본법」상 "공항·항만과 물류시설에 폭발물·무기류 등 위해물품을 은닉·반입하거나 물류에 필요한 시설·장비·인력·화물 등에 위해를 가할 목적으로 행하여지는 불법행위를 사전에 방지하기 위한 조치"는?',o:['물류보안','물류안보','물류정보화조치','물류방어'],a:0,e:'「물류정책기본법」에서 "물류보안"은 물류시설·장비·화물 등에 대한 테러·불법행위를 사전에 방지하기 위한 조치를 의미합니다. 물류안보는 국가 차원의 안보 개념으로 다른 의미입니다.'},
+{s:'모의',d:'hard',q:'[법규] 「해운법」상 안전관리종사자에 해당하지 않는 대상은?',o:['도선선 운항자','선장','해원','선박운항관리자'],a:0,e:'「해운법」상 안전관리종사자는 선장, 해원, 선박운항관리자 등이 해당됩니다. 도선선 운항자(도선사)는 「도선법」의 적용을 받으며 「해운법」상 안전관리종사자가 아닙니다.'},
+{s:'모의',d:'hard',q:'[법규] 항만공사의 대행에 대한 설명으로 옳은 것은?',o:['국토교통부장관은 국가 소유 선박이 이용하는 항만시설에 관한 항만개발사업을 대행할 수 있다.','해양수산부장관은 국방부장관과 협의하여 군함이 이용하는 항만시설 개발사업을 국토교통부장관에게 대행하게 할 수 있다.','비관리청은 항만개발사업을 위해 민간이 개발 비용을 부담하도록 강제할 수 있다.','관리청은 필요하다고 인정되면 비관리청과 협의하여 허가한 비관리청의 항만개발사업을 그 비관리청의 비용 부담으로 대행할 수 있다.'],a:3,e:'「항만법」에 따라 관리청은 비관리청의 항만개발사업을 그 비관리청의 비용 부담으로 대행할 수 있습니다. ①②③은 근거 없거나 사실과 다른 내용입니다.'},
+{s:'모의',d:'hard',q:'[법규] 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」에서 "정보통신망"의 정의에 포함되지 않는 행위는?',o:['수집·가공','저장·검색','송신·수신','분석·과금'],a:3,e:'정보통신망은 전기통신설비를 이용하여 정보를 수집·가공·저장·검색·송신·수신하는 정보통신체제입니다. "분석·과금"은 법률상 정보통신망 정의에 포함되지 않습니다.'},
+{s:'모의',d:'hard',q:'[법규] 소프트웨어 사업자가 국가기관 등과 소프트웨어 사업 계약을 체결하는 경우, 물품 구매 금액을 제외한 소프트웨어 사업 금액의 몇 %를 초과하여 하도급할 수 없는가?',o:['10%','30%','50%','70%'],a:2,e:'「소프트웨어 진흥법」에 따라 소프트웨어 사업자는 물품 구매 금액을 제외한 소프트웨어 사업 금액의 100분의 50(50%)을 초과하여 하도급할 수 없습니다.'},
+/* ===== 모의고사 난이도 추가 100문항 ===== */
+/* 국제물류거래 스타일 (26문항) */
+{s:'무역',d:'hard',q:'인코텀즈 2020에서 DAP(Delivered at Place) 조건의 매도인 의무 범위는?',o:['본선 선적까지','목적지 지정 장소에서 양하 준비 완료까지(양하 비용 제외)','목적지에서 양하 완료까지','수입 통관까지'],a:1,e:'DAP는 지정 목적지에서 도착 운송수단에 실린 채 매수인의 임의 처분 상태로 인도합니다. 양하 비용은 매수인 부담이며(DPU와의 차이), 수입 통관도 매수인 부담입니다.'},
+{s:'무역',d:'hard',q:'신용장의 "엄밀일치(Strict Compliance)" 원칙이 의미하는 것은?',o:['서류가 대략적으로 일치하면 수리','제시된 서류는 신용장 조건과 문면상 엄밀하게 일치해야 하며, 불일치 시 하자(Discrepancy)로 처리','서류 내용이 실제 화물과 일치해야 함','서류 언어가 반드시 영어여야 함'],a:1,e:'UCP 600에 따라 서류 심사는 문면상(On Its Face) 엄밀일치 원칙을 적용합니다. 서류가 신용장 조건과 맞지 않으면 하자 서류로 처리되며, 개설은행이 지급을 거절할 수 있습니다.'},
+{s:'무역',d:'hard',q:'인코텀즈 2020에서 FCA 조건 사용 시 B/L "On Board" 표기를 위한 특약 조항이 신설된 배경은?',o:['선사의 요청','신용장 결제 시 은행이 On Board B/L을 요구하는데, FCA 위험 이전 후 선사 발행이 어려워 당사자 간 특약으로 해결하기 위함','세관 요건 충족','운임 절감'],a:1,e:'FCA에서 위험은 수출항 내륙에서 이전되지만 신용장은 On Board B/L을 요구하는 경우가 많습니다. 이 충돌을 해결하기 위해 Incoterms 2020에서 당사자 간 특약으로 On Board B/L 발행 가능 조항을 신설했습니다.'},
+{s:'무역',d:'hard',q:'수입통관 시 과세가격 결정 원칙 중 "거래가격방법"이 적용되지 않는 경우는?',o:['운임이 CIF 기준인 경우','매도인·매수인 간 특수관계로 거래가격이 왜곡된 경우','분할 선적인 경우','컨테이너 화물인 경우'],a:1,e:'거래가격방법은 가장 우선 적용하지만, 매도인·매수인 간 특수관계(계열사 등)로 인해 가격이 왜곡된 경우에는 적용하기 어렵습니다. 이 경우 동종물품 거래가격법 등 순서대로 적용합니다.'},
+{s:'무역',d:'hard',q:'원산지증명서(C/O) 발급에서 "자율발급(Approved Exporter)"과 "기관발급"의 차이는?',o:['자율발급=수입자가 발급','자율발급=자격을 갖춘 수출자가 스스로 발급, 기관발급=세관·상공회의소 등 공인기관 발급','자율발급=구매자가 요청','기관발급이 항상 우선'],a:1,e:'FTA에 따라 기관발급(세관, 상공회의소 등)이 기본이나, 승인수출자(Approved Exporter) 자격을 갖춘 기업은 원산지증명서를 스스로 작성·발급하는 자율발급이 허용됩니다. 한-EU FTA가 대표 사례입니다.'},
+{s:'무역',d:'hard',q:'무역보험에서 "중소기업 수출신용보증(단기)"의 주요 보장 대상은?',o:['수출자의 해상 화물 손해','해외 수입자의 대금 미지급·파산 등 신용 위험과 국가 위험','수출자의 환율 손실','국내 원자재 가격 상승'],a:1,e:'수출신용보증(단기)은 수출자가 수입자에게 외상으로 판매한 뒤 수입자의 신용 위험(부도·지급 거절)이나 국가 위험(전쟁·외환 부족)으로 대금을 받지 못하는 경우를 보장합니다.'},
+{s:'무역',d:'hard',q:'국제 상사중재에서 "뉴욕협약(1958)"의 의의는?',o:['관세 자동 면제','외국 중재판정의 승인 및 집행을 보장하여 중재판정의 국제적 실효성 확보','국제 운임 기준 제정','해운 동맹 허용'],a:1,e:'1958년 뉴욕협약(외국중재판정의 승인 및 집행에 관한 협약)은 체약국(165개국 이상)에서 외국 중재판정을 법원 판결과 동등하게 강제 집행할 수 있게 보장하여 국제 상사중재의 실효성을 높입니다.'},
+{s:'무역',d:'mid',q:'무역계약에서 "Hardship Clause(경제적 이행곤란 조항)"의 역할은?',o:['계약 자동 해제','계약 체결 후 예견 불가능한 사정 변경으로 이행이 현저히 곤란할 때 재협상 요구 가능','운임 자동 조정','신용장 조건 변경'],a:1,e:'Hardship Clause는 계약 후 전혀 예견하지 못한 경제적·정치적 사정(천재지변·전쟁·급격한 원자재 가격 급등 등)으로 일방이 현저한 불이익을 받을 때 계약 조건 재협상을 요구할 수 있는 조항입니다.'},
+{s:'무역',d:'hard',q:'HS코드 6단위 체계에서 앞 2자리(Chapter), 2~4자리(Heading), 4~6자리(Sub-heading)의 의미 중 틀린 것은?',o:['2자리=류(Chapter): 상품 대분류','2~4자리=호(Heading): 세부 분류','4~6자리=소호(Sub-heading): 더 세분화된 분류','7자리 이상은 WCO가 국제 통일 기준으로 지정'],a:3,e:'HS코드 6자리까지는 WCO 국제 통일 기준이지만, 7자리 이상은 각국이 자국 사정에 맞게 독자적으로 세분화합니다. 한국은 HSK로 10자리를 사용합니다.'},
+{s:'무역',d:'mid',q:'수입통관에서 "관세유예(Deferred Payment)"와 "보세(Bonded) 제도"의 공통점은?',o:['영구 면제','수입 시 관세 납부를 일정 조건 하에 미루는 제도','수출만 해당','항만에서만 적용'],a:1,e:'관세유예와 보세 제도 모두 수입 화물에 대한 관세 납부를 즉시 하지 않고 일정 조건(가공·재수출·판매 후 등)이 충족될 때까지 유예하는 공통적인 특성을 가집니다.'},
+{s:'무역',d:'hard',q:'수출 L/C에서 "기한부 어음(Usance Draft)"을 발행한 경우 "인수(Acceptance)"의 의미는?',o:['대금 즉시 지급','환어음 만기일에 지급할 것을 약속하는 서명','서류 거절','신용장 취소'],a:1,e:'기한부 어음에서 지급인(개설은행 또는 확인은행)이 어음을 인수(Accept)하면, 어음 만기일(30·60·90일 후 등)에 대금을 지급할 것을 공식 확약합니다. 인수된 어음은 할인(Discount)하여 조기 현금화가 가능합니다.'},
+{s:'무역',d:'hard',q:'SWIFT(국제은행간통신협회) 망을 이용한 전자 L/C 전송의 표준 메시지 유형은?',o:['EDI 850','MT700','ISO 6346','UCP 600'],a:1,e:'MT700(Issue of a Documentary Credit)은 SWIFT 망을 통해 개설은행이 통지은행에 신용장을 전송할 때 사용하는 표준 메시지 유형입니다. MT710=제3은행 통지, MT720=양도 통지입니다.'},
+/* 해운물류론 스타일 (26문항) */
+{s:'해운',d:'hard',q:'정기용선(Time Charter)에서 "Off-Hire(용선료 지급 중지)" 조건이 발생하는 경우가 아닌 것은?',o:['선박 기기 고장으로 정상 운항 불가','건식 도크(Dry Docking) 수리 중','항만 혼잡으로 인한 선박 대기','화재·충돌로 인한 임시 수리'],a:2,e:'Off-Hire는 선박 고장, 수리, 건식 도크 등 선주 귀책으로 선박을 사용하지 못할 때 용선료 지급이 중지됩니다. 항만 혼잡으로 인한 대기는 운항 가능 상태이므로 Off-Hire에 해당하지 않습니다.'},
+{s:'해운',d:'hard',q:'선박의 복원성(Stability)에서 GM(메타센터 높이)이 중요한 이유는?',o:['선박 속도 결정','GM이 양(+)이면 복원력이 있고, 음(-)이면 전복 위험이 있어 안전 운항의 핵심 지표','연료 효율 지표','선박 크기 지표'],a:1,e:'GM(중심G에서 메타센터M까지의 거리)은 선박 복원성의 핵심 지표입니다. GM이 클수록 복원력이 강하지만 과도하면 Rolling이 심해집니다. 컨테이너 적재 시 무게 배분이 GM에 직접 영향을 줍니다.'},
+{s:'해운',d:'hard',q:'선하증권(B/L)의 "통지조항(Notify Clause)"과 관련하여 수하인(Consignee)란에 "To Order"가 기재된 경우의 의미는?',o:['수하인 불명으로 반송','B/L이 배서(Endorsement)에 의해 양도 가능한 지시식 증권','수하인이 직접 수령','운임 선불'],a:1,e:'"To Order" 기재 B/L은 지시식(Order B/L)으로, 배서(Endorsement)를 통해 제3자에게 양도할 수 있는 유통 가능(Negotiable) 증권입니다. 신용장 결제에서 가장 많이 사용됩니다.'},
+{s:'해운',d:'hard',q:'해상 운임 산정에서 "Freight All Kind(FAK)"이란?',o:['화물 종류와 관계없이 동일 운임 적용','화물 중량만으로 계산','위험물 전용 운임','냉동 화물 전용 운임'],a:0,e:'FAK는 화물의 종류(품목)에 관계없이 동일한 운임률을 적용하는 방식입니다. 특정 품목에 따른 개별 운임을 협상하기 어려울 때 또는 화주-선사 간 볼륨 계약에서 사용됩니다.'},
+{s:'해운',d:'hard',q:'용선계약에서 "Worldscale"이 사용되는 분야는?',o:['컨테이너 운임','건화물선 운임','유조선(탱커) 운임','LNG선 운임'],a:2,e:'Worldscale(World Tanker Nominal Freight Scale)은 유조선 운임 산정의 기준 지수입니다. 각 항로별 기준운임(WS100) 대비 비율로 실제 운임을 표시합니다.'},
+{s:'해운',d:'hard',q:'국제 해상 위험물 운송 규정인 IMDG Code의 위험물 분류 중 Class 3은?',o:['폭발물','인화성 액체','독성 물질','방사성 물질'],a:1,e:'IMDG Code Class 3은 인화성 액체(Flammable Liquids)입니다. Class 1=폭발물, Class 2=가스, Class 3=인화성액체, Class 6=독성물질, Class 7=방사성물질입니다.'},
+{s:'해운',d:'hard',q:'컨테이너선의 "베이(Bay)·로우(Row)·티어(Tier)" 번호 체계에서 티어(Tier) 번호 부여 방식은?',o:['선수에서 선미 방향','좌현에서 우현 방향','아래에서 위 방향(짝수=선창, 홀수=갑판 위)','홀수=좌현, 짝수=우현'],a:2,e:'컨테이너 위치 코드에서 Tier는 선저에서 위쪽 방향으로 부여하며, 선창 내는 02·04·06 등 짝수, 갑판 위는 82·84·86 등 짝수(또는 선사마다 규칙 상이)로 표기합니다.'},
+{s:'해운',d:'hard',q:'해운에서 "Lien(선취특권)"이란?',o:['선박 우선순위 등록','채무 변제 시까지 화물 또는 선박을 유치(점유)할 수 있는 권리','항만 사용료','선원 권리'],a:1,e:'Maritime Lien(선취특권)은 채무 이행 전까지 화물(Cargo Lien) 또는 선박(Ship Lien)을 유치할 수 있는 권리입니다. 운임·체선료 미수 시 화주 화물을 유치하는 것이 대표적입니다.'},
+{s:'해운',d:'hard',q:'선박 도면에서 "Lightship Weight"의 의미는?',o:['DWT','화물·연료·선원 등 모든 가변 하중을 제거한 선박 자체의 순수 무게','만재 배수량','연료 중량'],a:1,e:'Lightship Weight(경하중량)은 선원·연료·화물·밸러스트 등을 제외한 선박 구조 자체의 무게입니다. 만재배수량(Displacement) = 경하중량 + DWT입니다.'},
+{s:'해운',d:'hard',q:'정기선 운항에서 "Blank Sailing(공백 운항)"이란?',o:['빈 선박으로 운항','선사 또는 얼라이언스가 일정 항차를 결항하는 것','화물 없이 시험 운항','선원 교대 항차'],a:1,e:'Blank Sailing은 수요 감소 또는 선복 조정 목적으로 선사나 얼라이언스가 사전 공지 후 특정 항차(Voyage)를 결항하는 것입니다. 코로나19 기간에 대규모 Blank Sailing이 이루어졌습니다.'},
+{s:'해운',d:'hard',q:'선박 보험에서 "협회기간약관(ITC, Institute Time Clauses)"이 주로 담보하는 내용은?',o:['P&I 배상책임','선체·기기 등 선박 물적 손해를 일정 기간(1년) 담보','화물 손해','운임 손실'],a:1,e:'ITC(Institute Time Clauses - Hulls)는 선박 자체(Hull & Machinery)의 물적 손해를 담보하는 선박 보험의 핵심 약관으로, 침몰·충돌·화재 등으로 인한 선체 손해를 보상합니다.'},
+{s:'해운',d:'hard',q:'해상법에서 "공동해손(General Average)"의 성립 요건은?',o:['항해 관련 없는 사고','항해 중 공동 위험에서 선박·화물을 구하기 위해 의도적으로 희생(투하 등)한 손해로 이해관계자가 비례 분담','선박 단독 사고','자연 손모'],a:1,e:'공동해손(General Average)은 ①항해 관련 위험, ②선장의 의도적 행위, ③선박·화물 보전 목적, ④합리적 희생이라는 요건 하에 성립하며, 손해를 화주·선주가 비례 분담합니다. York-Antwerp Rules가 기준입니다.'},
+{s:'해운',d:'hard',q:'컨테이너 운송의 SI(Shipping Instruction) 제출 마감과 VGM 제출의 관계는?',o:['VGM은 B/L 발행 후 제출','SI Cut-off와 VGM Cut-off는 별개로, VGM은 보통 선적 전 일정 기한까지 선사와 터미널에 제출 필요','VGM=운임 산정용','SI 없이 VGM만 제출 가능'],a:1,e:'SI Cut-off(선하증권 작성 마감)와 VGM Cut-off(컨테이너 총중량 검증 제출 마감)는 별도로 관리됩니다. VGM은 SOLAS 의무 사항으로 선박 출항 전 선사와 터미널 모두에 제출해야 합니다.'},
+{s:'해운',d:'hard',q:'해운의 "Cabotage(카보타주)" 규제란?',o:['외국 선박의 공해 항행 금지','자국 항구 간 내항 운송을 자국 선박으로만 허용하는 규제','운임 상한선 규제','환경 규제'],a:1,e:'카보타주(Cabotage)는 한 국가의 두 항구 사이 운송(내항 운송)을 자국 국적 선박만 허용하는 규제입니다. 미국의 Jones Act, 한국의 내항운송 규제가 대표적입니다.'},
+/* ICT·디지털 스타일 (24문항) */
+{s:'ICT',d:'hard',q:'OSI 7계층에서 TCP와 UDP가 속하는 계층과 두 프로토콜의 주요 차이점은?',o:['3계층, TCP=비연결, UDP=연결형','4계층(전송), TCP=연결형·신뢰성 보장, UDP=비연결형·빠르지만 신뢰성 낮음','5계층, 동일','7계층, 암호화 여부'],a:1,e:'TCP(Transmission Control Protocol)는 연결형으로 패킷 순서·손실을 보장하여 신뢰성이 높고, UDP(User Datagram Protocol)는 비연결형으로 빠르지만 신뢰성이 낮습니다. 둘 다 OSI 4계층(전송 계층)에 속합니다.'},
+{s:'ICT',d:'hard',q:'블록체인의 "스마트 컨트랙트(Smart Contract)"가 해상물류에 적용될 때의 장점은?',o:['종이 계약서 증가','조건 충족 시 자동으로 대금 지급·서류 발행 등이 실행되어 중개인 없이 계약 이행 자동화','선박 속도 향상','관세 자동 면제'],a:1,e:'스마트 컨트랙트는 블록체인 위에서 계약 조건이 충족되면 자동으로 실행되는 코드로, 화물 선적 확인 시 자동 운임 지급, B/L 자동 발행, 보험 청구 자동화 등에 활용될 수 있습니다.'},
+{s:'ICT',d:'hard',q:'해상물류 정보 연계에서 "적하목록(Manifest)"의 전자 제출 의무와 주요 목적은?',o:['화물 보험용','관세청에 선박 입항 전 화물 정보를 사전 신고하여 통관 심사·리스크 관리에 활용','운임 계산용','선원 식단 계획'],a:1,e:'적하목록(Cargo Manifest)은 선박에 적재된 모든 화물 목록으로, 한국에서는 입항 24시간 전(장거리) 또는 4시간 전(단거리)까지 선사가 관세청에 전자 제출 의무가 있습니다.'},
+{s:'ICT',d:'hard',q:'해운물류 디지털화에서 "Port Community System(PCS)"과 "National Single Window(NSW)"의 관계는?',o:['동일한 시스템','PCS는 항만 내 민간 이해관계자 간 데이터 교환, NSW는 정부 기관 간 통관 정보 단일 창구로 상호 연계','PCS=수출, NSW=수입','NSW가 PCS를 대체'],a:1,e:'PCS는 항만 생태계의 민간 주체(선사·터미널·포워더 등) 간 데이터 교환 플랫폼이고, NSW는 세관·검역·항만청 등 정부 기관 간 통관 정보를 통합하는 정부 플랫폼입니다. 두 시스템은 API로 상호 연계합니다.'},
+{s:'ICT',d:'hard',q:'해운물류에서 "AIS 데이터"와 "위성 AIS(S-AIS)"의 차이점은?',o:['동일','육상 AIS=연안 수십km 범위, S-AIS=위성으로 공해상 포함 전 세계 선박 추적 가능','S-AIS=선박 속도만 측정','육상 AIS=더 정확'],a:1,e:'육상 기반 AIS 수신기는 연안 40~70km 내 선박만 추적하지만, 위성 AIS(S-AIS)는 지구 전체를 커버하여 공해상 선박도 실시간 추적이 가능합니다. Exactearth·Orbcomm 등이 S-AIS 데이터를 제공합니다.'},
+{s:'ICT',d:'hard',q:'물류 IT에서 "마이크로서비스 아키텍처(MSA)"의 장점은?',o:['하나의 거대한 시스템으로 통합 관리','기능별로 독립적인 서비스로 분리하여 개별 배포·확장이 가능하고 장애가 격리됨','보안이 약해짐','비용이 무조건 절감'],a:1,e:'MSA(Microservices Architecture)는 WMS·TMS·주문관리 등 기능을 독립 서비스로 분리하여 특정 기능만 업데이트·확장하고, 일부 장애가 전체 시스템에 영향을 주지 않도록 합니다.'},
+{s:'ICT',d:'hard',q:'해운물류에서 EDI의 UN/EDIFACT 표준과 XML 기반 데이터 교환의 차이점은?',o:['동일한 표준','UN/EDIFACT=레거시 형식, 고정 구조·처리 효율 높음; XML=가독성 높고 유연하지만 데이터 크기 큼','XML이 더 오래된 표준','UN/EDIFACT=인터넷 전용'],a:1,e:'UN/EDIFACT는 1980년대 개발된 고정 형식으로 처리 효율이 높아 대용량 배치 처리에 적합하고, XML은 가독성과 유연성이 높아 API·웹서비스 연동에 유리하지만 데이터 크기가 큰 단점이 있습니다.'},
+{s:'ICT',d:'hard',q:'컨테이너 터미널의 "Yard Planning(야드 플래닝)" 알고리즘 최적화의 목적은?',o:['야드 면적 최대화','컨테이너 재취급(Reshuffling) 최소화·크레인 이동 거리 단축으로 처리 시간 단축','직원 수 최대화','보안 강화'],a:1,e:'야드 플래닝은 컨테이너를 어느 블록·행·단에 배치할지 결정합니다. 선적 순서를 고려해 위에 쌓인 컨테이너를 불필요하게 들어내는 Reshuffling을 최소화하는 것이 핵심 최적화 목표입니다.'},
+{s:'ICT',d:'hard',q:'해운물류에서 "디지털 화물 중개(Digital Freight Brokerage)"가 전통 중개와 다른 핵심 차이점은?',o:['더 비쌈','알고리즘·데이터로 실시간 운임 매칭·투명한 가격·자동 서류 처리를 제공하여 거래 속도와 효율 향상','화물 종류 제한','전화 기반'],a:1,e:'디지털 프레이트 브로커(Flexport·Freightos 등)는 알고리즘으로 화주-운송사를 실시간 매칭하고, 온라인 운임 투명성과 자동 서류(B/L·인보이스) 발행을 제공하여 전통 전화/팩스 방식보다 훨씬 빠릅니다.'},
+{s:'ICT',d:'hard',q:'물류 AI에서 "강화학습(Reinforcement Learning)"이 경로 최적화에 활용되는 원리는?',o:['정답 데이터로 학습','에이전트가 환경과 상호작용하며 보상을 최대화하는 행동 패턴을 스스로 학습','무작위 탐색','고정 규칙 적용'],a:1,e:'강화학습은 배송 에이전트가 다양한 경로를 시도하며 최단 시간·최소 비용 등 보상이 큰 경로를 스스로 학습합니다. 구글 DeepMind의 물류창고 에너지 최적화, 배송 경로 최적화 등에 활용됩니다.'},
+{s:'ICT',d:'hard',q:'해운물류 플랫폼에서 "API Rate Limiting"이 필요한 이유는?',o:['더 많은 요청을 보내기 위해','과도한 API 호출로 서버 과부하를 방지하고 서비스 안정성·공정한 이용을 보장','보안 약화','비용 절감'],a:1,e:'API Rate Limiting은 단위 시간당 API 호출 수를 제한하여 서버 과부하·DDoS 공격 방지, 공정한 서비스 이용 보장, 비용 관리에 활용됩니다. 선사 API를 과다 호출하는 포워더 시스템 제어에 실제 적용됩니다.'},
+/* 스마트해상물류 스타일 (24문항) */
+{s:'스마트',d:'hard',q:'IMO MASS(자율운항선박) 규제 프레임워크에서 4단계(Degree 4) 선박의 특징은?',o:['선원 보조 자율 운항','원격 제어 (선원 탑승)','원격 제어 (무인)','완전 자율 운항 (인간 개입 없음)'],a:3,e:'IMO MASS 4단계(Degree 4)는 선박 스스로 모든 항해·운항 결정을 내리는 완전 자율 운항 선박입니다. 1단계=의사결정 지원, 2단계=원격 제어(선원 탑승), 3단계=원격 제어(무인), 4단계=완전 자율입니다.'},
+{s:'스마트',d:'hard',q:'선박 IoT에서 "예측 정비(PdM)"와 "예방 정비(PM)"의 핵심 차이점은?',o:['PdM=고장 후 수리','PdM=센서 데이터 기반 이상 징후 사전 감지, PM=정해진 주기에 따른 정기 교체·점검','PM=더 비쌈','동일'],a:1,e:'PM(Preventive Maintenance)은 고장 여부 관계없이 일정 주기에 수행하는 반면, PdM(Predictive Maintenance)은 실시간 센서 데이터 분석으로 실제 이상 징후 발생 시에만 정비하여 불필요한 교체를 줄입니다.'},
+{s:'스마트',d:'hard',q:'해양 디지털 트윈(Digital Twin) 구현에 필요한 핵심 데이터 소스로 옳지 않은 것은?',o:['실시간 AIS 위치 데이터','IoT 센서(엔진·날씨·화물) 데이터','역사적 운항 데이터','선원 개인 일기장'],a:3,e:'해양 디지털 트윈은 AIS 위치, IoT 센서, 기상 데이터, 과거 운항 기록, CAD 도면 등 실측 데이터를 기반으로 가상 복제본을 구축합니다. 선원 개인 일기는 디지털 트윈 데이터 소스가 아닙니다.'},
+{s:'스마트',d:'hard',q:'스마트 항만의 "무인 자동화 게이트(Automated Gate)"에서 OCR이 인식하는 정보로 옳지 않은 것은?',o:['컨테이너 번호(ISO 6346)','봉인(Seal) 번호','차량(트럭) 번호판','운전기사 개인 신용점수'],a:3,e:'자동화 게이트의 OCR은 컨테이너 번호(ISO 6346), 봉인 번호, 트럭 번호판, 컨테이너 손상 여부를 자동 인식합니다. 운전기사 신용점수는 OCR 인식 정보가 아닙니다.'},
+{s:'스마트',d:'hard',q:'IMO의 "GHG 전략 2023(Revised GHG Strategy)"에서 2040년 중간 목표로 옳은 것은?',o:['2008년 대비 20% 감축','2008년 대비 70~80% 감축','2008년 대비 100% 감축','현상 유지'],a:1,e:'IMO 개정 GHG 전략(2023): 2030년까지 20~30% 감축, 2040년까지 70~80% 감축, 2050년경 넷제로 달성이 목표입니다(2008년 기준).'},
+{s:'스마트',d:'hard',q:'선박 연료로서 "그린 암모니아(Green Ammonia)"의 특징과 과제는?',o:['탄소 배출이 많음','연소 시 CO2 비배출(탄소중립), 하지만 독성·폭발성·에너지밀도 낮음이 과제','기존 엔진 수정 불필요','현재 전 세계 공급 충분'],a:1,e:'그린 암모니아(재생에너지+수전해 수소+질소 합성)는 연소 시 CO2를 배출하지 않는 탄소중립 연료입니다. 그러나 독성(NH3), 부식성, 에너지 밀도 낮음, 전용 엔진 개발 필요, 공급망 미성숙이 현안 과제입니다.'},
+{s:'스마트',d:'hard',q:'스마트 항만에서 "AGV(Automated Guided Vehicle)"와 "AMR(Autonomous Mobile Robot)"의 차이점은?',o:['동일한 장비','AGV=고정 경로 이동, AMR=센서·AI로 장애물 인식하며 자율 경로 변경 가능','AGV=실내 전용, AMR=실외 전용','AMR이 더 느림'],a:1,e:'AGV는 바닥 유도선·자기 테이프·레이저를 따라 고정 경로로 이동하며 경로 변경이 어렵습니다. AMR은 LIDAR·카메라·AI로 주변 환경을 인식하고 장애물을 피해 스스로 경로를 계획합니다.'},
+{s:'스마트',d:'hard',q:'해운물류에서 "Carbon Intensity Indicator(CII)"와 "EEXI(에너지효율기존선박지수)"의 차이점은?',o:['동일한 지수','EEXI=신조 기준(EEDI와 유사, 기존선 적용), CII=운항 중 실제 탄소집약도 연간 등급 평가','EEXI=운항 중 측정, CII=설계 단계','둘 다 신조 전용'],a:1,e:'EEXI(2023년 발효)는 기존 운항 선박의 설계 효율 기준(일회성 인증)이고, CII(2023년 발효)는 매년 실제 운항 데이터 기반으로 A~E 등급을 평가하는 운항 효율 지표입니다.'},
+{s:'스마트',d:'hard',q:'스마트 해운에서 "항만 커뮤니티 시스템(PCS)"의 데이터 거버넌스 원칙으로 가장 중요한 것은?',o:['특정 기업이 데이터 독점','중립성(Neutrality): 특정 이해관계자에 종속되지 않는 독립 운영','정부만 접근 가능','유료 회원만 접근'],a:1,e:'PCS의 핵심 원칙은 중립성(Neutrality)으로, 특정 선사·터미널·포워더에 종속되지 않고 모든 항만 이해관계자가 공평하게 접근할 수 있어야 합니다. Rotterdam의 Portbase가 대표 사례입니다.'},
+{s:'스마트',d:'hard',q:'해운의 EU ETS 편입(2024년~)에서 비EU 항구 간 화물에 대한 규제 범위는?',o:['전혀 적용 안 됨','EU 역내 항구 간 100%, EU↔비EU 항구 간 50%, 비EU↔비EU는 0%','EU 항구 기항 시 100%','연료량 기준으로만'],a:1,e:'EU ETS 해운 편입: EU 내 항구 간 운항=배출량 100%, EU 항구 ↔ 비EU 항구=50%, 비EU 간=0%로 단계별 적용됩니다. 2024년 40%, 2025년 70%, 2026년 100% 적용 비율이 증가합니다.'},
+{s:'스마트',d:'hard',q:'"선박 에너지 효율 관리 계획서(SEEMP)"의 주요 목적과 구성은?',o:['선원 급여 계획','선박의 에너지 효율 개선 목표·조치·모니터링 방법을 담은 운항 문서로 CII 달성 계획 포함','선박 건조 계획','화물 적재 계획'],a:1,e:'SEEMP(Ship Energy Efficiency Management Plan)은 선박별 에너지 효율 개선 목표, 조치(슬로우 스티밍·항로 최적화 등), 모니터링·보고 방법을 담은 의무 문서입니다. 2023년부터 CII 달성 계획도 포함이 의무화됐습니다.'},
+{s:'스마트',d:'hard',q:'해운 디지털 전환에서 "오픈 소스 선박 데이터 표준(NMEA 2000)"의 용도는?',o:['해운 운임 공시 표준','선박 내 항법·엔진·센서 장비 간 디지털 데이터 통신 표준 프로토콜','블록체인 기반 B/L 표준','AI 모델 공유 표준'],a:1,e:'NMEA 2000은 선박 내 GPS·레이더·엔진 제어기·연료계 등 다양한 항전 장비 간 디지털 통신을 위한 표준 프로토콜로, 선박 IoT 데이터 통합의 기초 인프라입니다.'}
+];
+
+// ===== APP STATE =====
+let subjFilter='all', diffFilter='all', wrongMode=false;
+let state={};
+let order=[...Array(QS.length).keys()];
+
+// ===== SIDEBAR COUNTS =====
+function updateSidebarCounts(){
+  const cnt={};
+  QS.forEach(q=>{cnt[q.s]=(cnt[q.s]||0)+1});
+  document.getElementById('cntAll').textContent=QS.length;
+  document.getElementById('cntHaeun').textContent=cnt['해운']||0;
+  document.getElementById('cntHangman').textContent=cnt['항만']||0;
+  document.getElementById('cntMuyeok').textContent=cnt['무역']||0;
+  document.getElementById('cntSCM').textContent=cnt['SCM']||0;
+  document.getElementById('cntICT').textContent=cnt['ICT']||0;
+  document.getElementById('cntSmart').textContent=cnt['스마트']||0;
+  document.getElementById('cntMoui').textContent=cnt['모의']||0;
+}
+
+// ===== FILTERS =====
+function setSubj(v,btn){
+  subjFilter=v; wrongMode=false;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); render();
+}
+function setDiff(v,btn){
+  diffFilter=v;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); render();
+}
+function showWrong(){ wrongMode=true; render(); }
+async function resetAll(){
+  if(!confirm('모든 풀이 기록을 초기화합니까?\nDB에서도 삭제됩니다.')) return;
+  state={};
+  await clearProgress();
+  render(); updateStats();
+}
+function shuffle(){ order.sort(()=>Math.random()-.5); render(); }
+function expandAll(){ document.querySelectorAll('.exp').forEach(e=>e.classList.add('show')); }
+
+function filtered(){
+  const kw=document.getElementById('searchBox').value.trim().toLowerCase();
+  return order.filter(i=>{
+    const q=QS[i];
+    if(subjFilter!=='all'&&q.s!==subjFilter) return false;
+    if(diffFilter!=='all'&&q.d!==diffFilter) return false;
+    if(wrongMode&&state[i]!=='wrong'&&!String(state[i]).startsWith('wrong-')) return false;
+    if(kw&&!q.q.toLowerCase().includes(kw)&&!q.o.join('').toLowerCase().includes(kw)) return false;
+    return true;
+  });
+}
+
+function render(){
+  const ids=filtered();
+  document.getElementById('sTotal').textContent=ids.length;
+  const list=document.getElementById('qlist');
+  if(!ids.length){
+    list.innerHTML='<div class="no-q"><div class="icon">🔍</div><div>조건에 맞는 문제가 없습니다</div></div>';
+    return;
+  }
+  list.innerHTML=ids.map((i,idx)=>{
+    const q=QS[i]; const st=state[i];
+    const diffCls={easy:'diff-easy',mid:'diff-mid',hard:'diff-hard'}[q.d];
+    const diffLabel={easy:'기초',mid:'중급',hard:'고급'}[q.d];
+    const cardCls=st?(String(st).startsWith('correct')?'done-correct':'done-wrong'):'';
+    const opts=q.o.map((o,oi)=>{
+      let cls='';
+      if(st){
+        if(oi===q.a) cls='correct';
+        else if(st==='wrong-'+oi) cls='wrong';
+      }
+      return `<button class="opt ${cls}" onclick="answer(${i},${oi})" ${st?'disabled':''}>` +
+        ['①','②','③','④'][oi]+' '+o+'</button>';
+    }).join('');
+    const badge = st==='correct'
+      ? '<span class="tag diff-easy">✓ 정답</span>'
+      : st ? '<span class="tag diff-hard">✗ 오답</span>' : '';
+    return `<div class="qcard ${cardCls}" id="qc${i}">
+      <div class="qmeta">
+        <span class="tag subj">${q.s}</span>
+        <span class="tag ${diffCls}">${diffLabel}</span>
+        <span class="tag num">Q${idx+1}</span>
+        ${badge}
+      </div>
+      <div class="qtext">${q.q}</div>
+      <div class="opts">${opts}</div>
+      <div class="exp ${st?'show':''}" id="exp${i}">💡 ${q.e}</div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+async function answer(qi,oi){
+  if(state[qi]) return;
+  const q=QS[qi];
+  const result = oi===q.a ? 'correct' : 'wrong-'+oi;
+  state[qi] = result;
+
+  const card=document.getElementById('qc'+qi);
+  const exp=document.getElementById('exp'+qi);
+  card.querySelectorAll('.opt').forEach((btn,i)=>{
+    btn.disabled=true;
+    if(i===q.a) btn.classList.add('correct');
+    else if(i===oi) btn.classList.add('wrong');
+  });
+  exp.classList.add('show');
+  card.className='qcard '+(oi===q.a?'done-correct':'done-wrong');
+  updateStats();
+
+  // DB에 저장 (비동기, UI 블로킹 없음)
+  setSyncStatus('loading','저장 중...');
+  await saveAnswer(qi, result);
+  setSyncStatus('ok','✓ 저장됨 · ' + new Date().toLocaleTimeString('ko-KR'));
+}
+
+function updateStats(){
+  const done=Object.keys(state).length;
+  const correct=Object.values(state).filter(v=>v==='correct').length;
+  const pct=done?Math.round(correct/done*100):0;
+  const prog=Math.round(done/QS.length*100);
+  document.getElementById('sDone').textContent=done;
+  document.getElementById('sCorrect').textContent=correct;
+  document.getElementById('sRate').textContent=pct+'%';
+  document.getElementById('progFill').style.width=prog+'%';
+  document.getElementById('progPct').textContent=prog+'%';
+}
+
+// ===== INIT =====
+async function init(){
+  updateSidebarCounts();
+  // 로컬 캐시 먼저 적용 (빠른 초기 렌더)
+  const local = JSON.parse(localStorage.getItem('quiz_state')||'{}')
+;
+  Object.assign(state, local);
+  render();
+  // DB에서 최신 데이터 로드
+  await loadProgress();
+  render();
+}
+init();
+</script>
+</body>
+</html>
