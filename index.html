@@ -181,6 +181,27 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 .retry-btn{padding:10px 30px;border-radius:8px;border:1px solid #5a3a00;background:#1a1000;color:#f39c12;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;margin-top:12px;transition:.15s}
 .retry-btn:hover{background:#3a2000}
 @media(max-width:700px){.wrap{grid-template-columns:1fr}.side{display:none}.opts,.popts{grid-template-columns:1fr}.enb{width:28px;height:28px;font-size:10px}}
+
+/* ===== 오답노트 메모 ===== */
+.memo-area{margin-top:8px}
+.memo-input{width:100%;padding:7px 10px;border-radius:5px;border:1px solid #1a3a5c;background:#090f1e;color:#c8ddef;font-size:11px;font-family:inherit;resize:none;outline:none;line-height:1.5}
+.memo-input:focus{border-color:#f39c12}
+.memo-saved{font-size:10px;color:#5a85aa;margin-top:3px}
+.memo-text{font-size:11px;color:#b8860b;background:#1a1400;border-radius:4px;padding:5px 8px;margin-top:6px;border-left:2px solid #b8860b;line-height:1.5}
+
+/* ===== 스트릭 캘린더 ===== */
+.streak-panel{background:#0d1622;border-top:1px solid #1a3355;padding:14px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.streak-info{display:flex;gap:14px;align-items:center}
+.streak-num{font-size:22px;font-weight:700;color:#f39c12}
+.streak-label{font-size:10px;color:#5a85aa;margin-top:1px}
+.streak-grid{display:flex;gap:2px;flex-wrap:wrap;max-width:700px}
+.streak-cell{width:13px;height:13px;border-radius:2px;background:#111d30;position:relative}
+.streak-cell.s1{background:#0d3a20}
+.streak-cell.s2{background:#1a6a40}
+.streak-cell.s3{background:#27ae60}
+.streak-cell.s4{background:#2ecc71}
+.streak-cell.today{box-shadow:0 0 0 1px #f39c12}
+.streak-cell:hover::after{content:attr(data-tip);position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:#0d1622;border:1px solid #1a3355;padding:3px 7px;border-radius:4px;font-size:10px;color:#c8ddef;white-space:nowrap;z-index:10;pointer-events:none}
 </style>
 </head>
 <body>
@@ -203,6 +224,16 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
   <button class="tab-btn exam-tab" onclick="switchTab('exam3',this)">📋 모의고사 3회</button>
 </div>
 <div class="sync-bar loading" id="syncBar"><div class="sync-dot"></div><span id="syncMsg">기록 불러오는 중...</span></div>
+
+<!-- 스트릭 캘린더 -->
+<div class="streak-panel" id="streakPanel">
+  <div class="streak-info">
+    <div><div class="streak-num" id="streakDays">0</div><div class="streak-label">연속 학습일</div></div>
+    <div><div class="streak-num" id="streakTotal" style="color:#4db8ff">0</div><div class="streak-label">총 학습일</div></div>
+    <div><div class="streak-num" id="todayCount" style="color:#2ecc71">0</div><div class="streak-label">오늘 풀이</div></div>
+  </div>
+  <div class="streak-grid" id="streakGrid"></div>
+</div>
 
 <!-- 문제은행 -->
 <div class="page active" id="page-bank">
@@ -873,12 +904,21 @@ function render() {
     const bmLabel = s.bookmarked ? '⭐ 북마크 해제' : '☆ 북마크';
     const bmCls = s.bookmarked ? 'act-btn bm-on' : 'act-btn';
     actions += `<button class="${bmCls}" onclick="toggleBookmark(${i})">${bmLabel}</button>`;
+    actions += `<button class="act-btn" onclick="toggleMemo(${i})" style="color:#b8860b;border-color:#3a2a00">✏️ 오답메모</button>`;
+    const memo = s.memo || '';
+    const memoHtml = memo ? `<div class="memo-text">✏️ ${memo}</div>` : '';
+    const memoAreaHtml = `<div class="memo-area" id="memoArea${i}" style="display:none">
+      <textarea class="memo-input" id="memoInput${i}" rows="2" placeholder="왜 틀렸는지 메모... (Enter로 저장)">${memo}</textarea>
+      <div class="memo-saved" id="memoSaved${i}"></div>
+    </div>`;
     return `<div class="qcard ${cardCls}" id="qc${i}">
       <div class="qmeta"><span class="tag subj">${q.s}</span><span class="tag ${diffCls}">${diffLabel}</span><span class="tag num">Q${idx + 1}</span>${badges}</div>
       <div class="qtext">${q.q}</div>
       <div class="opts">${opts}</div>
       <div class="exp ${answered ? 'show' : ''}" id="exp${i}">💡 ${q.e}</div>
+      ${memoHtml}
       <div class="card-actions">${actions}</div>
+      ${memoAreaHtml}
     </div>`;
   }).join('');
   updateStats();
@@ -896,6 +936,7 @@ async function answer(qi, oi) {
   const resultStr = correct ? 'correct' : `wrong-${oi}:${s.wrongCount}`;
   await saveToDb(qi, resultStr);
   setSyncStatus('ok', '✓ 저장됨 · ' + new Date().toLocaleTimeString('ko-KR'));
+  recordTodayActivity(1);
 }
 
 function retryOne(qi) { const s = getS(qi); s.retrying = true; s.lastResult = null; render(); }
@@ -1244,6 +1285,97 @@ function retryExam() {
   renderExamStart();
 }
 
+
+// ===== 오답노트 메모 =====
+function toggleMemo(qi) {
+  const area = document.getElementById('memoArea' + qi);
+  if (!area) return;
+  const isHidden = area.style.display === 'none';
+  area.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    const inp = document.getElementById('memoInput' + qi);
+    if (inp) {
+      inp.focus();
+      inp.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveMemo(qi); } };
+      inp.onblur = () => saveMemo(qi);
+    }
+  }
+}
+
+async function saveMemo(qi) {
+  const inp = document.getElementById('memoInput' + qi);
+  if (!inp) return;
+  const text = inp.value.trim();
+  getS(qi).memo = text;
+  const saved = document.getElementById('memoSaved' + qi);
+  if (saved) saved.textContent = text ? '✓ 저장됨' : '';
+  // localStorage에 메모 저장
+  const memos = JSON.parse(localStorage.getItem('quiz_memos') || '{}');
+  if (text) memos[qi] = text; else delete memos[qi];
+  localStorage.setItem('quiz_memos', JSON.stringify(memos));
+  // 카드 재렌더 (메모 텍스트 표시)
+  setTimeout(() => render(), 300);
+}
+
+function loadMemos() {
+  const memos = JSON.parse(localStorage.getItem('quiz_memos') || '{}');
+  Object.entries(memos).forEach(([qi, text]) => {
+    getS(parseInt(qi)).memo = text;
+  });
+}
+
+// ===== 스트릭 캘린더 =====
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function recordTodayActivity(count) {
+  const log = JSON.parse(localStorage.getItem('streak_log') || '{}');
+  const key = getTodayKey();
+  log[key] = (log[key] || 0) + count;
+  localStorage.setItem('streak_log', JSON.stringify(log));
+  renderStreak();
+}
+
+function renderStreak() {
+  const log = JSON.parse(localStorage.getItem('streak_log') || '{}');
+  const today = getTodayKey();
+
+  // 연속 학습일 계산
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const key = d.toISOString().slice(0, 10);
+    if (log[key] && log[key] > 0) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+
+  // 총 학습일
+  const totalDays = Object.values(log).filter(v => v > 0).length;
+  const todayCount = log[today] || 0;
+
+  document.getElementById('streakDays').textContent = streak;
+  document.getElementById('streakTotal').textContent = totalDays;
+  document.getElementById('todayCount').textContent = todayCount;
+
+  // 최근 84일(12주) 그리드
+  const grid = document.getElementById('streakGrid');
+  if (!grid) return;
+  const cells = [];
+  const max = Math.max(1, ...Object.values(log));
+  for (let i = 83; i >= 0; i--) {
+    const dt = new Date();
+    dt.setDate(dt.getDate() - i);
+    const key = dt.toISOString().slice(0, 10);
+    const cnt = log[key] || 0;
+    const level = cnt === 0 ? 0 : cnt < max * .25 ? 1 : cnt < max * .5 ? 2 : cnt < max * .75 ? 3 : 4;
+    const isToday = key === today;
+    const tip = `${key}: ${cnt}문제`;
+    cells.push(`<div class="streak-cell s${level}${isToday ? ' today' : ''}" data-tip="${tip}"></div>`);
+  }
+  grid.innerHTML = cells.join('');
+}
+
 // ===== 초기화 =====
 async function init() {
   updateSidebarCounts();
@@ -1251,7 +1383,9 @@ async function init() {
   Object.entries(local).forEach(([qi, result]) => parseResult(parseInt(qi), result));
   render();
   await loadProgress();
+  loadMemos();
   render();
+  renderStreak();
 }
 init();
 </script>
