@@ -7,18 +7,25 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;color:#d4e4f0;min-height:100vh;font-size:14px}
-.top{background:linear-gradient(135deg,#0d1f3c,#0a3060);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a4a80;gap:12px;flex-wrap:wrap}
+.top{background:linear-gradient(135deg,#0d1f3c,#0a3060);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a4a80;gap:12px;flex-wrap:wrap}
 .top-title{font-size:16px;font-weight:700;color:#4db8ff}
 .top-sub{font-size:11px;color:#5a85aa;margin-top:2px}
 .stats-row{display:flex;gap:8px;flex-wrap:wrap}
 .stat{text-align:center;background:#111d30;border:1px solid #1a3a5c;border-radius:7px;padding:5px 12px;min-width:52px}
 .stat .n{font-size:17px;font-weight:700;color:#4db8ff}
 .stat .l{font-size:10px;color:#5a85aa}
-.sync-bar{background:#0a1a10;border-bottom:1px solid #1a4a30;padding:5px 24px;font-size:11px;color:#3a8a5a;display:flex;align-items:center;gap:8px}
+.tab-nav{background:#0d1622;border-bottom:2px solid #1a3355;display:flex;overflow-x:auto;flex-shrink:0}
+.tab-btn{padding:11px 18px;border:none;background:transparent;color:#5a85aa;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;font-family:inherit}
+.tab-btn:hover{color:#8ab2cc;background:#111d30}
+.tab-btn.active{color:#4db8ff;border-bottom-color:#4db8ff;background:#0a1525}
+.tab-btn.exam-tab{color:#8a6a3a}.tab-btn.exam-tab.active{color:#f39c12;border-bottom-color:#f39c12}
+.tab-btn.practice-tab{color:#2a8a5a}.tab-btn.practice-tab.active{color:#2ecc71;border-bottom-color:#2ecc71}
+.sync-bar{background:#0a1a10;border-bottom:1px solid #1a4a30;padding:5px 20px;font-size:11px;color:#3a8a5a;display:flex;align-items:center;gap:8px}
 .sync-bar.error{background:#1a0a0a;border-color:#4a1a1a;color:#8a3a3a}
 .sync-bar.loading{color:#5a85aa;background:#0a0f1a;border-color:#1a3355}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
-.wrap{display:grid;grid-template-columns:240px 1fr;height:calc(100vh - 84px)}
+.page{display:none}.page.active{display:flex;flex-direction:column}
+.wrap{display:grid;grid-template-columns:230px 1fr;height:calc(100vh - 118px)}
 .side{background:#0d1622;border-right:1px solid #1a3355;padding:14px;overflow-y:auto}
 .side-h{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#4a6a8a;margin-bottom:8px;margin-top:4px}
 .filter-btn{width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;background:#111d30;border:1px solid #1a3a5c;border-radius:6px;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s}
@@ -34,7 +41,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 .prog-label{font-size:11px;color:#5a85aa;margin-bottom:5px;display:flex;justify-content:space-between}
 .prog-track{background:#111d30;border-radius:4px;height:5px;overflow:hidden}
 .prog-fill{background:linear-gradient(90deg,#1a6ab0,#4db8ff);height:100%;transition:.4s;border-radius:4px;width:0%}
-.main{overflow-y:auto;padding:20px 24px}
+.main{overflow-y:auto;padding:20px}
 .controls{display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
 .search-box{flex:1;min-width:160px;padding:8px 12px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#d4e4f0;font-size:13px;outline:none}
 .search-box:focus{border-color:#4db8ff}
@@ -42,7 +49,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 .ctrl-btn:hover{border-color:#4db8ff;color:#4db8ff}
 .ctrl-btn.primary{background:#0d3a70;border-color:#4db8ff;color:#4db8ff;font-weight:700}
 .qlist{display:flex;flex-direction:column;gap:12px}
-.qcard{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:16px;position:relative}
+.qcard{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:16px}
 .qcard.done-correct{border-color:#1a5c30;background:#0a1a10}
 .qcard.done-wrong{border-color:#5c1a1a;background:#1a0a0a}
 .qcard.bookmarked{box-shadow:0 0 0 1px #b8860b inset}
@@ -68,34 +75,136 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 .act-btn{padding:5px 12px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;transition:.15s}
 .act-btn:hover{border-color:#4db8ff;color:#4db8ff}
 .act-btn.retry{border-color:#1a5a20;color:#2ecc71}
-.act-btn.retry:hover{background:#0a2010}
 .act-btn.bm-on{border-color:#b8860b;color:#f1c40f;background:#1a1400}
 .no-q{text-align:center;padding:60px 20px;color:#3a5a7a}
 .no-q .icon{font-size:40px;margin-bottom:12px}
-@media(max-width:700px){.wrap{grid-template-columns:1fr}.side{display:none}.opts{grid-template-columns:1fr}}
+/* 연습문제 */
+.prac-wrap{padding:20px;max-width:920px;margin:0 auto;width:100%;overflow-y:auto;max-height:calc(100vh - 118px)}
+.sec-hdr{border-radius:10px;padding:16px 20px;margin-bottom:18px}
+.sec-hdr.green{background:linear-gradient(135deg,#0d2a1a,#0a3a20);border:1px solid #1a6a40}
+.sec-hdr h2{font-size:17px;margin-bottom:5px;color:#2ecc71}
+.sec-hdr p{font-size:12px;color:#5a9a6a}
+.set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+.set-card{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:16px;cursor:pointer;transition:.2s}
+.set-card:hover,.set-card.sel{border-color:#2ecc71;background:#0a1a10}
+.set-card h3{color:#c8ddef;font-size:14px;margin-bottom:6px}
+.set-card .sc-meta{font-size:11px;color:#5a85aa;margin-bottom:8px}
+.set-card .sc-score{font-size:13px;font-weight:700;color:#2ecc71}
+.sc-subjs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.sc-stag{padding:2px 8px;border-radius:3px;background:#0d3060;color:#4db8ff;font-size:10px}
+.quiz-area{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:10px;padding:20px;margin-top:4px}
+.qa-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #1a3355;flex-wrap:wrap;gap:8px}
+.qa-hdr h3{color:#2ecc71;font-size:14px}
+.prac-prog{display:flex;align-items:center;gap:10px;font-size:11px;color:#5a85aa}
+.prac-pb{width:120px;height:4px;background:#111d30;border-radius:2px;overflow:hidden}
+.prac-pf{height:100%;background:linear-gradient(90deg,#1a8a50,#2ecc71);border-radius:2px;transition:.3s}
+.pqcard{background:#111d30;border-radius:8px;padding:14px;margin-bottom:12px;border:1px solid #1a3a5c}
+.pqcard.ac{border-color:#27ae60;background:#0a1a10}
+.pqcard.aw{border-color:#c0392b;background:#200808}
+.pqmeta{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.popts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.popt{padding:8px 10px;border-radius:5px;border:1px solid #1a3a5c;background:#0d1a2e;color:#8ab2cc;cursor:pointer;font-size:12px;text-align:left;transition:.15s;line-height:1.4;font-family:inherit}
+.popt:hover:not(:disabled){border-color:#2ecc71;color:#c8ddef}
+.popt:disabled{cursor:default}
+.popt.correct{border-color:#27ae60!important;background:#0a2010!important;color:#2ecc71!important}
+.popt.wrong{border-color:#c0392b!important;background:#200808!important;color:#e74c3c!important}
+.pexp{margin-top:8px;padding:8px 12px;background:#090f1e;border-left:3px solid #2ecc71;font-size:11px;color:#5a9a6a;line-height:1.6;display:none}
+.pexp.show{display:block}
+.score-box{background:#090f1e;border:1px solid #1a4a30;border-radius:10px;padding:20px;text-align:center;margin-top:16px}
+.score-big{font-size:48px;font-weight:700;color:#2ecc71;line-height:1}
+.score-lbl{font-size:12px;color:#5a85aa;margin-top:4px;margin-bottom:16px}
+.subj-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.ss-item{background:#111d30;border-radius:6px;padding:8px;text-align:center}
+.ss-name{font-size:10px;color:#5a85aa}
+.ss-pct{font-size:18px;font-weight:700;color:#4db8ff;margin-top:2px}
+.reset-btn{padding:8px 20px;border-radius:6px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;margin-top:12px;font-family:inherit;transition:.15s}
+.reset-btn:hover{border-color:#2ecc71;color:#2ecc71}
+/* 모의고사 */
+.exam-wrap{padding:20px;max-width:920px;margin:0 auto;width:100%;overflow-y:auto;max-height:calc(100vh - 118px)}
+.estart{text-align:center;padding:30px 20px}
+.estart .ebig{font-size:52px;margin-bottom:12px}
+.estart h2{color:#f39c12;font-size:22px;margin-bottom:10px}
+.estart p{color:#8a6a3a;font-size:13px;line-height:1.7;margin-bottom:6px}
+.einfo-row{display:flex;justify-content:center;gap:16px;margin:20px 0;flex-wrap:wrap}
+.einfo-box{background:#111d30;border:1px solid #5a3a00;border-radius:8px;padding:14px 20px;text-align:center;min-width:100px}
+.eib-val{font-size:22px;font-weight:700;color:#f39c12}
+.eib-lbl{font-size:10px;color:#5a85aa;margin-top:3px}
+.start-btn{padding:14px 50px;border-radius:10px;border:none;background:linear-gradient(135deg,#8a4a00,#c06000);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;margin-top:8px}
+.start-btn:hover{background:linear-gradient(135deg,#aa5a00,#e07000)}
+.past-row{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.past-item{background:#111d30;border:1px solid #1a3a5c;border-radius:6px;padding:8px 16px;font-size:12px;color:#5a85aa}
+.past-item .ps{font-weight:700;color:#f39c12}
+.einprog{display:none}.einprog.show{display:block}
+.etimer-bar{background:#0d1622;border-bottom:1px solid #1a3355;padding:8px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.timer-val{font-size:24px;font-weight:700;color:#f39c12;font-variant-numeric:tabular-nums}
+.timer-val.warn{color:#e74c3c;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.enav{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.enb{width:34px;height:34px;border-radius:5px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;font-weight:700;transition:.15s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.enb.ans{background:#0d3a20;border-color:#27ae60;color:#2ecc71}
+.enb.cur{border-color:#f39c12;color:#f39c12;background:#1a1000}
+.eq-box{background:#111d30;border:1px solid #1a3a5c;border-radius:10px;padding:16px;margin-bottom:12px}
+.eq-meta{display:flex;justify-content:space-between;margin-bottom:10px;font-size:11px;flex-wrap:wrap;gap:4px}
+.eq-text{font-size:13px;line-height:1.75;color:#c8ddef;margin-bottom:14px}
+.eopts{display:flex;flex-direction:column;gap:7px}
+.eopt{padding:10px 14px;border-radius:6px;border:1px solid #1a3a5c;background:#0d1a2e;color:#8ab2cc;cursor:pointer;font-size:12px;text-align:left;transition:.15s;line-height:1.45;font-family:inherit}
+.eopt:hover:not(:disabled){border-color:#f39c12;color:#c8ddef;background:#1a1000}
+.eopt.sel{border-color:#f39c12;background:#1a1000;color:#f39c12}
+.eopt.cshow{border-color:#27ae60!important;background:#0a2010!important;color:#2ecc71!important}
+.eopt.wshow{border-color:#c0392b!important;background:#200808!important;color:#e74c3c!important}
+.eopt:disabled{cursor:default}
+.ebot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
+.nav-btn{padding:9px 20px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;transition:.15s;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc}
+.nav-btn.nxt{background:#0d3a70;color:#4db8ff;border-color:#2a5a9a}
+.nav-btn.sub{background:#8a3a00;color:#f39c12;border-color:#5a3000}
+.nav-btn.sub:hover{background:#aa4a00}
+.eresult{display:none}.eresult.show{display:block}
+.res-hdr{background:linear-gradient(135deg,#1a1000,#3a2000);border:1px solid #5a3a00;border-radius:12px;padding:24px;text-align:center;margin-bottom:20px}
+.res-hdr h3{color:#f39c12;font-size:18px;margin-bottom:6px}
+.res-big{font-size:60px;font-weight:700;color:#f39c12;line-height:1;margin:10px 0}
+.res-sub{color:#8a6a3a;font-size:13px}
+.res-brkd{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.rbd{background:#111d30;border-radius:8px;padding:12px;border:1px solid #1a3a5c}
+.rbd-name{font-size:10px;color:#5a85aa;margin-bottom:4px}
+.rbd-score{font-size:22px;font-weight:700;color:#4db8ff}
+.rbd-detail{font-size:10px;color:#3a5a7a;margin-top:2px}
+.rv-tog{width:100%;padding:10px;border-radius:7px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:13px;font-family:inherit;margin-bottom:12px;transition:.15s}
+.rv-tog:hover{border-color:#f39c12;color:#f39c12}
+.rv-list{display:flex;flex-direction:column;gap:10px}
+.rv-card{background:#111d30;border-radius:8px;padding:12px;border-left:3px solid #1a3a5c}
+.rv-card.rvc{border-left-color:#27ae60}
+.rv-card.rvw{border-left-color:#c0392b}
+.rv-hdr{display:flex;justify-content:space-between;font-size:10px;color:#5a85aa;margin-bottom:6px}
+.rv-q{font-size:12px;color:#c8ddef;line-height:1.6;margin-bottom:6px}
+.rv-ans{font-size:11px;margin-bottom:4px}
+.rv-exp{font-size:11px;color:#5a85aa;border-top:1px solid #1a3355;padding-top:6px;margin-top:6px;line-height:1.6}
+.retry-btn{padding:10px 30px;border-radius:8px;border:1px solid #5a3a00;background:#1a1000;color:#f39c12;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;margin-top:12px;transition:.15s}
+.retry-btn:hover{background:#3a2000}
+@media(max-width:700px){.wrap{grid-template-columns:1fr}.side{display:none}.opts,.popts{grid-template-columns:1fr}.enb{width:28px;height:28px;font-size:10px}}
 </style>
 </head>
 <body>
 <div class="top">
-  <div>
-    <div class="top-title">⚓ 스마트해상물류관리사 문제은행</div>
-    <div class="top-sub">274문항 · 오답 횟수 추적 · 다시풀기 · 북마크 · DB 자동저장</div>
-  </div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <a href="./flashcard.html" style="padding:8px 16px;border-radius:7px;border:1px solid #2ecc71;background:#0a2010;color:#2ecc71;text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap">📚 영어 암기카드 →</a>
-    <div class="stats-row">
+  <div><div class="top-title">⚓ 스마트해상물류관리사</div><div class="top-sub">274문항 문제은행 · 연습문제 3세트 · 모의고사 1·2·3회</div></div>
+  <div class="stats-row">
     <div class="stat"><div class="n" id="sTotal">-</div><div class="l">표시</div></div>
     <div class="stat"><div class="n" id="sDone">0</div><div class="l">완료</div></div>
     <div class="stat"><div class="n" id="sCorrect">0</div><div class="l">정답</div></div>
     <div class="stat"><div class="n" id="sRate">0%</div><div class="l">정답률</div></div>
     <div class="stat"><div class="n" id="sWrongTop" style="color:#e67e22">0</div><div class="l">최다오답</div></div>
   </div>
-  </div>
 </div>
-<div class="sync-bar loading" id="syncBar">
-  <div class="sync-dot"></div>
-  <span id="syncMsg">기록 불러오는 중...</span>
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('bank',this)">📚 문제은행 <span style="font-size:10px;opacity:.55">(274)</span></button>
+  <button class="tab-btn practice-tab" onclick="switchTab('practice',this)">✏️ 연습문제 <span style="font-size:10px;opacity:.55">(75)</span></button>
+  <button class="tab-btn exam-tab" onclick="switchTab('exam1',this)">📋 모의고사 1회</button>
+  <button class="tab-btn exam-tab" onclick="switchTab('exam2',this)">📋 모의고사 2회</button>
+  <button class="tab-btn exam-tab" onclick="switchTab('exam3',this)">📋 모의고사 3회</button>
 </div>
+<div class="sync-bar loading" id="syncBar"><div class="sync-dot"></div><span id="syncMsg">기록 불러오는 중...</span></div>
+
+<!-- 문제은행 -->
+<div class="page active" id="page-bank">
 <div class="wrap">
 <div class="side">
   <div class="side-h">과목</div>
@@ -106,7 +215,6 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
   <button class="filter-btn" onclick="setSubj('SCM',this)">SCM·물류 <span class="cnt" id="cntSCM">-</span></button>
   <button class="filter-btn" onclick="setSubj('ICT',this)">ICT·디지털 <span class="cnt" id="cntICT">-</span></button>
   <button class="filter-btn" onclick="setSubj('스마트',this)">스마트해상 <span class="cnt" id="cntSmart">-</span></button>
-  <button class="filter-btn" onclick="setSubj('모의',this)" style="color:#f39c12;border-color:#5a3a00">📋 모의고사 <span class="cnt" id="cntMoui">-</span></button>
   <div class="divider"></div>
   <div class="side-h">난이도</div>
   <div class="diff-row">
@@ -139,69 +247,34 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
   <div class="qlist" id="qlist"></div>
 </div>
 </div>
+</div>
+
+<!-- 연습문제 -->
+<div class="page" id="page-practice">
+<div class="prac-wrap">
+  <div class="sec-hdr green"><h2>✏️ 연습문제 (자격검정 샘플)</h2><p>공식 자격검정 샘플문제 3세트 · 5과목 × 5문항 · 세트당 25문항 · 즉시 채점</p></div>
+  <div class="set-grid" id="setGrid"></div>
+  <div id="practiceArea"></div>
+</div>
+</div>
+
+<!-- 모의고사 1·2·3회 -->
+<div class="page" id="page-exam1"><div class="exam-wrap" id="ew1"></div></div>
+<div class="page" id="page-exam2"><div class="exam-wrap" id="ew2"></div></div>
+<div class="page" id="page-exam3"><div class="exam-wrap" id="ew3"></div></div>
 
 <script>
-// ===== SUPABASE =====
-const SUPABASE_URL = 'https://pdoelwybbnrdyitoeqrb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI';
 
-function getDeviceId(){
-  let id = localStorage.getItem('quiz_device_id');
-  if(!id){ id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem('quiz_device_id',id); }
-  return id;
-}
-const DEVICE_ID = getDeviceId();
+const SUPABASE_URL='https://pdoelwybbnrdyitoeqrb.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI';
+function getDeviceId(){let id=localStorage.getItem('quiz_device_id');if(!id){id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);localStorage.setItem('quiz_device_id',id);}return id;}
+const DEVICE_ID=getDeviceId();
+async function sbReq(method,path,body=null){const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};if(body)opts.body=JSON.stringify(body);const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);const text=await res.text();return text?JSON.parse(text):[];}
+async function loadProgress(){setSyncStatus('loading','기록 불러오는 중...');try{const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`);rows.forEach(r=>{if(!state[r.question_index])state[r.question_index]={};parseResult(r.question_index,r.result)});setSyncStatus('ok','✓ 기록 불러옴 · ID: '+DEVICE_ID.slice(0,14)+'...');}catch(e){setSyncStatus('error','DB 연결 실패 — 로컬에서만 저장');}}
+function parseResult(qi,result){if(!state[qi])state[qi]={lastResult:null,wrongCount:0,bookmarked:false};if(result.startsWith('bookmark:')){state[qi].bookmarked=result.includes('true');}else if(result.startsWith('wrong')){const parts=result.split(':');state[qi].lastResult='wrong';state[qi].wrongCount=parts[1]?parseInt(parts[1]):(state[qi].wrongCount||0)+1;}else if(result==='correct'){state[qi].lastResult='correct';}}
+async function saveToDb(qi,resultStr){const local=JSON.parse(localStorage.getItem('quiz_state2')||'{}');local[qi]=resultStr;localStorage.setItem('quiz_state2',JSON.stringify(local));try{await sbReq('POST','quiz_progress',{device_id:DEVICE_ID,question_index:qi,result:resultStr});}catch(e){}}
+function setSyncStatus(type,msg){const bar=document.getElementById('syncBar');bar.className='sync-bar '+(type==='error'?'error':type==='loading'?'loading':'');document.getElementById('syncMsg').textContent=msg;}
 
-async function sbReq(method, path, body=null){
-  const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};
-  if(body) opts.body=JSON.stringify(body);
-  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);
-  const text=await res.text();
-  return text?JSON.parse(text):[];
-}
-
-async function loadProgress(){
-  setSyncStatus('loading','기록 불러오는 중...');
-  try{
-    const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`);
-    rows.forEach(r=>{
-      if(!state[r.question_index]) state[r.question_index]={};
-      // result 파싱: "correct", "wrong-N", "wrong-N:3" (횟수포함)
-      parseResult(r.question_index, r.result);
-    });
-    setSyncStatus('ok','✓ 기록 불러옴 · ID: '+DEVICE_ID.slice(0,14)+'...');
-  }catch(e){ setSyncStatus('error','DB 연결 실패 — 로컬에서만 저장'); }
-}
-
-function parseResult(qi, result){
-  if(!state[qi]) state[qi]={lastResult:null, wrongCount:0, bookmarked:false};
-  if(result.startsWith('bookmark:')){
-    state[qi].bookmarked = result.includes('true');
-  } else if(result.startsWith('wrong')){
-    const parts = result.split(':');
-    state[qi].lastResult = 'wrong';
-    state[qi].wrongCount = parts[1] ? parseInt(parts[1]) : (state[qi].wrongCount||0)+1;
-  } else if(result === 'correct'){
-    state[qi].lastResult = 'correct';
-  }
-}
-
-async function saveToDb(qi, resultStr){
-  const local = JSON.parse(localStorage.getItem('quiz_state2')||'{}');
-  local[qi] = resultStr;
-  localStorage.setItem('quiz_state2', JSON.stringify(local));
-  try{
-    await sbReq('POST','quiz_progress',{device_id:DEVICE_ID, question_index:qi, result:resultStr});
-  }catch(e){ console.warn('DB save failed'); }
-}
-
-function setSyncStatus(type,msg){
-  const bar=document.getElementById('syncBar');
-  bar.className='sync-bar '+(type==='error'?'error':type==='loading'?'loading':'');
-  document.getElementById('syncMsg').textContent=msg;
-}
-
-// ===== QUESTIONS =====
 const QS=[
 /* ===== 해운론 (1-35) ===== */
 {s:'해운',d:'easy',q:'정기선(Liner) 운송의 가장 큰 특징은?',o:['화주와 매 항해마다 개별 계약','정해진 항로·일정·요율로 운항','화주 전용 선박을 배선','운임이 수요공급에 따라 매일 변동'],a:1,e:'정기선은 특정 항로에 정해진 스케줄·공표운임(Tariff)으로 운항합니다. 반대 개념은 부정기선(Tramper)입니다.'},
@@ -502,211 +575,680 @@ const QS=[
 {s:'스마트',d:'hard',q:'해운 디지털 전환에서 "오픈 소스 선박 데이터 표준(NMEA 2000)"의 용도는?',o:['해운 운임 공시 표준','선박 내 항법·엔진·센서 장비 간 디지털 데이터 통신 표준 프로토콜','블록체인 기반 B/L 표준','AI 모델 공유 표준'],a:1,e:'NMEA 2000은 선박 내 GPS·레이더·엔진 제어기·연료계 등 다양한 항전 장비 간 디지털 통신을 위한 표준 프로토콜로, 선박 IoT 데이터 통합의 기초 인프라입니다.'}
 ];
 
-// ===== STATE =====
-// state[qi] = { lastResult: 'correct'|'wrong'|null, wrongCount: N, bookmarked: bool, retrying: bool }
-let state = {};
-let subjFilter='all', diffFilter='all', sortMode='default';
-let order=[...Array(QS.length).keys()];
+// ===== 연습문제 3세트 (PDF에서 추출) =====
+const PRACTICE_SETS = [
+{
+  id:'A', name:'세트 A (연습문제.pdf)',
+  desc:'5과목 × 5문항 · 공식 자격검정 연습문제',
+  qs:[
+    {subj:'국제물류거래',q:'다음 중 인코텀즈 2020 특징이 아닌 것은?',o:['DAT조건을 폐지하고 DPU조건을 신설하였다','물품의 위험 이전과 비용부담의 분기점을 수정하였다','CIP와 CIF의 담보조건에 변화가 있다','CIF와 CIP 모두 최소담보(ICC C) 조건으로 규정하고 있다'],a:3,e:'인코텀즈 2020에서 CIF는 최소담보(ICC C), CIP는 최대담보(ICC A)로 차별화됩니다.'},
+    {subj:'국제물류거래',q:'인코텀즈 2020 FOB 조건의 설명으로 틀린 것은?',o:['지정 선적항에서 본선 적재 시 매도인 의무 완료','위험과 비용의 분기점은 본선의 난간을 통과한 시점','매도인은 선박에 물품의 선적 완료 시 책임이 끝난다','선적 완료 이후 모든 책임과 비용은 매수인 부담'],a:1,e:'인코텀즈 2020 FOB에서 위험·비용 분기점은 본선 갑판에 물건이 적재된 때입니다. 난간 통과는 구 버전의 표현입니다.'},
+    {subj:'국제물류거래',q:'샘플에 따라 상품의 품질을 결정하는 무역계약조건은?',o:['상표매매','견품매매','규격매매','명세서매매'],a:1,e:'견품매매(Sales by Sample)는 사전에 제시된 샘플을 기준으로 품질을 결정하는 방법입니다.'},
+    {subj:'국제물류거래',q:'수출업자의 지사나 대리인이 수입국에서 수입통관 후 물품을 인도할 때 대금을 수령하는 방식은?',o:['서류상환방식','추심방식','신용장방식','현물상환방식'],a:3,e:'현물상환방식(Cash on Delivery)은 수출자의 지사·대리인이 수입국에서 수입통관 후 물품 인도 시 대금을 수령하는 방식으로 귀금속 등 고가품에 활용됩니다.'},
+    {subj:'국제물류거래',q:'무역계약서의 종류와 거리가 먼 것은?',o:['청약서(offer sheet)','신고필증','구매서(purchase note)','판매서(sales note)'],a:1,e:'신고필증은 세관 신고 관련 서류로 무역계약서 종류가 아닙니다. 청약서, 구매서, 판매서는 무역계약 관련 서류입니다.'},
+    {subj:'해운물류론',q:'물류관리의 7R 원칙으로 짝지어지지 않은 것은?',o:['Right Commodity - Right Parts','Right Quantity - Right Quality','Right Time - Right Price','Right Impression - Right Place'],a:0,e:'7R: Right Commodity, Quality, Quantity, Time, Place, Impression, Price입니다. Right Parts는 7R에 포함되지 않습니다.'},
+    {subj:'해운물류론',q:'용도에 따른 항만의 종류가 아닌 것은?',o:['상업항','공업항','연안항','피난항'],a:2,e:'연안항은 입지(위치)에 따른 분류입니다. 용도에 따른 분류는 상업항, 공업항, 피난항 등입니다.'},
+    {subj:'해운물류론',q:'항만운송관련사업의 종류가 아닌 것은?',o:['항만용역업','검량사업','선박연료공급업','선용품공급업'],a:1,e:'항만운송사업법상 항만운송관련사업: 항만용역업, 선용품공급업, 선박연료공급업, 선박수리업 및 컨테이너수리업. 검량사업은 해당하지 않습니다.'},
+    {subj:'해운물류론',q:'컨테이너 종류에 관한 설명으로 알맞은 것은?',o:['드라이 컨테이너: 측면에 통풍용 구멍 설치','냉동냉장 컨테이너: 액체화물용 탱크 형태','오픈탑 컨테이너: 지붕이 개방되어 상부로 하역 가능','플래트랙 컨테이너: 천장·좌우·앞뒤 벽면 모두 제거'],a:2,e:'오픈탑 컨테이너는 지붕이 없어 크레인 등으로 상부 하역이 가능합니다. 플래트랙은 천장과 좌우 옆면만 제거한 형태입니다.'},
+    {subj:'해운물류론',q:'나용선계약에 관한 설명이 알맞지 않은 것은?',o:['선장·해원을 선임 및 해임할 권한','선박 자체만을 일정기간 용선','나용선자는 선박자본비·운항비·항해비 부담','나용선계약은 보통 단기간 계약'],a:3,e:'나용선계약은 선박 금융과 연계되어 통상 장기 계약으로 이루어집니다. 선박자본비는 선주 부담입니다.'},
+    {subj:'ICT요소기술개론',q:'각 시각화 방법에 대한 설명으로 올바르지 않은 것은?',o:['시간 시각화 – 막대그래프, 누적막대그래프, 점그래프, 추세선','분포 시각화 – 히스토그램, 파이차트, 도넛차트, 트리맵','관계 시각화 – 지도 맵핑, 단계구분도, 카토그램','비교 시각화 – 히트맵, 스타차트, 평형좌표계, 다차원 척도법'],a:2,e:'관계 시각화는 산점도, 히트맵, 버블차트 등으로 표현합니다. 지도 맵핑·단계구분도·카토그램은 공간 시각화입니다.'},
+    {subj:'ICT요소기술개론',q:'빅데이터 유형별 설명으로 올바르지 않은 것은?',o:['정형데이터: RDB, 엑셀 등 정해진 형식','반정형데이터: HTML, XML, JSON, 웹로그 등','비정형데이터: 형태 없는 데이터, Crawling·Streaming 수집','멀티정형데이터: 소셜·이미지·오디오·비디오, ETL·FTP·Open API 수집'],a:3,e:'멀티정형 데이터 수집은 크롤링, API, 스트리밍 등을 활용합니다. ETL은 주로 정형데이터 통합에 사용됩니다.'},
+    {subj:'ICT요소기술개론',q:'IPTV, 비디오 컨퍼런싱 등 대규모 호스트에 실시간 데이터를 전송하는 IP 그룹 전송 방식은?',o:['유니캐스트','브로드캐스트','멀티캐스트','애니캐스트'],a:2,e:'멀티캐스트는 IP 주소 범위로 식별되는 그룹 멤버에게 데이터를 전송하는 방식으로 IPTV 등에 활용됩니다.'},
+    {subj:'ICT요소기술개론',q:'인터넷상에서 데이터를 신뢰성 있게 전송하는 연결 지향형 프로토콜은?',o:['Internet Protocol','Transmission Control Protocol','User Datagram Protocol','Internet Control Message Protocol'],a:1,e:'TCP(Transmission Control Protocol)는 연결 지향형으로 데이터 전송의 신뢰성을 보장합니다.'},
+    {subj:'ICT요소기술개론',q:'정보교환장치의 기능이 서로 맞지 않는 것은?',o:['스위치: LAN에서 데이터 전송','라우터: 다양한 네트워크 간 데이터 전송, IP 기반','모뎀: 아날로그 신호를 디지털 신호로 변환','게이트웨이: 송신 데이터를 연결된 모든 장치에 브로드캐스트'],a:3,e:'게이트웨이는 서로 다른 프로토콜 네트워크 간 통신을 연결하는 장치입니다. 브로드캐스트는 허브의 기능입니다.'},
+    {subj:'스마트해상물류기술개론',q:'항만 내 컨테이너 자동 운송(플랫카)과 자동 반출입(오버헤드 셔틀)이 가능한 자동하역시스템은?',o:['AGV','OSS','AS/RS','S/C'],a:1,e:'OSS(Overhead Shuttle System)는 항만 자동화 기술로 광양항에서 성능 검증 중입니다.'},
+    {subj:'스마트해상물류기술개론',q:'PORT-MIS 시스템의 특징으로 볼 수 없는 것은?',o:['인터넷 신고','무료 서비스','웹링크 연계 서비스 제공','모바일 지원'],a:2,e:'PORT-MIS 특징: 인터넷 신고, 무료 서비스, 모바일 지원, 예선신청, EDI 병행. 웹링크 연계 서비스는 PORT-MIS 특징이 아닙니다(PLISM 특징).'},
+    {subj:'스마트해상물류기술개론',q:'해상운송 업무 프로세스에 해당하지 않는 것은?',o:['화물배정','통합화물신고','입항신고','항만시설 사용 신청 및 신고'],a:1,e:'통합화물신고는 항만운송 업무 프로세스입니다. 해상운송 업무: 화물배정, 입항신고, 항만시설 사용 신청, 도예선 신청 등.'},
+    {subj:'스마트해상물류기술개론',q:'통합 PORT-MIS에서 사용할 수 있는 기능으로 알맞은 것은?',o:['해상적하목록취합 서비스','D/O 관리','한중일 컨테이너 정보','통관진행 정보'],a:2,e:'통합 Port-MIS의 물류이동시스템에서 한중일 선박스케줄 정보와 한중일 컨테이너 정보를 제공합니다.'},
+    {subj:'스마트해상물류기술개론',q:'PLISM의 특징으로 알맞지 않은 것은?',o:['최적 기능, 최저 비용 실현','웹 링크 연계 서비스','모바일 앱 제공 및 웹 애플리케이션과 연동','예선 신청 및 지정 서비스 제공'],a:3,e:'예선 신청 및 지정 서비스는 PORT-MIS의 서비스입니다. PLISM은 항만물류정보중계망으로 해상적하목록 취합, 물류 Visibility 등을 제공합니다.'},
+    {subj:'해상물류·정보통신법규',q:'항만법상 항만의 정의로 알맞은 것은?',o:['선박의 출입·화물 하역·보관·해양친수활동 등 시설과 부가가치 창출 시설이 갖추어진 곳','국민경제와 공공의 이해에 밀접하고 주로 외항선이 입출항하는 항만','선박을 위한 연료공급·급수시설 등 선박보급시설','보관창고·복합화물터미널 등 배후유통시설'],a:0,e:'항만법상 "항만"이란 선박의 출입, 사람의 승하선, 화물의 하역·보관·처리, 해양친수활동 등을 위한 시설과 화물의 조립·가공·포장·제조 등 부가가치 창출을 위한 시설이 갖추어진 곳입니다.'},
+    {subj:'해상물류·정보통신법규',q:'항만법상 항만물류의 정의로 알맞은 것은?',o:['항만 이용자를 위한 후생복지시설과 편의제공시설','항만물류통합정보체계','항만시설의 신설·개축·유지보수 등 항만개발사업','항만에서 화물이 공급자부터 수요자에게 전달될 때까지 운송·보관·하역·포장 등 일련의 처리과정'],a:3,e:'항만물류는 항만에서 화물이 공급자로부터 수요자에게 전달될 때까지 이루어지는 운송·보관·하역 및 포장 등 일련의 처리과정입니다.'},
+    {subj:'해상물류·정보통신법규',q:'해운법상 안전관리종사자에 해당하지 않는 것은?',o:['선장','해원','선박운항관리자','해사안전운항자'],a:3,e:'해운법상 안전관리종사자: 선장, 해원, 선박운항관리자. 해사안전운항자는 해당하지 않습니다.'},
+    {subj:'해상물류·정보통신법규',q:'소프트웨어진흥법에서 정의한 내용으로 알맞은 것은? (소프트웨어와 다른 분야 간 기술·서비스 결합으로 새로운 가치를 창출하는 활동)',o:['응용 소프트웨어','소프트웨어 융합','상용 소프트웨어','오픈소스 소프트웨어'],a:1,e:'소프트웨어 융합이란 소프트웨어와 다른 분야 간 기술 또는 서비스의 결합·복합을 통해 새로운 사회적·시장적 가치를 창출하는 창의적이고 혁신적인 활동 및 현상입니다.'},
+    {subj:'해상물류·정보통신법규',q:'소프트웨어사업 과업심의위원회 구성으로 옳지 않은 것은?',o:['위촉된 위원의 임기는 2년으로 하며 연임할 수 있다','소프트웨어 관련 분야를 가르치는 조교수 이상','소프트웨어 기술 분야에서 6년 이상 경력을 갖춘 사람','소프트웨어업무 관련 행정기관의 고위공무원단에 속하는 공무원 또는 이에 상당하는 공공기관 직'],a:3,e:'과업심의위원회는 5급 이상 공무원(고위공무원단 포함) 또는 이에 상당하는 공공기관의 직입니다. 고위공무원단만 해당하는 것이 아닙니다.'}
+  ]
+},
+{
+  id:'B', name:'세트 B (자격검정_샘플문제.pdf)',
+  desc:'5과목 × 5문항 · 공식 자격검정 샘플문제',
+  qs:[
+    {subj:'국제물류거래',q:'수출보험의 기능에 맞지 않는 것은?',o:['무역거래상의 불안성을 제거할 수 있다','금융보완적 기능을 갖는다','무역진흥 정책수단으로서 기능을 갖는다','수출업자에 대한 신용조사 기능을 갖는다'],a:3,e:'수출보험의 기능: 불안성 제거, 금융보완, 무역진흥 정책수단. 신용조사 기능은 수출보험의 기능이 아닙니다.'},
+    {subj:'국제물류거래',q:'INCOTERMS 2020 DAP(도착지인도조건) 설명 중 올바르지 않은 것은?',o:['매도인은 하역하지 않은 상태로 매수인의 임의처분 하에 인도한다','매도인은 자기 비용으로 지정목적지까지 운송계약을 체결해야 한다','매도인은 자기 비용으로 지정목적지의 합의된 지점까지 운송계약을 체결해야 한다','매도인의 자가운송을 허용하지 않고, 수출통관 의무도 없다'],a:3,e:'DAP에서 매도인은 자가운송 허용, 수출통관 의무 있습니다. 인코텀즈 2020에서 매도인 자가운송이 명시적으로 허용됩니다.'},
+    {subj:'국제물류거래',q:'INCOTERMS 2020에서 양륙품질조건에 해당되지 않는 규칙은?',o:['DAP (Delivered At Place)','DPU (Delivered at Place Unloaded)','DDP (Delivered Duty Paid)','FOB (Free On Board)'],a:3,e:'양륙품질조건(Landed Terms)은 목적지 도착 기준 조건으로 DAP, DPU, DDP가 해당합니다. FOB는 선적항 선적 기준입니다.'},
+    {subj:'국제물류거래',q:'수출절차 흐름도에서 6단계에 들어갈 절차는? (1.수출계약체결 2.신용장수령 3.수출승인 4.무역금융이용 5.운송및보험계약체결 6.? 7.무역분쟁및해결)',o:['상품조회 후 신용조회','수출검사 및 수출통관','청약과 승낙','분쟁해결 조건 협의'],a:1,e:'수출절차 6단계는 수출검사 및 수출통관입니다.'},
+    {subj:'국제물류거래',q:'운송서류 원본 미도착 시 수입자가 거래은행으로부터 받아 선사에 제출하는 보증서는?',o:['화물선취보증서','화물인도지시서','선하증권','대도'],a:0,e:'화물선취보증서(L/G, Letter of Guarantee)는 B/L 원본 미도착 시 화물을 먼저 인수하기 위해 은행을 통해 선사에 제출하는 보증서입니다.'},
+    {subj:'해운물류론',q:'컨테이너터미널의 구성요소가 아닌 것은?',o:['컨테이너장치장(Container Yard)','에이프런(Apron)','선회장(Basin)','마샬링야드(Marshalling Yard)'],a:2,e:'선회장(Basin)은 선박이 회전하는 수역으로 터미널 구성요소가 아닙니다. CY, 에이프런, 마샬링야드는 터미널 구성요소입니다.'},
+    {subj:'해운물류론',q:'컨테이너 운송형태에 관한 설명이 잘못 기술된 것은?',o:['CY/CY: 단일 송하인과 단일 수하인','CY/CFS: 단일 송하인과 다수 수하인','CFS/CY: 다수 송하인과 단일 수하인','CFS/CFS: 단일 송하인과 단일 수하인'],a:3,e:'CFS/CFS(LCL/LCL)는 다수의 송하인과 다수의 수하인 간의 거래입니다.'},
+    {subj:'해운물류론',q:'정기선 해운의 특징이 아닌 것은?',o:['정해진 스케줄에 따라 정해진 항구를 규칙적으로 반복 운항','미리 정해진 운임요율표에 의해 운임 결정','선화증권이 운송계약의 역할','단일 선박에 의해 해상운송 서비스가 공급됨'],a:3,e:'정기선은 복수의 선박이 서비스 루프를 이루어 운항합니다. 단일 선박만 운항하는 것이 아닙니다.'},
+    {subj:'해운물류론',q:'용선(charter)의 종류가 아닌 것은?',o:['정기용선','항해용선','나용선','역내용선'],a:3,e:'용선 종류: 정기용선(Time Charter), 항해용선(Voyage Charter), 나용선(Bareboat Charter). 역내용선은 용선 종류가 아닙니다.'},
+    {subj:'해운물류론',q:'선박의 톤수 중 중량톤에 포함되지 않는 것은?',o:['만재배수톤수','경화배수톤수','순톤수','재화중량톤수'],a:2,e:'중량톤: 만재배수톤수, 경화배수톤수, 재화중량톤수. 순톤수(Net Tonnage)는 용적톤으로 중량톤이 아닙니다.'},
+    {subj:'ICT요소기술개론',q:'IEEE802.11 표준을 기반으로 만들어진 무선 네트워크 기술은?',o:['블루투스','Wi-Fi','NFC','ZigBee'],a:1,e:'Wi-Fi는 IEEE 802.11 표준 기반의 무선 LAN 기술로 높은 전송 속도를 제공합니다.'},
+    {subj:'ICT요소기술개론',q:'인터넷 프로토콜에 대한 설명이 올바르지 않은 것은?',o:['네트워크 계층에서 패킷 전송과 라우팅 역할','전송 계층의 TCP/UDP와 함께 데이터 안정성 보장','인터넷에서 데이터를 분할하고 패킷으로 전송','IP 주소 체계는 32비트(IPv4)와 64비트(IPv6)로 구성'],a:3,e:'IPv6는 128비트 주소 체계입니다. 64비트가 아닙니다.'},
+    {subj:'ICT요소기술개론',q:'자동식별시스템으로 선박의 위치·속도·방향 정보를 교환하는 항만 통신 시스템은?',o:['AIS','RDF','VTS','VHF'],a:0,e:'AIS(Automatic Identification System)는 선박이 위치·속도·방향 등을 자동 송수신하는 시스템입니다.'},
+    {subj:'ICT요소기술개론',q:'빅데이터의 3V 특징과 거리가 먼 것은?',o:['Volume','Variety','Velocity','Verifiability'],a:3,e:'빅데이터 3V: Volume(규모), Variety(다양성), Velocity(속도). Verifiability(검증가능성)는 3V에 포함되지 않습니다.'},
+    {subj:'ICT요소기술개론',q:'빅데이터 저장기술과 거리가 먼 것은?',o:['분산파일 시스템','데이터베이스 클러스터','병렬 DBMS','Solid State Drive'],a:3,e:'SSD(Solid State Drive)는 저장 장치이지 빅데이터 저장 기술이 아닙니다. 분산파일시스템, DB 클러스터, 병렬 DBMS가 빅데이터 저장 기술입니다.'},
+    {subj:'스마트해상물류기술개론',q:'Maersk 등 대형선사가 유럽 항만에 제안하여 대기시간 20% 감축을 추진 중인 프로젝트는?',o:['Port Call Optimization','Port Call Hub','Port Call Operation','Port Information Optimization'],a:0,e:'Port Call Optimization은 해상·항만 구역 내 상황 데이터 공유를 통해 선박 대기시간을 줄이는 프로젝트입니다.'},
+    {subj:'스마트해상물류기술개론',q:'컨테이너터미널에서 화물관리·재고관리 등을 지원하는 정보시스템은?',o:['VTS','TOS','CTSS','GICOMS'],a:1,e:'TOS(Terminal Operating System)는 컨테이너터미널의 화물관리·재고관리·하역 작업 전반을 지원하는 핵심 시스템입니다.'},
+    {subj:'스마트해상물류기술개론',q:'우리나라 항만운영정보시스템(PORT-MIS)의 특징에 해당하지 않는 것은?',o:['인터넷 신고','유료서비스','모바일 서비스 지원','예선 신청 및 지정서비스 제공'],a:1,e:'PORT-MIS는 무료 서비스입니다. 유료서비스는 PORT-MIS의 특징이 아닙니다.'},
+    {subj:'스마트해상물류기술개론',q:'PLISM의 주요 B2B 서비스에 해당하지 않는 것은?',o:['선사 서비스','철도운송 지원 서비스','터미널 서비스','전자세금 계산서'],a:3,e:'전자세금 계산서는 PLISM의 B2B 서비스가 아닙니다. 선사·터미널·철도운송 지원 서비스가 B2B 서비스에 해당합니다.'},
+    {subj:'스마트해상물류기술개론',q:'외항화물반출입정보 데이터구조를 구성하는 항목에 해당하지 않는 것은?',o:['화물품목코드','반입반출구분','운임톤','양하화물톤'],a:3,e:'양하화물톤은 외항화물반출입정보 데이터구조 항목이 아닙니다. 화물품목코드, 반입반출구분, 운임톤 등이 포함됩니다.'},
+    {subj:'해상물류·정보통신법규',q:'해상여객·화물운송사업자 간 또는 외국인과 선박의 전부나 일부를 용선하거나 대선하는 것은?',o:['해상화물운송사업','용대선','용선업','해운중개'],a:1,e:'용대선이란 해상운송사업자 간 또는 외국인과 선박을 용선하거나 대선하는 것을 말합니다.'},
+    {subj:'해상물류·정보통신법규',q:'항만법상 항만을 정의한 내용으로 올바른 것은?',o:['선박의 출입·화물 하역·보관·해양친수활동 시설과 부가가치 창출 시설이 갖추어진 곳','국민경제와 공공의 이해에 밀접하고 주로 외항선이 입출항하는 항만','항만의 수상구역과 육상구역','주로 국내항 간을 운항하는 선박이 입출항하는 항만'],a:0,e:'항만은 선박의 출입, 화물 하역·보관, 해양친수활동 등 시설과 부가가치 창출 시설이 갖추어진 곳입니다.'},
+    {subj:'해상물류·정보통신법규',q:'소프트웨어사업 하도급 한도로 올바른 것은? (물품 구매 금액 제외 SW사업 금액의 ?를 초과하여 하도급 불가)',o:['100분의 30','100분의 40','100분의 50','100분의 60'],a:2,e:'소프트웨어사업자는 물품 구매 금액을 제외한 소프트웨어사업 금액의 100분의 50을 초과하여 하도급할 수 없습니다.'},
+    {subj:'해상물류·정보통신법규',q:'소프트웨어진흥법상 올바른 정의는?',o:['"소프트웨어"란 명령·제어 등 지시·명령의 집합과 관련 자료','"소프트웨어사업"이란 SW 개발·유통·운영 등 서비스를 제공하는 산업','"소프트웨어산업"이란 SW산업 관련 경제활동','"소프트웨어활동"이란 SW를 개발하고 유지·관리하는 방법·절차·활동'],a:0,e:'"소프트웨어"란 컴퓨터·통신 등 장비에 명령·제어·입력·처리·저장·출력·상호작용이 가능하게 하는 지시·명령의 집합과 관련 자료를 말합니다.'},
+    {subj:'해상물류·정보통신법규',q:'소프트웨어진흥법의 목적에 해당하지 않는 것은?',o:['국민생활의 향상','국가경쟁력의 확보','정보통신망 이용 촉진','국민 경제의 건전하고 지속적인 발전'],a:2,e:'소프트웨어진흥법의 목적: 국민생활의 향상, 국가경쟁력 확보, 국민경제의 건전하고 지속적인 발전. 정보통신망 이용 촉진은 정보통신망법의 목적입니다.'}
+  ]
+},
+{
+  id:'C', name:'세트 C (샘플문제_및_해설.pdf)',
+  desc:'5과목 × 5문항 · 해설 포함 샘플문제',
+  qs:[
+    {subj:'국제물류거래',q:'인코텀즈에 대한 설명으로 옳지 않은 것은?',o:['국제상업회의소에서 1936년에 최초 제정','인코텀즈는 국제법과 같은 강제성을 지니고 있다','인코텀즈는 거래당사자의 합의에 따라 자율적으로 적용된다','무역계약 시 인코텀즈 채택 내용을 계약서에 포함하는 것이 합리적이다'],a:1,e:'인코텀즈는 강제성이 없는 임의 규칙입니다. 계약 당사자가 합의하여 적용하는 자율 규칙입니다.'},
+    {subj:'국제물류거래',q:'수출입물류 흐름에 대한 설명으로 옳지 않은 것은?',o:['무역계약서 작성 시 상사중재 조항 삽입이 필요하다','선하증권은 단순한 선적 증명 서류로 소유권 관련 역할은 하지 않는다','신용장 방식일 경우 모든 서류는 신용장 내용과 엄밀하게 일치해야 한다','수출보험 등을 활용하는 것이 바람직하다'],a:1,e:'선하증권은 소유권을 이전할 수 있는 권리증권(Document of Title)입니다. 단순 선적 증명 서류가 아닙니다.'},
+    {subj:'국제물류거래',q:'인코텀즈 2020 CIF에 대한 설명으로 옳지 않은 것은?',o:['CFR조건에 매도인의 해상보험 의무가 추가된 것','매도인은 운송계약과 보험계약을 체결하고 운임·보험료를 지급','보험금액은 계약금액의 110%','보험조건은 협회적하약관 B로 규정되어 있다'],a:3,e:'인코텀즈 2020 CIF의 보험조건은 ICC(C) 최소담보입니다. ICC(B)가 아닙니다.'},
+    {subj:'국제물류거래',q:'해상운임 산정의 기초가 되는 서류는?',o:['중량 및 용적증명서','해상운송서류','복합운송서류','상업송장'],a:0,e:'해상운임은 중량(Weight)과 용적(Measurement) 중 높은 쪽을 기준으로 산정하며, 중량 및 용적증명서가 기초가 됩니다.'},
+    {subj:'국제물류거래',q:'수입화물 통관 절차 중에서 가장 먼저 수행하는 단계는?',o:['물품을 보세구역에 반입','관세액 결정','수입검사','수출신고'],a:0,e:'수입통관 첫 단계는 물품을 보세구역에 반입하는 것입니다. 이후 수입신고 → 심사·검사 → 관세 납부 → 신고수리 순으로 진행됩니다.'},
+    {subj:'해운물류론',q:'컨테이너 코드 중 장비식별 기호가 아닌 것은?',o:['U: 컨테이너','J: 분리 가능한 컨테이너 관련 장비','G: 친환경 장비','Z: 트레일러 또는 섀시'],a:2,e:'ISO 6346의 장비식별 기호: U(컨테이너), J(분리가능 관련장비), Z(트레일러·섀시). G는 친환경이 아닌 다른 의미의 코드입니다.'},
+    {subj:'해운물류론',q:'컨테이너 하역 방식이 아닌 것은?',o:['LO/LO 방식','TO/TO 방식','RO/RO 방식','FO/FO 방식'],a:1,e:'컨테이너 하역방식: LO/LO(크레인 상하역), RO/RO(경사로 자력 이동), FO/FO(부양 이동). TO/TO는 실제 하역 방식이 아닙니다.'},
+    {subj:'해운물류론',q:'컨테이너 운송형태 중 FCL 화물에는 적용되지 않는 방식은?',o:['CY/CFS','CFS/CY','CFS/CFS','CY/CY'],a:2,e:'CFS/CFS는 LCL/LCL 방식으로 FCL 화물에는 적용되지 않습니다. FCL 관련 방식: CY/CY, CY/CFS, CFS/CY.'},
+    {subj:'해운물류론',q:'다음 컨테이너 코드 "2 4 R1"의 의미는?',o:['20ft·8.6ft·일반 컨테이너','40ft·9.6ft·오픈탑 컨테이너','20ft·8.6ft·냉동냉장 컨테이너','40ft·9.6ft·탱크 컨테이너'],a:2,e:'ISO 컨테이너 코드: 길이(2=20ft), 높이(4=8.6ft), 특성(R1=냉동냉장). 24R1은 20ft 표준높이 냉동냉장 컨테이너입니다.'},
+    {subj:'해운물류론',q:'정기용선 계약서의 주요 사항으로 짝지어지지 않은 것은?',o:['선박의 인도(Delivery)와 반선(Redelivery), 재용선 권리','선박의 명세, 안전한 항구와 부두','항행 구역(Trading Limits), 정박 기간(Laytime)','용선료, 용선료 지급 중지(Off-Hire)'],a:2,e:'정박 기간(Laytime)은 항해용선 계약의 주요 사항입니다. 정기용선 계약서에는 항행 구역과 용선료 지급 중지(Off-Hire) 등이 포함됩니다.'},
+    {subj:'ICT요소기술개론',q:'VTS(Vessel Traffic Service)에 대한 설명으로 옳은 것은?',o:['센서와 장비를 네트워크로 연결하여 데이터 수집·모니터링·제어하는 기술','항구 내의 시설물 및 선박의 상황을 모니터링하는 시스템','자동식별시스템으로 선박의 위치·속도·방향 정보를 교환하는 시스템','선박의 운항 상황·위치·해양환경을 모니터링하고 충돌 예방·안전항해를 돕는 정보 제공 시스템'],a:3,e:'VTS는 선박의 운항 상황과 위치, 해양 환경 등을 모니터링하고 선박 간 충돌을 예방하며 안전한 항해를 위한 정보를 제공합니다.'},
+    {subj:'ICT요소기술개론',q:'OSI 7계층 모델에서 코드 간의 번역, 암호화 등이 수행되는 계층은?',o:['2계층','3계층','5계층','6계층'],a:3,e:'OSI 6계층은 표현 계층(Presentation Layer)으로 데이터 형식 변환, 암호화·복호화, 압축 등을 담당합니다.'},
+    {subj:'ICT요소기술개론',q:'빅데이터에 대한 설명으로 옳지 않은 것은?',o:['빅데이터는 비정형 데이터에 초점을 맞춘다','수집된 빅데이터는 단기간 활용에 초점을 맞추고 있다','기존 시스템으로는 분석할 수 없는 대용량 데이터 집합','데이터 분석을 통해 가치를 창출하는 것에 의의가 있다'],a:1,e:'빅데이터는 단기가 아닌 장기적 활용에 초점을 맞춥니다. 분석·인사이트 도출을 통한 가치 창출이 목적입니다.'},
+    {subj:'ICT요소기술개론',q:'고정된 테이블 스키마가 필요 없고 조인 연산 불가, 수평적 확장 가능한 DBMS는?',o:['병렬 DBMS','데이터베이스 클러스터','NoSQL','클라우드 파일 저장 시스템'],a:2,e:'NoSQL은 고정 스키마 없이 유연한 데이터 구조를 지원하고, 수평 확장이 가능한 분산 데이터베이스 시스템입니다.'},
+    {subj:'ICT요소기술개론',q:'"데이터를 분석해서 나온 일정한 패턴을 신뢰할 수 있다"는 빅데이터 특성은?',o:['진실성(Veracity)','다양성(Variety)','정확성(Validity)','가치(Value)'],a:0,e:'Veracity(진실성)는 빅데이터의 신뢰성 관련 특성으로, 분석 결과 패턴의 신뢰가능성을 의미합니다.'},
+    {subj:'스마트해상물류기술개론',q:'"IoT로 설비를 연결하여 정보를 수집·분석하고 최적의 의사결정을 지원한다"는 스마트 해상물류 특징은?',o:['자동화','지능화','최적화','정보화'],a:2,e:'최적화는 IoT·빅데이터로 설비 운용 정보를 수집·분석하여 최적의 계획을 수립하고 의사결정을 지원하는 특징입니다.'},
+    {subj:'스마트해상물류기술개론',q:'"해상교통 안전·효율 증진을 위해 선박 위치를 탐지하고 선박 동정을 관찰하며 안전 정보를 제공"하는 것은?',o:['GICOMS','VTS','TOS','GNSS'],a:1,e:'VTS(Vessel Traffic Service)는 선박의 위치를 탐지하고 동정을 관찰하며 선박 안전 정보를 제공하는 해상교통관제 시스템입니다.'},
+    {subj:'스마트해상물류기술개론',q:'반입/장치 업무에서 선사가 터미널에 COLDLT와 COPINO 정보를 송신하고, 작업 완료 후 터미널이 선사에 보내는 것은?',o:['컨테이너 하역결과서','본선적부도','컨테이너 선적예정목록','선적예정물량 통보서'],a:2,e:'COLDLT는 컨테이너 선적예정목록입니다. 반입/장치 업무 흐름: 선사→터미널(COLDLT+COPINO) → 터미널→선사(CODECO).'},
+    {subj:'스마트해상물류기술개론',q:'PLISM에서 제공하는 정보가 아닌 것은?',o:['실시간 화물·선적 확인 정보 등 물류 Visibility','통합화물진행정보(적하목록·통관 등의 진행 정보)','컨테이너별 이동 현황 및 반출/반입지 연계 정보','항만시설 사용 신청 및 신고'],a:3,e:'항만시설 사용 신청 및 신고는 PORT-MIS 서비스입니다. PLISM은 해상적하목록 취합, 화물 Visibility, 컨테이너 이동 현황 등을 제공합니다.'},
+    {subj:'스마트해상물류기술개론',q:'"해상운송에서 화물운송 위치 및 컨테이너 선적·양하·이적 지시와 운송 내용 정보를 담고 있는" EDI 문서는?',o:['COPINO','COLDLT','CODECO','MOVINS'],a:3,e:'MOVINS(Movement Instruction)는 선적 대상 컨테이너의 세부 사항과 선적·양하·이적 관련 지시·운송 내용을 담은 EDI 문서입니다.'},
+    {subj:'해상물류·정보통신법규',q:'"물류시설에 위해물품 반입 방지 및 불법행위 사전 방지 조치"를 일컫는 용어는?',o:['물류보안','물류안보','물류정보화조치','물류방어'],a:0,e:'물류보안은 물류정책기본법상 공항·항만·물류시설에 위해물품 은닉·반입 및 불법행위를 사전에 방지하기 위한 조치입니다.'},
+    {subj:'해상물류·정보통신법규',q:'해운법상 안전관리종사자에 해당하지 않는 대상은?',o:['도선선 운항자','선장','해원','선박운항관리자'],a:0,e:'해운법상 안전관리종사자: 선장, 해원, 선박운항관리자. 도선선 운항자는 해당하지 않습니다.'},
+    {subj:'해상물류·정보통신법규',q:'항만공사 대행에 대한 설명으로 옳은 것은?',o:['국토교통부장관이 국가소유 선박의 항만개발사업 대행 가능','해양수산부장관이 군함 항만시설 국토교통부장관에게 대행 가능','비관리청이 민간에 개발 비용 부담을 강제할 수 있다','관리청이 비관리청 비용으로 항만개발사업 대행 가능'],a:3,e:'관리청은 비관리청과 협의하여 허가한 비관리청의 항만개발사업을 그 비관리청의 비용 부담으로 대행할 수 있습니다.'},
+    {subj:'해상물류·정보통신법규',q:'정보통신망의 정의에서 ( )에 들어갈 용어로 알맞지 않은 것은?',o:['수집·가공','저장·검색','송신·수신','분석·과금'],a:3,e:'"정보통신망"이란 전기통신설비를 이용하거나 컴퓨터 기술을 활용하여 정보를 수집·가공, 저장·검색, 송신·수신하는 정보통신체제. 분석·과금은 정의에 포함되지 않습니다.'},
+    {subj:'해상물류·정보통신법규',q:'소프트웨어 사업 하도급 한도는? (물품 구매 금액 제외 SW사업 금액의 100분의 ?)',o:['10','30','50','70'],a:2,e:'소프트웨어사업 하도급 한도는 물품 구매 금액을 제외한 소프트웨어 사업 금액의 100분의 50입니다.'}
+  ]
+}
+];
 
-function getS(qi){
-  if(!state[qi]) state[qi]={lastResult:null,wrongCount:0,bookmarked:false,retrying:false};
+// ===== 모의고사 1회 (5과목 × 20문항 = 100문항) =====
+const MOCK_EXAM = {
+  id:1, title:'모의고사 1회',
+  subjects:['1과목 국제물류거래','2과목 해운물류론','3과목 ICT요소기술개론','4과목 스마트해상물류기술개론','5과목 해상물류·정보통신법규'],
+  qs:[
+    {s:'1과목',q:'인코텀즈 2020에서 DAT 조건을 대체하여 신설된 조건은?',o:['DAP','DPU','DDP','FCA'],a:1,e:'인코텀즈 2020에서 DAT(Delivered At Terminal)가 DPU(Delivered at Place Unloaded)로 변경됐습니다. DPU는 지정 목적지에서 하역 후 인도합니다.'},
+    {s:'1과목',q:'FOB 조건에서 위험과 비용의 분기점은?',o:['화물이 컨테이너에 적입된 때','지정 선적항에서 본선에 적재된 때','수출 통관이 완료된 때','운송인에게 화물이 인도된 때'],a:1,e:'FOB에서 위험·비용 분기점은 지정 선적항에서 본선 갑판에 화물이 적재된 때입니다.'},
+    {s:'1과목',q:'인코텀즈 2020에서 CIF 조건의 보험 담보 조건은?',o:['ICC(A) 최대담보','ICC(B) 중간담보','ICC(C) 최소담보','보험 의무 없음'],a:2,e:'인코텀즈 2020에서 CIF는 ICC(C) 최소담보, CIP는 ICC(A) 최대담보로 차별화됩니다.'},
+    {s:'1과목',q:'신용장(L/C)을 개설하는 주체는?',o:['수출상(Beneficiary)','수출상 거래은행','수입상(Applicant)의 거래은행','운송인'],a:2,e:'신용장은 수입상(Applicant)의 거래은행(Opening Bank)이 수출상에게 발행하는 지급 보증서입니다.'},
+    {s:'1과목',q:'선하증권(B/L)의 3대 기능이 아닌 것은?',o:['화물 수령증','운송계약 증거','권리증권(유통가능)','관세 납부 영수증'],a:3,e:'B/L의 3대 기능: 화물 수령증, 운송계약 증거, 권리증권(Document of Title). 관세 납부 영수증은 B/L 기능이 아닙니다.'},
+    {s:'1과목',q:'D/A(Documents against Acceptance)의 특징은?',o:['서류와 동시에 대금 지급','환어음 인수 후 서류 수령하고 만기일에 결제하는 외상 방식','신용장이 반드시 필요','현물 교환 방식'],a:1,e:'D/A는 기한부 환어음을 인수(Accept)하면 서류를 먼저 받고 만기일에 대금을 지급하는 외상 거래입니다.'},
+    {s:'1과목',q:'수출 VGM(Verified Gross Mass) 제출의 법적 근거는?',o:['ICC 규칙','SOLAS 협약','UCP 600','CISG 협약'],a:1,e:'VGM은 2016년부터 SOLAS 협약에 의거한 의무 사항으로, 실제 컨테이너 총중량을 선사와 터미널에 제출해야 합니다.'},
+    {s:'1과목',q:'HS코드(Harmonized System Code)의 역할은?',o:['화물 배송 추적 번호','전 세계 공통 상품 분류 코드로 관세율 결정의 기준','선박 식별 번호','포장 바코드'],a:1,e:'HS코드는 WCO가 제정한 국제 상품 분류 코드(6자리)로 관세율 결정과 무역 통계의 기준입니다.'},
+    {s:'1과목',q:'UCP 600에서 은행의 서류 검토 기간은?',o:['3 은행영업일','5 은행영업일','7 역일','14 역일'],a:1,e:'UCP 600 제14조: 은행은 서류 접수 후 최대 5 은행영업일 이내에 수리 또는 거절을 통보해야 합니다.'},
+    {s:'1과목',q:'원산지증명서(C/O)가 필요한 주요 이유는?',o:['화물 중량 증명','FTA 특혜 관세 적용 등을 위한 화물 생산국 공식 증명','선박 항로 증명','포장 상태 확인'],a:1,e:'원산지증명서는 화물이 특정 국가에서 생산됐음을 증명하여 FTA 특혜 관세 적용에 활용됩니다.'},
+    {s:'1과목',q:'Surrender B/L이 활용되는 상황은?',o:['B/L 분실 시 재발행','선적지에서 원본 B/L을 반환하여 목적지에서 원본 없이 화물 인수 가능','화물 파손 시','신용장 결제 시 필수'],a:1,e:'Surrender B/L은 근거리 항로에서 선적지에서 원본을 반환하여 목적지에서 원본 제시 없이 화물을 인수하는 방식입니다.'},
+    {s:'1과목',q:'무역에서 Back-to-Back L/C란?',o:['취소 불가능 신용장','원신용장을 담보로 중개상이 공급자에게 개설하는 종속 신용장','일람불 신용장','기한부 신용장'],a:1,e:'Back-to-Back L/C는 중개 무역에서 중개상이 원신용장(Master L/C)을 담보로 실제 공급자에게 개설해 주는 종속 신용장입니다.'},
+    {s:'1과목',q:'수출신고필증의 역할은?',o:['세관에서 수출 신고를 수리했음을 확인하는 서류','상업 송장','포장 명세서','선하증권'],a:0,e:'수출신고필증은 세관이 수출 신고를 수리했음을 확인하는 공식 서류로 관세 환급·외환 수취 등에 활용됩니다.'},
+    {s:'1과목',q:'Proforma Invoice(견적송장)의 주요 용도는?',o:['최종 대금 청구 문서','거래 조건 확인·신용장 개설·수입허가 신청 등에 활용되는 사전 견적 서류','세관 신고서','선하증권 대체 문서'],a:1,e:'Proforma Invoice는 정식 계약 전 매도인이 발행하는 견적 송장으로 신용장 개설, 수입 허가 신청 등에 활용됩니다.'},
+    {s:'1과목',q:'FTA 원산지 규정(Rules of Origin)의 역할은?',o:['운임 계산 기준','협정국 원산지 상품에만 특혜 관세를 부여하기 위한 원산지 판정 기준','포장 방법 결정','선적 경로 결정'],a:1,e:'원산지 규정은 어느 국가에서 생산된 제품인가를 판정하는 기준으로 FTA 특혜 관세의 부당 적용을 방지하는 역할도 합니다.'},
+    {s:'1과목',q:'해상화물운송장(Sea Waybill)이 B/L과 다른 가장 큰 차이점은?',o:['운송 계약 증거 기능 없음','유통 불가능(Non-negotiable)로 원본 제시 없이 화물 수령 가능','보험 증권 역할','항공 화물에만 사용'],a:1,e:'Sea Waybill은 권리증권이 아닌 비유통 서류로, 수하인이 원본 제출 없이 신분 확인만으로 화물을 수령할 수 있습니다.'},
+    {s:'1과목',q:'수출입 거래에서 추심방식(Collection)의 특징은?',o:['은행이 대금 지급 보증','은행은 서류 전달 역할만 하며 지급 보증 없음','신용장이 반드시 필요','화물 도착 전 결제'],a:1,e:'추심방식(D/P·D/A)에서 은행은 서류 전달 역할만 하며 대금 지급을 보증하지 않습니다.'},
+    {s:'1과목',q:'CISG(국제물품매매계약 유엔협약)의 적용 범위는?',o:['소비자 구매계약도 적용','체약국 상인 간 국제 물품 매매계약에 적용','서비스 계약에도 적용','부동산 매매에 적용'],a:1,e:'CISG는 체약국 사업자 간 국제 물품 매매계약에 적용됩니다. 소비자·서비스·유가증권 매매는 제외됩니다.'},
+    {s:'1과목',q:'관세환급(Drawback)의 의미는?',o:['수출 시 부과되는 추가 관세','수입 원재료에 납부한 관세를 수출 후 환급받는 제도','수입 금지 품목 예외 허가','관세 납부 유예'],a:1,e:'관세환급(Drawback)은 수입 원재료에 납부한 관세를 이를 사용한 제품 수출 시 환급받는 수출 경쟁력 지원 제도입니다.'},
+    {s:'1과목',q:'Pack List(포장명세서)에 반드시 기재해야 하는 항목이 아닌 것은?',o:['화물 품목명·모델','각 박스별 수량·중량·용적','HS코드','박스 번호 및 포장 방법'],a:2,e:'Pack List에는 품목명·수량·포장방법·박스별 중량·용적 등을 기재합니다. HS코드는 인보이스나 신고서에 기재됩니다.'},
+    {s:'2과목',q:'정기선(Liner) 운송의 가장 큰 특징은?',o:['화주와 매 항해마다 개별 계약','정해진 항로·일정·요율로 운항','화주 전용 선박 배선','운임이 수요공급에 따라 매일 변동'],a:1,e:'정기선은 특정 항로에 정해진 스케줄과 공표운임(Tariff)으로 운항합니다.'},
+    {s:'2과목',q:'항해용선(Voyage Charter)의 특징은?',o:['일정 기간 선박을 빌리는 계약','특정 항해에 대해 화물 운송을 약정하는 계약','선박 자체만 빌리는 계약','항만 사용권 계약'],a:1,e:'항해용선은 특정 항구 간 특정 화물의 운송을 약정하는 계약으로 선주가 선원·연료 등 운항 비용을 부담합니다.'},
+    {s:'2과목',q:'기간용선(Time Charter)에서 용선자가 부담하는 주요 비용은?',o:['선박자본비','선원비·보험료','연료비·항만비','선박 수리비'],a:2,e:'기간용선에서 용선자는 연료비와 항만비 등 운항 비용을 부담하고, 선주는 선원비·보험·수선비 등을 부담합니다.'},
+    {s:'2과목',q:'나용선(Bareboat Charter)의 핵심 특징은?',o:['화물 운송만 위탁','선박의 점유·관리·운항을 용선자가 완전히 담당','선원 포함 임대','단기간 계약만 가능'],a:1,e:'나용선은 선박 자체만 임대하는 계약으로 용선자가 선원 고용·보험·운항 등 모든 책임을 집니다.'},
+    {s:'2과목',q:'Laytime(정박기간)의 의미는?',o:['선박의 총 운항 기간','하역 작업을 위해 무상으로 허용된 정박 시간','항만 임대 계약 기간','용선 계약 전체 기간'],a:1,e:'Laytime은 용선 계약에서 선적 또는 양하를 위해 무상으로 허용된 정박 시간입니다. 초과 시 Demurrage가 발생합니다.'},
+    {s:'2과목',q:'체선료(Demurrage)의 의미는?',o:['화물 손상 배상금','Laytime을 초과한 정박에 대해 화주가 선주에게 지급하는 비용','조기 출항 시 선주가 화주에게 환급하는 금액','항만 사용료'],a:1,e:'Demurrage는 Laytime을 초과하여 선박이 항구에 정박할 때 화주가 선주에게 지급하는 체선료입니다.'},
+    {s:'2과목',q:'FCL(Full Container Load) 화물이란?',o:['한 화주의 화물이 컨테이너 1개 이상을 채우는 경우','여러 화주의 화물을 혼재하는 경우','냉동 화물 전용','팔레트 단위 운송'],a:0,e:'FCL은 단일 화주의 화물이 컨테이너 1개 이상을 채우는 형태입니다. 반대는 LCL(Less than Container Load)입니다.'},
+    {s:'2과목',q:'해운 Alliance(얼라이언스)의 주요 목적은?',o:['운임 담합','선박·항로 공유로 비용 절감 및 서비스 범위 확대','정부 보조금 수령','선박 공동 건조'],a:1,e:'해운 얼라이언스는 선복 교환과 항로 공동 운영으로 비용을 줄이고 기항지와 서비스 빈도를 늘리는 협력체입니다.'},
+    {s:'2과목',q:'BAF(Bunker Adjustment Factor)란?',o:['항만 혼잡 할증료','선박 연료비 변동을 반영하는 유류 할증료','통화 변동 할증료','성수기 할증료'],a:1,e:'BAF(유류할증료)는 국제 연료유 가격 변동에 따라 기본 운임에 추가로 부과되는 할증료입니다.'},
+    {s:'2과목',q:'선박의 DWT(재화중량톤수)의 정의는?',o:['선박 자체 무게','선박이 안전하게 운반할 수 있는 최대 화물+연료+선원+물 등의 총 중량','선박 전체 내부 용적','항만 입출항 기준 톤수'],a:1,e:'DWT(Deadweight Tonnage)는 선박이 안전하게 탑재할 수 있는 최대 중량으로 선박의 실질적 운송 능력을 나타냅니다.'},
+    {s:'2과목',q:'THC(Terminal Handling Charge)란?',o:['선박 연료비','터미널에서 컨테이너 처리에 드는 비용','세관 검사 수수료','선박 도선 요금'],a:1,e:'THC는 컨테이너 터미널이 화주에게 청구하는 터미널 내 하역·이동·보관 처리 비용입니다.'},
+    {s:'2과목',q:'환적(Transshipment)의 의미는?',o:['직항 운송','출발항과 목적항 사이 중간 허브항에서 다른 선박으로 옮겨 타는 것','컨테이너를 해체하는 것','화물을 분할 선적하는 것'],a:1,e:'환적은 화물이 중간 허브항에서 다른 선박으로 옮겨 타는 운송 방식입니다. 부산항은 동북아 주요 환적 허브입니다.'},
+    {s:'2과목',q:'Baltic Dry Index(BDI)는 무엇을 나타내는가?',o:['컨테이너 운임 지수','건화물(Dry Bulk) 해상 운임 종합 지수','유조선 운임 지수','LNG 운반선 운임 지수'],a:1,e:'BDI는 Baltic Exchange가 발표하는 건화물선(철광석·석탄·곡물 등) 운임 지수로 세계 경기의 선행지표입니다.'},
+    {s:'2과목',q:'Blank Sailing이란?',o:['빈 선박 운항','선사나 얼라이언스가 특정 항차를 결항하는 것','화물 없이 시험 운항','선원 교대 항차'],a:1,e:'Blank Sailing은 수요 감소나 선복 조정 목적으로 선사·얼라이언스가 사전 공지 후 특정 항차를 결항하는 것입니다.'},
+    {s:'2과목',q:'PSS(Peak Season Surcharge)가 부과되는 이유는?',o:['비수기 선복 보전','성수기 화물 수요 급증으로 선복 부족 시 임시 부과하는 할증료','연중 고정 부과','항만 혼잡 시만 부과'],a:1,e:'PSS는 미국·유럽 수출 성수기에 화물 수요가 급증하여 선복이 부족할 때 선사들이 임시 부과하는 성수기 할증료입니다.'},
+    {s:'2과목',q:'P&I(Protection & Indemnity) 보험의 주요 담보 내용은?',o:['선체 손해 담보','선박 운항 관련 법적 배상책임(선원 사상·화물 손해·유류 오염 등) 담보','운임 손실','선박 건조 리스크'],a:1,e:'P&I 보험은 선사의 제3자 배상책임을 담보하는 보험으로 선원 사상, 화물 손해 배상, 충돌 책임, 유류 오염 손해 등을 커버합니다.'},
+    {s:'2과목',q:'Dead Freight(데드프레이트)란?',o:['선박 파손 시 지급 보상','약정한 화물량을 선적하지 못했을 때 화주가 지급하는 미선적 운임','선박 지연 부과 요금','빈 선박 운항 비용'],a:1,e:'Dead Freight는 화주가 약정한 화물량보다 적게 선적하여 남은 선복에 대해 선주에게 지급하는 운임입니다.'},
+    {s:'2과목',q:'컨테이너 운송 CFS(Container Freight Station)의 주요 기능은?',o:['컨테이너 수리 시설','LCL 화물의 혼재 및 분류 작업 수행 시설','세관 검사 시설','선박 연료 보급 시설'],a:1,e:'CFS는 LCL 화물을 여러 화주에서 모아 컨테이너에 혼재(Consolidation)하거나, 수입 LCL 화물을 화주별로 분류(Devanning)하는 시설입니다.'},
+    {s:'2과목',q:'해상보험 ICC(A)·ICC(B)·ICC(C) 중 담보 범위가 가장 넓은 것은?',o:['ICC(C)','ICC(B)','ICC(A)','모두 동일'],a:2,e:'ICC(A)는 면책사항 제외 모든 위험을 담보하는 최대 담보 조건이고, ICC(C)는 열거된 위험만 담보하는 최소 조건입니다.'},
+    {s:'2과목',q:'Hague-Visby Rules에서 선사의 책임 한도는?',o:['화물 총 가액의 10%','포장당 666.67 SDR 또는 kg당 2 SDR 중 높은 금액','B/L 기재 가액 전액','선박 보험금액 기준'],a:1,e:'Hague-Visby Rules에서 선사 책임은 포장당 666.67 SDR 또는 kg당 2 SDR 중 높은 금액으로 제한됩니다.'},
+    {s:'3과목',q:'EDI(Electronic Data Interchange)의 주요 기능은?',o:['종이 서류의 표준화된 전자 교환','선박 자동화','항만 크레인 제어','위성 위치추적'],a:0,e:'EDI는 표준화된 전자 형식으로 기업 간 상거래 문서(주문서·송장·선하증권 등)를 자동으로 교환하는 시스템입니다.'},
+    {s:'3과목',q:'RFID의 물류 주요 활용 용도는?',o:['선박 엔진 제어','화물·자산 비접촉 자동 인식 및 추적','항만 세관 심사','운임 자동 계산'],a:1,e:'RFID는 전파를 이용해 태그 정보를 비접촉으로 읽어 물류센터 입출고, 컨테이너 추적, 재고 관리에 활용합니다.'},
+    {s:'3과목',q:'빅데이터의 3V 특성은?',o:['속도·정확도·가시성','Volume·Velocity·Variety','규모·가치·정확도','다양성·가시성·가치'],a:1,e:'빅데이터 3V: Volume(규모), Velocity(속도), Variety(다양성). 이후 Veracity, Value가 추가된 5V로 확장됩니다.'},
+    {s:'3과목',q:'IoT(Internet of Things)의 핵심 개념은?',o:['인터넷으로만 연결된 PC 네트워크','물리적 사물에 센서를 부착해 네트워크로 연결·데이터 수집','로봇끼리만 통신하는 시스템','클라우드 데이터 저장'],a:1,e:'IoT는 센서가 부착된 물리적 사물이 인터넷을 통해 서로 데이터를 송수신하는 개념으로 화물 위치·온도 모니터링 등에 활용됩니다.'},
+    {s:'3과목',q:'블록체인의 물류 적용 사례로 가장 적합한 것은?',o:['야드 크레인 자동화','선박 엔진 출력 최적화','수출입 서류의 위·변조 방지 및 실시간 추적','물류센터 조명 제어'],a:2,e:'블록체인은 분산 원장으로 데이터 위·변조를 어렵게 하여 선하증권·원산지증명·통관 서류의 진위 확인에 활용됩니다.'},
+    {s:'3과목',q:'WMS(Warehouse Management System)의 핵심 기능은?',o:['선박 운항 관리','창고 내 입출고·재고·작업 통합 관리','해상 운임 협상','세관 신고 자동화'],a:1,e:'WMS는 창고의 입고·보관·피킹·출고·재고 현황을 통합 관리하는 시스템입니다.'},
+    {s:'3과목',q:'TMS(Transportation Management System)의 주요 기능은?',o:['창고 재고 관리','운송 계획·배차·화물 추적·운임 정산 등 운송 프로세스 관리','해상 운임 결정','세관 통관 자동화'],a:1,e:'TMS는 운송 계획, 배차, 화물 추적, 운임 정산 등 운송 프로세스를 관리하는 시스템입니다.'},
+    {s:'3과목',q:'AIS(Automatic Identification System)의 주요 용도는?',o:['화물 중량 측정','선박의 위치·속도·항로 정보를 자동 송수신','연료 효율 계산','선원 신분 인증'],a:1,e:'AIS는 선박이 위치·속도·항로 등을 VHF 주파수로 자동 송수신하여 충돌 방지, VTS, 선박 추적에 활용됩니다.'},
+    {s:'3과목',q:'OSI 7계층에서 TCP와 UDP가 속하는 계층은?',o:['3계층(네트워크)','4계층(전송)','5계층(세션)','6계층(표현)'],a:1,e:'TCP와 UDP는 OSI 모델 4계층(전송 계층, Transport Layer)에 속합니다.'},
+    {s:'3과목',q:'5G 통신이 스마트 항만에 기여하는 핵심 역할은?',o:['항만 세금 납부 자동화','초저지연 대용량 데이터 전송으로 AGV·크레인 자동화 지원','항만 직원 급여 지급','선박 건조 기간 단축'],a:1,e:'5G는 초저지연·초고속 특성으로 AGV, 자동화 크레인, 디지털 트윈, 실시간 영상 분석 등 스마트 항만 인프라를 지원합니다.'},
+    {s:'3과목',q:'디지털 트윈(Digital Twin)의 물류 활용 개념은?',o:['실물 대신 디지털 상품 유통','물리적 시스템의 가상 복제본으로 시뮬레이션·분석','종이 서류 전자화','전자상거래 플랫폼'],a:1,e:'디지털 트윈은 항만·선박·물류센터의 실시간 데이터를 기반으로 가상 복제본을 구축하여 운영 시나리오를 시뮬레이션합니다.'},
+    {s:'3과목',q:'NoSQL의 특징으로 올바른 것은?',o:['고정된 테이블 스키마 필수','조인 연산 가능, 수직 확장만 가능','고정 스키마 불필요, 수평 확장 가능','관계형 데이터베이스와 동일'],a:2,e:'NoSQL은 고정 스키마 없이 유연한 데이터 구조를 지원하고 조인 연산 없이 수평적 확장이 가능한 분산 DB 시스템입니다.'},
+    {s:'3과목',q:'빅데이터 Veracity(진실성)의 의미는?',o:['데이터 규모','데이터 생성 속도','데이터 분석 패턴의 신뢰성','데이터 다양성'],a:2,e:'Veracity(진실성)는 빅데이터의 신뢰성 관련 특성으로 데이터를 분석해서 나온 일정한 패턴을 신뢰할 수 있는 정도를 의미합니다.'},
+    {s:'3과목',q:'Port Community System(PCS)의 핵심 역할은?',o:['선박 건조 관리','항만 내 선사·터미널·포워더·세관 등 이해관계자 간 정보 공유·효율화','항만 보안 강화만','물류비 통제'],a:1,e:'PCS는 항만 이해관계자 간 선박 도착·화물·통관·하역 정보를 표준화된 방식으로 공유하여 물류 효율을 높이는 플랫폼입니다.'},
+    {s:'3과목',q:'클라우드 컴퓨팅 도입의 물류 효과가 아닌 것은?',o:['IT 인프라 투자비 절감','언제 어디서나 데이터 접근','초기 설치 비용 대폭 증가','시스템 확장성 향상'],a:2,e:'클라우드는 자체 서버 구축 불필요로 초기비용을 낮추고 탄력적 확장, 원격 접근이 가능합니다.'},
+    {s:'3과목',q:'멀티캐스트(Multicast)가 활용되는 대표적인 서비스는?',o:['1:1 파일 전송','IPTV·비디오 컨퍼런싱 등 그룹 멤버에게 실시간 데이터 전송','네트워크 전체 방송','가장 가까운 서버에 전송'],a:1,e:'멀티캐스트는 IP 주소 범위로 식별되는 그룹 멤버에게 데이터를 전송하는 방식으로 IPTV, 비디오 컨퍼런싱 등에 활용됩니다.'},
+    {s:'3과목',q:'ERP(Enterprise Resource Planning)의 물류 모듈 역할은?',o:['선박 자동 운항','기업의 구매·재고·물류를 하나의 시스템에서 통합 관리','직원 급여 관리만','IT 보안 관리'],a:1,e:'ERP의 물류 모듈은 구매, 재고, 입출고, 배송 등 물류 업무를 다른 부서와 연계하여 실시간 통합 관리합니다.'},
+    {s:'3과목',q:'RPA(Robotic Process Automation)의 물류 활용 사례는?',o:['물리적 로봇 조작','반복적 디지털 작업(B/L 데이터 입력·세관 서류 처리 등) 자동화','선박 자율 운항','창고 크레인 제어'],a:1,e:'RPA는 소프트웨어 로봇이 규칙 기반 반복 작업을 자동화하는 기술로 물류에서 B/L 데이터 입력, 세관 서류 처리 자동화 등에 활용됩니다.'},
+    {s:'3과목',q:'빅데이터 정형 데이터의 예시로 올바른 것은?',o:['소셜미디어 텍스트','RDB·엑셀 스프레드시트 등 정해진 형식에 따라 저장되는 데이터','HTML·XML·JSON 등 반구조 데이터','이미지·오디오·비디오'],a:1,e:'정형 데이터는 미리 정해진 형식과 구조에 따라 저장되는 데이터로 RDB, 엑셀 스프레드시트 등이 해당합니다.'},
+    {s:'3과목',q:'GNSS(Global Navigation Satellite System)의 해상 물류 활용은?',o:['선박 엔진 제어','위성 기반 정밀 위치 측정으로 선박 항법·화물 추적에 활용','선박 보험 계산','화물 중량 측정'],a:1,e:'GNSS(GPS 포함)는 위성 신호로 정밀 위치를 측정하여 선박 항법, AIS 위치 데이터, 터미널 AGV 위치 제어 등에 활용됩니다.'},
+    {s:'4과목',q:'자율운항선박(MASS)의 특징은?',o:['무조건 무인으로 운항','AI·센서·통신 기술로 인간 개입 없이 또는 최소화하여 자율 운항','수중 무인잠수함','AI 없이 자동화된 화물선'],a:1,e:'MASS(Maritime Autonomous Surface Ship)는 AI·센서·통신 기술을 이용해 인간의 개입을 최소화하여 자율 운항하는 선박입니다.'},
+    {s:'4과목',q:'IMO가 설정한 2050년 해운 탈탄소화 목표는?',o:['CO2 배출 50% 증가','선박 탄소 배출 넷제로(Net-zero) 달성','화석연료 50% 유지','2030년 완전 전동화'],a:1,e:'IMO는 2023년 개정 GHG 전략에서 2050년경 넷제로 달성을 목표로 설정했습니다.'},
+    {s:'4과목',q:'PORT-MIS 시스템의 특징으로 올바른 것은?',o:['유료 서비스','무료 웹 기반, 인터넷 신고, 모바일 지원, 예선 신청 서비스 제공','EDI 방식만 사용','모바일 지원 불가'],a:1,e:'PORT-MIS는 무료 웹 기반 서비스로 인터넷 신고, 스마트폰 모바일 지원, 예선 신청 및 지정 서비스를 제공합니다.'},
+    {s:'4과목',q:'TOS(Terminal Operating System)의 역할은?',o:['선박 엔진 제어','컨테이너터미널의 화물관리·하역 작업 전반을 통합 지원하는 시스템','항만 세금 납부','선원 관리'],a:1,e:'TOS는 컨테이너터미널에서 선석 배정, 야드 플래닝, 크레인·AGV 제어, 게이트 관리 등 모든 작업을 통합 제어합니다.'},
+    {s:'4과목',q:'PLISM(항만물류정보중계망)의 주요 서비스는?',o:['선원 급여 관리','해상적하목록 취합, 물류 Visibility, 통합화물진행정보 서비스','선박 보험 가입','항만 운임 협상'],a:1,e:'PLISM은 해상적하목록 취합 서비스, 실시간 화물·선적 확인 정보(물류 Visibility), 통합화물진행정보 등을 제공합니다.'},
+    {s:'4과목',q:'AGV(Automated Guided Vehicle)와 AMR(Autonomous Mobile Robot)의 차이는?',o:['동일한 장비','AGV=고정 경로 이동, AMR=AI·센서로 장애물 인식하며 자율 경로 변경 가능','AGV=실내 전용, AMR=실외 전용','AMR이 더 느림'],a:1,e:'AGV는 고정 경로로 이동하고, AMR은 LIDAR·카메라·AI로 주변 환경을 인식하여 자율 경로를 계획합니다.'},
+    {s:'4과목',q:'CII(탄소집약도지수) 규제에서 D등급 3년 연속 시의 결과는?',o:['즉시 운항 정지','개선 계획(Corrective Action Plan) 제출 의무','자동으로 E등급 강등','추가 세금 부과'],a:1,e:'CII 규제에서 D등급 3년 연속 또는 E등급 1년이면 개선 계획을 제출해야 합니다.'},
+    {s:'4과목',q:'슬로우 스티밍(Slow Steaming)의 주요 효과는?',o:['빠른 운송으로 연료 절감','선박 속도를 낮추어 연료 소비 및 CO2 배출 감소','항만 처리량 증가','운임 자동 하락'],a:1,e:'슬로우 스티밍은 선박 운항 속도를 낮게 유지하여 연료 소비와 CO2 배출을 줄이는 방법입니다.'},
+    {s:'4과목',q:'EEXI와 CII의 차이점은?',o:['동일한 지수','EEXI=기존선 설계 효율 기준(일회성 인증), CII=연간 운항 실적 기반 등급 평가','EEXI=운항 중 측정, CII=설계 단계','둘 다 신조 전용'],a:1,e:'EEXI는 기존 운항 선박의 설계 효율에 대한 일회성 인증이고, CII는 매년 실제 운항 데이터 기반으로 A~E 등급을 평가하는 연간 지표입니다.'},
+    {s:'4과목',q:'Port Call Optimization의 주요 목적은?',o:['항만 운임 인상','선박 도착·하역·출항 데이터 공유로 대기 시간 단축 및 효율화','항만 보안 강화','연료 증가'],a:1,e:'Port Call Optimization은 선사·터미널·도선사 등이 데이터를 공유하여 선박 대기 시간을 줄이고 항만 효율을 높이는 개념입니다.'},
+    {s:'4과목',q:'OSS(Overhead Shuttle System)의 특징은?',o:['안벽 크레인','항만 내 컨테이너 자동 운송과 자동 반출입이 가능한 대용량 자동하역시스템','야드 트랙터','게이트 자동 인식 시스템'],a:1,e:'OSS는 항만 자동화 기술로 컨테이너의 자동 운송(플랫카)과 자동 반출입(오버헤드 셔틀)이 가능한 자동하역시스템으로 광양항에서 검증 중입니다.'},
+    {s:'4과목',q:'통합 PORT-MIS에서 한중일 컨테이너 정보를 제공하는 서브시스템은?',o:['Port-MIS시스템','해운종합정보시스템','물류이동시스템','물류통계시스템'],a:2,e:'통합 PORT-MIS의 물류이동시스템에서 한중일 선박스케줄 정보와 한중일 컨테이너 정보를 제공합니다.'},
+    {s:'4과목',q:'PLISM이 제공하지 않는 정보는?',o:['실시간 화물·선적 확인 정보','통합화물진행정보','컨테이너별 이동 현황','항만시설 사용 신청 및 신고'],a:3,e:'항만시설 사용 신청 및 신고는 PORT-MIS 서비스입니다. PLISM은 해상적하목록 취합, 화물 Visibility, 컨테이너 이동 현황 등을 제공합니다.'},
+    {s:'4과목',q:'반입/장치 업무에서 COLDLT EDI 문서의 내용은?',o:['컨테이너 하역결과서','컨테이너 선적예정목록','본선적부도','선적예정물량 통보서'],a:1,e:'COLDLT(Container Load List for Departure)는 선사가 터미널에 전송하는 컨테이너 선적예정목록입니다.'},
+    {s:'4과목',q:'MOVINS EDI 문서의 내용은?',o:['컨테이너 반출입 계획','선적·양하·이적 지시와 선적 대상 컨테이너 세부 사항 포함','운임 청구서','선박 도착 통보'],a:1,e:'MOVINS는 해상운송 부문에서 컨테이너의 선적·양하·이적 관련 지시와 운송 내용 정보를 담은 EDI 문서입니다.'},
+    {s:'4과목',q:'스마트 항만에서 자동화 게이트 OCR이 인식하지 않는 정보는?',o:['컨테이너 번호(ISO 6346)','봉인(Seal) 번호','트럭 번호판','운전기사 개인 신용점수'],a:3,e:'자동화 게이트 OCR은 컨테이너 번호, 봉인 번호, 트럭 번호판, 컨테이너 손상 여부를 자동 인식합니다.'},
+    {s:'4과목',q:'GRI(General Rate Increase)의 발생 이유는?',o:['수요 감소 시 할인','연료비·운항비 상승 또는 저운임 상황에서 선사가 일괄 운임 인상 발표','정부 규제 의무 인상','환경 규제 부과금'],a:1,e:'GRI는 선사들이 원가 상승이나 저운임 상황을 타개하기 위해 특정 날짜부터 운임을 일괄 인상한다고 사전 발표하는 운임 정책입니다.'},
+    {s:'4과목',q:'선박 친환경 대체연료로 가장 주목받는 것들은?',o:['석탄·중유','LNG·암모니아·메탄올·수소','가솔린·경유','핵연료·태양열'],a:1,e:'IMO 탈탄소 목표에 따라 LNG(단기), 메탄올, 암모니아, 수소(장기)가 선박 대체연료로 주목받습니다.'},
+    {s:'5과목',q:'항만법상 항만의 정의로 옳은 것은?',o:['선박의 출입·화물 하역·해양친수활동 시설과 화물 부가가치 창출 시설이 갖추어진 곳','주로 외항선이 입출항하는 무역항','선박보급시설','배후유통시설'],a:0,e:'항만법상 항만은 선박의 출입, 사람의 승하선, 화물의 하역·보관·처리, 해양친수활동 등 시설과 화물 부가가치 창출 시설이 갖추어진 곳입니다.'},
+    {s:'5과목',q:'항만법상 무역항의 정의는?',o:['선박 출입·화물 하역 시설이 갖추어진 곳','국민경제와 공공의 이해에 밀접하고 주로 외항선이 입출항하는 항만','주로 국내항 간 선박이 입출항하는 항만','항만의 수상구역과 육상구역'],a:1,e:'무역항은 국민경제와 공공의 이해에 밀접한 관계가 있고 주로 외항선이 입항·출항하는 항만입니다.'},
+    {s:'5과목',q:'해운법상 안전관리종사자에 해당하는 것은?',o:['도선사','선장·해원·선박운항관리자','항만시설 관리자','화물 검수원'],a:1,e:'해운법상 안전관리종사자는 선장, 해원, 선박운항관리자입니다.'},
+    {s:'5과목',q:'소프트웨어진흥법상 소프트웨어사업 하도급 한도는?',o:['100분의 30','100분의 40','100분의 50','100분의 60'],a:2,e:'소프트웨어사업자는 물품 구매 금액을 제외한 소프트웨어사업 금액의 100분의 50을 초과하여 하도급할 수 없습니다.'},
+    {s:'5과목',q:'물류보안(물류정책기본법)의 정의는?',o:['물류 비용 절감 조치','공항·항만·물류시설에 위해물품 반입 방지 및 불법행위 사전 방지 조치','물류 정보화 조치','물류 안전 기준'],a:1,e:'물류보안은 공항·항만과 물류시설에 폭발물 등 위해물품 은닉·반입 방지와 불법행위를 사전에 방지하기 위한 조치입니다.'},
+    {s:'5과목',q:'소프트웨어진흥법상 소프트웨어 융합의 정의는?',o:['소프트웨어 간 통합','SW와 다른 분야 간 기술·서비스 결합으로 새로운 가치를 창출하는 활동','소프트웨어 업그레이드','하드웨어와 소프트웨어 통합'],a:1,e:'소프트웨어 융합은 소프트웨어와 다른 분야 간 기술 또는 서비스의 결합·복합을 통해 새로운 사회적·시장적 가치를 창출하는 창의적이고 혁신적인 활동입니다.'},
+    {s:'5과목',q:'항만법상 항만물류의 정의는?',o:['항만 이용자를 위한 복지시설','항만물류통합정보체계','항만개발사업','항만에서 화물이 공급자부터 수요자에게 전달될 때까지 운송·보관·하역·포장 등 일련의 처리과정'],a:3,e:'항만물류는 항만에서 화물이 공급자로부터 수요자에게 전달될 때까지 이루어지는 운송·보관·하역·포장 등 일련의 처리과정입니다.'},
+    {s:'5과목',q:'정보통신망의 정의에서 포함되지 않는 활동은?',o:['정보의 수집·가공','정보의 저장·검색','정보의 송신·수신','정보의 분석·과금'],a:3,e:'정보통신망은 전기통신설비 등을 활용하여 정보를 수집·가공, 저장·검색, 송신·수신하는 정보통신체제입니다. 분석·과금은 포함되지 않습니다.'},
+    {s:'5과목',q:'소프트웨어진흥법의 목적이 아닌 것은?',o:['국민생활의 향상','국가경쟁력의 확보','정보통신망 이용 촉진','국민 경제의 건전하고 지속적인 발전'],a:2,e:'소프트웨어진흥법의 목적: 국민생활 향상, 국가경쟁력 확보, 국민경제의 건전하고 지속적인 발전. 정보통신망 이용 촉진은 정보통신망법의 목적입니다.'},
+    {s:'5과목',q:'항만공사 대행에 대한 설명으로 옳은 것은?',o:['국토교통부장관이 국가선박 항만개발 대행','해양수산부장관이 군함 항만시설을 국토부에 대행 가능','비관리청이 민간에 개발비 부담 강제 가능','관리청이 비관리청 비용 부담으로 항만개발사업 대행 가능'],a:3,e:'관리청은 비관리청과 협의하여 허가한 비관리청의 항만개발사업을 그 비관리청의 비용 부담으로 대행할 수 있습니다.'},
+    {s:'5과목',q:'용대선의 법적 정의는?',o:['선박 수리 계약','해상운송사업자 간 또는 외국인과 선박의 전부나 일부를 용선하거나 대선하는 것','항만 사용 계약','선원 고용 계약'],a:1,e:'용대선은 해상운송사업자 간 또는 외국인 사이에 선박의 전부나 일부를 용선하거나 대선하는 것입니다.'},
+    {s:'5과목',q:'소프트웨어진흥법상 소프트웨어의 정의는?',o:['컴퓨터 하드웨어','컴퓨터·통신 등 장비에 명령·제어 등이 가능하게 하는 지시·명령의 집합과 관련 자료','오직 응용 프로그램만','인터넷 서비스'],a:1,e:'소프트웨어란 컴퓨터, 통신, 자동화 등의 장비에 명령·제어·입력·처리·저장·출력·상호작용이 가능하게 하는 지시·명령의 집합과 관련 자료입니다.'},
+    {s:'5과목',q:'ISPS Code(국제선박항만보안규약)의 주요 목적은?',o:['항만 운임 통제','선박·항만시설의 보안 등급 설정 및 보안 계획 수립','화물 보험 의무화','항만 환경 기준 설정'],a:1,e:'ISPS Code는 선박과 항만시설에 보안 등급(1~3)을 설정하고 보안 계획(SSP/PFSP)을 수립·시행하도록 요구합니다.'},
+    {s:'5과목',q:'MARPOL Annex VI가 규제하는 내용은?',o:['선박 평형수 관리','선박 대기오염(NOx·SOx 등) 규제','선박 폐수 처리','해양 투기 금지'],a:1,e:'MARPOL Annex VI는 선박 엔진의 NOx, 연료의 SOx 등 대기오염물질 배출을 규제합니다.'},
+    {s:'5과목',q:'항만 국가 통제(PSC)의 목적은?',o:['항만 운임 통제','외국 선박이 IMO 안전 기준을 준수하는지 입항국이 검사하는 제도','화물 검사','관세 징수'],a:1,e:'PSC는 외국 선박의 구조·장비·운항 조건이 SOLAS·MARPOL 등 국제 협약을 준수하는지 입항국 관리가 점검하는 제도입니다.'},
+    {s:'5과목',q:'소프트웨어사업 과업심의위원회 위원의 임기는?',o:['1년','2년 (연임 가능)','3년','5년'],a:1,e:'소프트웨어사업 과업심의위원회에서 위촉된 위원의 임기는 2년으로 하며 연임할 수 있습니다.'},
+    {s:'5과목',q:'BWM(선박평형수관리) 협약의 목적은?',o:['선박 속도 증가','외래 수생생물 이동 방지를 위해 평형수 처리를 의무화','연료 효율 향상','선박 구조 표준화'],a:1,e:'BWM 협약은 선박이 다른 해역에서 취득한 평형수를 방류할 경우 외래 수생생물이 확산되는 것을 방지하기 위해 평형수 처리를 의무화합니다.'},
+    {s:'5과목',q:'상용 소프트웨어(Commercial Software)의 정의는?',o:['무료로 배포되는 소프트웨어','상업적 목적으로 개발되어 완성된 형태로 판매·제공되는 소프트웨어','오픈소스 소프트웨어','정부 개발 소프트웨어'],a:1,e:'상용 소프트웨어란 상업적 목적으로 개발되어 완성된 형태로 판매·제공되는 소프트웨어입니다(소프트웨어진흥법).'},
+    {s:'5과목',q:'소프트웨어 기술 분야 경력 요건(과업심의위원회)은?',o:['3년 이상','5년 이상','6년 이상','10년 이상'],a:2,e:'소프트웨어사업 과업심의위원회 위원 자격 중 소프트웨어 기술 분야에서 6년 이상 경력을 갖춘 사람이 해당됩니다.'},
+    {s:'5과목',q:'항만물류통합정보체계의 정의는?',o:['항만 건설 정보 시스템','관리청·항만 이용자가 항만물류비 절감 등을 위해 정보통신망으로 상호교환·처리·활용하는 체계','항만 보안 시스템','선박 운항 정보 시스템'],a:1,e:'항만물류통합정보체계는 관리청 및 항만을 이용하는 자가 항만물류비 절감 및 실시간 정보 획득을 위해 정보통신망을 이용하여 상호교환·처리·활용하는 체계입니다.'},
+    {s:'5과목',q:'소프트웨어진흥법상 소프트웨어사업의 정의는?',o:['소프트웨어 개발 업무만','소프트웨어의 개발·제작·생산·유통·운영 및 유지·관리 등과 관련된 서비스를 제공하는 산업','소프트웨어 설치만','인터넷 서비스 제공'],a:1,e:'소프트웨어사업이란 소프트웨어의 개발, 제작, 생산, 유통, 운영 및 유지·관리 등과 그 밖에 소프트웨어와 관련된 서비스를 제공하는 산업입니다.'},
+    {s:'5과목',q:'항만법상 항만개발사업의 정의는?',o:['항만 운영 서비스','항만시설의 신설·개축·보강·유지·보수 및 준설 등을 하는 사업','항만 보안 계획','항만 환경 관리'],a:1,e:'항만개발사업이란 항만시설의 신설·개축·보강·유지·보수(補修) 및 준설 등을 하는 사업을 말합니다.'}
+  ]
+};
+
+// ===== 탭 전환 =====
+function switchTab(tab, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab === 'practice' && !practiceInited) initPractice();
+  if (tab === 'exam1' && !examInited) initExam();
+}
+
+// ===== 문제은행 상태 =====
+let state = {};
+let subjFilter = 'all', diffFilter = 'all', sortMode = 'default';
+let order = [...Array(QS.length).keys()];
+
+function getS(qi) {
+  if (!state[qi]) state[qi] = { lastResult: null, wrongCount: 0, bookmarked: false, retrying: false };
   return state[qi];
 }
 
-// ===== SIDEBAR COUNTS =====
-function updateSidebarCounts(){
-  const cnt={};
-  QS.forEach(q=>{cnt[q.s]=(cnt[q.s]||0)+1});
-  document.getElementById('cntAll').textContent=QS.length;
-  document.getElementById('cntHaeun').textContent=cnt['해운']||0;
-  document.getElementById('cntHangman').textContent=cnt['항만']||0;
-  document.getElementById('cntMuyeok').textContent=cnt['무역']||0;
-  document.getElementById('cntSCM').textContent=cnt['SCM']||0;
-  document.getElementById('cntICT').textContent=cnt['ICT']||0;
-  document.getElementById('cntSmart').textContent=cnt['스마트']||0;
-  document.getElementById('cntMoui').textContent=cnt['모의']||0;
+function updateSidebarCounts() {
+  const cnt = {};
+  QS.forEach(q => { cnt[q.s] = (cnt[q.s] || 0) + 1; });
+  document.getElementById('cntAll').textContent = QS.length;
+  document.getElementById('cntHaeun').textContent = cnt['해운'] || 0;
+  document.getElementById('cntHangman').textContent = cnt['항만'] || 0;
+  document.getElementById('cntMuyeok').textContent = cnt['무역'] || 0;
+  document.getElementById('cntSCM').textContent = cnt['SCM'] || 0;
+  document.getElementById('cntICT').textContent = cnt['ICT'] || 0;
+  document.getElementById('cntSmart').textContent = cnt['스마트'] || 0;
 }
 
-// ===== FILTERS & SORT =====
-function setSubj(v,btn){
-  subjFilter=v;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+function setSubj(v, btn) {
+  subjFilter = v;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on'); render();
 }
-function setDiff(v,btn){
-  diffFilter=v;
-  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('on'));
+function setDiff(v, btn) {
+  diffFilter = v;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on'); render();
 }
-function setSort(v,btn){
-  sortMode=v;
-  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+function setSort(v, btn) {
+  sortMode = v;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on'); render();
 }
-function shuffle(){ order.sort(()=>Math.random()-.5); render(); }
-function expandAll(){ document.querySelectorAll('.exp').forEach(e=>e.classList.add('show')); }
+function shuffle() { order.sort(() => Math.random() - .5); render(); }
+function expandAll() { document.querySelectorAll('.exp').forEach(e => e.classList.add('show')); }
 
-function filtered(){
-  const kw=document.getElementById('searchBox').value.trim().toLowerCase();
-  let ids=[...order];
-
-  // 과목 필터
-  if(subjFilter!=='all') ids=ids.filter(i=>QS[i].s===subjFilter);
-  // 난이도 필터
-  if(diffFilter!=='all') ids=ids.filter(i=>QS[i].d===diffFilter);
-  // 키워드
-  if(kw) ids=ids.filter(i=>QS[i].q.toLowerCase().includes(kw)||QS[i].o.join('').toLowerCase().includes(kw));
-
-  // 정렬/뷰 모드
-  if(sortMode==='wrong') ids=ids.filter(i=>getS(i).wrongCount>0).sort((a,b)=>getS(b).wrongCount-getS(a).wrongCount);
-  if(sortMode==='bookmark') ids=ids.filter(i=>getS(i).bookmarked);
-  if(sortMode==='unsolved') ids=ids.filter(i=>!getS(i).lastResult && !getS(i).retrying);
-
+function filtered() {
+  const kw = document.getElementById('searchBox').value.trim().toLowerCase();
+  let ids = [...order];
+  if (subjFilter !== 'all') ids = ids.filter(i => QS[i].s === subjFilter);
+  if (diffFilter !== 'all') ids = ids.filter(i => QS[i].d === diffFilter);
+  if (kw) ids = ids.filter(i => QS[i].q.toLowerCase().includes(kw) || QS[i].o.join('').toLowerCase().includes(kw));
+  if (sortMode === 'wrong') ids = ids.filter(i => getS(i).wrongCount > 0).sort((a, b) => getS(b).wrongCount - getS(a).wrongCount);
+  if (sortMode === 'bookmark') ids = ids.filter(i => getS(i).bookmarked);
+  if (sortMode === 'unsolved') ids = ids.filter(i => !getS(i).lastResult && !getS(i).retrying);
   return ids;
 }
 
-// ===== RENDER =====
-function render(){
-  const ids=filtered();
-  document.getElementById('sTotal').textContent=ids.length;
-  const list=document.getElementById('qlist');
-  if(!ids.length){
-    list.innerHTML='<div class="no-q"><div class="icon">🔍</div><div>조건에 맞는 문제가 없습니다</div></div>';
+function render() {
+  const ids = filtered();
+  document.getElementById('sTotal').textContent = ids.length;
+  const list = document.getElementById('qlist');
+  if (!ids.length) {
+    list.innerHTML = '<div class="no-q"><div class="icon">🔍</div><div>조건에 맞는 문제가 없습니다</div></div>';
     updateStats(); return;
   }
-
-  list.innerHTML=ids.map((i,idx)=>{
-    const q=QS[i]; const s=getS(i);
-    const diffCls={easy:'diff-easy',mid:'diff-mid',hard:'diff-hard'}[q.d];
-    const diffLabel={easy:'기초',mid:'중급',hard:'고급'}[q.d];
+  list.innerHTML = ids.map((i, idx) => {
+    const q = QS[i]; const s = getS(i);
+    const diffCls = { easy: 'diff-easy', mid: 'diff-mid', hard: 'diff-hard' }[q.d];
+    const diffLabel = { easy: '기초', mid: '중급', hard: '고급' }[q.d];
     const answered = s.lastResult && !s.retrying;
-    const cardCls = answered ? (s.lastResult==='correct'?'done-correct':'done-wrong') : s.bookmarked?'bookmarked':'';
-
-    // 배지들
-    let badges='';
-    if(s.lastResult==='correct'&&!s.retrying) badges+='<span class="tag diff-easy">✓ 정답</span>';
-    if(s.lastResult==='wrong'&&!s.retrying) badges+='<span class="tag diff-hard">✗ 오답</span>';
-    if(s.wrongCount>0) badges+=`<span class="tag wrong-cnt">❌ ${s.wrongCount}회 틀림</span>`;
-    if(s.bookmarked) badges+='<span class="tag bookmark-tag">⭐ 북마크</span>';
-
-    // 선택지
-    const opts=q.o.map((o,oi)=>{
-      let cls='';
-      if(answered){ if(oi===q.a) cls='correct'; else if(s.wrongOptIdx===oi) cls='wrong'; }
-      return `<button class="opt ${cls}" onclick="answer(${i},${oi})" ${answered?'disabled':''}>` +
-        ['①','②','③','④'][oi]+' '+o+'</button>';
+    const cardCls = answered ? (s.lastResult === 'correct' ? 'done-correct' : 'done-wrong') : s.bookmarked ? 'bookmarked' : '';
+    let badges = '';
+    if (s.lastResult === 'correct' && !s.retrying) badges += '<span class="tag diff-easy">✓ 정답</span>';
+    if (s.lastResult === 'wrong' && !s.retrying) badges += '<span class="tag diff-hard">✗ 오답</span>';
+    if (s.wrongCount > 0) badges += `<span class="tag wrong-cnt">❌ ${s.wrongCount}회 틀림</span>`;
+    if (s.bookmarked) badges += '<span class="tag bookmark-tag">⭐ 북마크</span>';
+    const opts = q.o.map((o, oi) => {
+      let cls = '';
+      if (answered) { if (oi === q.a) cls = 'correct'; else if (s.wrongOptIdx === oi) cls = 'wrong'; }
+      return `<button class="opt ${cls}" onclick="answer(${i},${oi})" ${answered ? 'disabled' : ''}>` +
+        ['①', '②', '③', '④'][oi] + ' ' + o + '</button>';
     }).join('');
-
-    // 액션 버튼들
-    let actions='';
-    if(answered){
-      actions+=`<button class="act-btn retry" onclick="retryOne(${i})">🔄 다시 풀기</button>`;
-    }
+    let actions = '';
+    if (answered) actions += `<button class="act-btn retry" onclick="retryOne(${i})">🔄 다시 풀기</button>`;
     const bmLabel = s.bookmarked ? '⭐ 북마크 해제' : '☆ 북마크';
     const bmCls = s.bookmarked ? 'act-btn bm-on' : 'act-btn';
-    actions+=`<button class="${bmCls}" onclick="toggleBookmark(${i})">${bmLabel}</button>`;
-
+    actions += `<button class="${bmCls}" onclick="toggleBookmark(${i})">${bmLabel}</button>`;
     return `<div class="qcard ${cardCls}" id="qc${i}">
-      <div class="qmeta">
-        <span class="tag subj">${q.s}</span>
-        <span class="tag ${diffCls}">${diffLabel}</span>
-        <span class="tag num">Q${idx+1}</span>
-        ${badges}
-      </div>
+      <div class="qmeta"><span class="tag subj">${q.s}</span><span class="tag ${diffCls}">${diffLabel}</span><span class="tag num">Q${idx + 1}</span>${badges}</div>
       <div class="qtext">${q.q}</div>
       <div class="opts">${opts}</div>
-      <div class="exp ${answered?'show':''}" id="exp${i}">💡 ${q.e}</div>
+      <div class="exp ${answered ? 'show' : ''}" id="exp${i}">💡 ${q.e}</div>
       <div class="card-actions">${actions}</div>
     </div>`;
   }).join('');
   updateStats();
 }
 
-// ===== ANSWER =====
-async function answer(qi, oi){
-  const s=getS(qi); const q=QS[qi];
-  if(s.lastResult && !s.retrying) return;
-  const correct = oi===q.a;
-  s.retrying=false;
-  if(correct){
-    s.lastResult='correct';
-  } else {
-    s.lastResult='wrong';
-    s.wrongCount=(s.wrongCount||0)+1;
-    s.wrongOptIdx=oi;
-  }
+async function answer(qi, oi) {
+  const s = getS(qi); const q = QS[qi];
+  if (s.lastResult && !s.retrying) return;
+  const correct = oi === q.a;
+  s.retrying = false;
+  if (correct) { s.lastResult = 'correct'; }
+  else { s.lastResult = 'wrong'; s.wrongCount = (s.wrongCount || 0) + 1; s.wrongOptIdx = oi; }
   render();
-  // DB 저장
-  setSyncStatus('loading','저장 중...');
+  setSyncStatus('loading', '저장 중...');
   const resultStr = correct ? 'correct' : `wrong-${oi}:${s.wrongCount}`;
   await saveToDb(qi, resultStr);
-  setSyncStatus('ok','✓ 저장됨 · '+new Date().toLocaleTimeString('ko-KR'));
+  setSyncStatus('ok', '✓ 저장됨 · ' + new Date().toLocaleTimeString('ko-KR'));
 }
 
-// ===== RETRY ONE =====
-function retryOne(qi){
-  const s=getS(qi);
-  s.retrying=true;
-  s.lastResult=null;
-  render();
-}
+function retryOne(qi) { const s = getS(qi); s.retrying = true; s.lastResult = null; render(); }
 
-// ===== RETRY ALL WRONG =====
-function retryAllWrong(){
-  let cnt=0;
-  Object.keys(state).forEach(qi=>{
-    if(state[qi] && state[qi].wrongCount>0){ state[qi].retrying=true; state[qi].lastResult=null; cnt++; }
+function retryAllWrong() {
+  let cnt = 0;
+  Object.keys(state).forEach(qi => {
+    if (state[qi] && state[qi].wrongCount > 0) { state[qi].retrying = true; state[qi].lastResult = null; cnt++; }
   });
-  if(cnt===0){ alert('오답 문제가 없습니다!'); return; }
+  if (cnt === 0) { alert('오답 문제가 없습니다!'); return; }
   setSort('wrong', document.getElementById('sortWrong'));
 }
 
-// ===== BOOKMARK =====
-async function toggleBookmark(qi){
-  const s=getS(qi);
-  s.bookmarked=!s.bookmarked;
-  render();
-  await saveToDb(qi+100000, 'bookmark:'+s.bookmarked); // bookmark용 별도 row
-  setSyncStatus('ok',s.bookmarked?'⭐ 북마크 추가됨':'북마크 해제됨');
+async function toggleBookmark(qi) {
+  const s = getS(qi); s.bookmarked = !s.bookmarked; render();
+  await saveToDb(qi + 100000, 'bookmark:' + s.bookmarked);
+  setSyncStatus('ok', s.bookmarked ? '⭐ 북마크 추가됨' : '북마크 해제됨');
 }
 
-// ===== RESET =====
-async function resetAll(){
-  if(!confirm('모든 풀이 기록을 초기화합니까?\nDB에서도 삭제됩니다.')) return;
-  state={};
-  try{
-    await sbReq('DELETE',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}`);
-    localStorage.removeItem('quiz_state2');
-    setSyncStatus('ok','초기화 완료');
-  }catch(e){ console.warn('DB clear failed'); }
+async function resetAll() {
+  if (!confirm('모든 풀이 기록을 초기화합니까?\nDB에서도 삭제됩니다.')) return;
+  state = {};
+  try { await sbReq('DELETE', `quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}`); localStorage.removeItem('quiz_state2'); setSyncStatus('ok', '초기화 완료'); } catch (e) {}
   render(); updateStats();
 }
 
-// ===== STATS =====
-function updateStats(){
-  const all=Object.values(state);
-  const done=all.filter(s=>s&&s.lastResult&&!s.retrying).length;
-  const correct=all.filter(s=>s&&s.lastResult==='correct'&&!s.retrying).length;
-  const pct=done?Math.round(correct/done*100):0;
-  const prog=Math.round(done/QS.length*100);
-  const maxWrong=Math.max(0,...Object.values(state).map(s=>s?s.wrongCount||0:0));
-  document.getElementById('sDone').textContent=done;
-  document.getElementById('sCorrect').textContent=correct;
-  document.getElementById('sRate').textContent=pct+'%';
-  document.getElementById('sWrongTop').textContent=maxWrong;
-  document.getElementById('progFill').style.width=prog+'%';
-  document.getElementById('progPct').textContent=prog+'%';
+function updateStats() {
+  const all = Object.values(state);
+  const done = all.filter(s => s && s.lastResult && !s.retrying).length;
+  const correct = all.filter(s => s && s.lastResult === 'correct' && !s.retrying).length;
+  const pct = done ? Math.round(correct / done * 100) : 0;
+  const prog = Math.round(done / QS.length * 100);
+  const maxWrong = Math.max(0, ...Object.values(state).map(s => s ? s.wrongCount || 0 : 0));
+  document.getElementById('sDone').textContent = done;
+  document.getElementById('sCorrect').textContent = correct;
+  document.getElementById('sRate').textContent = pct + '%';
+  document.getElementById('sWrongTop').textContent = maxWrong;
+  document.getElementById('progFill').style.width = prog + '%';
+  document.getElementById('progPct').textContent = prog + '%';
 }
 
-// ===== INIT =====
-async function init(){
+// ===== 연습문제 =====
+let practiceInited = false;
+let pracState = {}; // {setId: {qi: {answered, correct, selected}}}
+
+function initPractice() {
+  practiceInited = true;
+  renderSetGrid();
+}
+
+function renderSetGrid() {
+  const grid = document.getElementById('setGrid');
+  grid.innerHTML = PRACTICE_SETS.map(set => {
+    const saved = JSON.parse(localStorage.getItem('prac_' + set.id) || 'null');
+    const scoreText = saved ? `✓ 최근: ${saved.score}/${saved.total}점` : '아직 풀지 않음';
+    return `<div class="set-card" onclick="startSet('${set.id}')">
+      <h3>📝 ${set.name}</h3>
+      <div class="sc-meta">${set.desc}</div>
+      <div class="sc-score">${scoreText}</div>
+      <div class="sc-subjs">${['국제물류거래','해운물류론','ICT요소기술','스마트해상물류','해상물류법규'].map(s => `<span class="sc-stag">${s}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function startSet(setId) {
+  const set = PRACTICE_SETS.find(s => s.id === setId);
+  if (!set) return;
+  if (!pracState[setId]) pracState[setId] = {};
+  document.querySelectorAll('.set-card').forEach(c => c.classList.remove('sel'));
+  renderPracticeQuiz(set);
+}
+
+function renderPracticeQuiz(set) {
+  const area = document.getElementById('practiceArea');
+  const answered = Object.keys(pracState[set.id] || {}).length;
+  const total = set.qs.length;
+  const pct = Math.round(answered / total * 100);
+
+  let qHtml = set.qs.map((q, qi) => {
+    const ps = (pracState[set.id] || {})[qi] || {};
+    const cardCls = ps.answered ? (ps.correct ? 'ac' : 'aw') : '';
+    const opts = q.o.map((o, oi) => {
+      let cls = '';
+      if (ps.answered) { if (oi === q.a) cls = 'correct'; else if (ps.selected === oi) cls = 'wrong'; }
+      return `<button class="popt ${cls}" onclick="pracAnswer('${set.id}',${qi},${oi})" ${ps.answered ? 'disabled' : ''}>` +
+        ['①','②','③','④'][oi] + ' ' + o + '</button>';
+    }).join('');
+    const expShow = ps.answered ? 'show' : '';
+    return `<div class="pqcard ${cardCls}" id="pqc_${set.id}_${qi}">
+      <div class="pqmeta"><span class="tag subj" style="font-size:9px">${q.subj||'문제'}</span><span class="tag num">Q${qi+1}</span></div>
+      <div class="qtext">${q.q}</div>
+      <div class="popts">${opts}</div>
+      <div class="pexp ${expShow}">💡 ${q.e}</div>
+    </div>`;
+  }).join('');
+
+  // 전부 풀었으면 결과 표시
+  let resultHtml = '';
+  if (answered === total) {
+    const qs = pracState[set.id];
+    const correct = Object.values(qs).filter(v => v.correct).length;
+    const subjMap = {};
+    set.qs.forEach((q, qi) => {
+      const subj = q.subj || '기타';
+      if (!subjMap[subj]) subjMap[subj] = { correct: 0, total: 0 };
+      subjMap[subj].total++;
+      if ((qs[qi] || {}).correct) subjMap[subj].correct++;
+    });
+    const subjHtml = Object.entries(subjMap).map(([name, v]) =>
+      `<div class="ss-item"><div class="ss-name">${name.replace('국제물류거래','국제물류').replace('해운물류론','해운물류').replace('ICT요소기술개론','ICT요소기술').replace('스마트해상물류기술개론','스마트해상물류').replace('해상물류·정보통신법규','해상물류법규')}</div><div class="ss-pct">${Math.round(v.correct/v.total*100)}%</div></div>`
+    ).join('');
+    localStorage.setItem('prac_' + set.id, JSON.stringify({ score: correct, total }));
+    resultHtml = `<div class="score-box"><div class="score-big">${correct}<span style="font-size:24px;color:#5a85aa">/${total}</span></div><div class="score-lbl">정답 · 정답률 ${Math.round(correct/total*100)}%</div><div class="subj-scores">${subjHtml}</div><button class="reset-btn" onclick="resetSet('${set.id}')">🔄 다시 풀기</button></div>`;
+    renderSetGrid();
+  }
+
+  area.innerHTML = `<div class="quiz-area">
+    <div class="qa-hdr">
+      <h3>📝 ${set.name}</h3>
+      <div class="prac-prog"><span>${answered}/${total}</span><div class="prac-pb"><div class="prac-pf" style="width:${pct}%"></div></div><button class="reset-btn" style="padding:4px 10px;font-size:10px" onclick="resetSet('${set.id}')">초기화</button></div>
+    </div>
+    ${qHtml}
+    ${resultHtml}
+  </div>`;
+}
+
+function pracAnswer(setId, qi, oi) {
+  const set = PRACTICE_SETS.find(s => s.id === setId);
+  if (!set) return;
+  if (!pracState[setId]) pracState[setId] = {};
+  const q = set.qs[qi];
+  pracState[setId][qi] = { answered: true, correct: oi === q.a, selected: oi };
+  renderPracticeQuiz(set);
+}
+
+function resetSet(setId) {
+  pracState[setId] = {};
+  localStorage.removeItem('prac_' + setId);
+  const set = PRACTICE_SETS.find(s => s.id === setId);
+  if (set) renderPracticeQuiz(set);
+  renderSetGrid();
+}
+
+// ===== 모의고사 =====
+let examInited = false;
+let examAnswers = {}; // {qi: selectedOption}
+let examCurrent = 0;
+let examTimer = null;
+let examTimeLeft = 7200; // 120분
+let examStarted = false;
+let examSubmitted = false;
+
+function initExam() {
+  examInited = true;
+  renderExamStart();
+}
+
+function renderExamStart() {
+  const past = JSON.parse(localStorage.getItem('exam1_scores') || '[]');
+  const pastHtml = past.length ? past.slice(-3).map(p =>
+    `<div class="past-item">${p.date} <span class="ps">${p.score}점</span></div>`
+  ).join('') : '';
+
+  document.getElementById('ew1').innerHTML = `
+    <div class="estart">
+      <div class="ebig">📋</div>
+      <h2>${MOCK_EXAM.title}</h2>
+      <p>5과목 × 20문항 · 총 100문항</p>
+      <p>시험 시간: 120분 · 과목별 40점 이상, 총점 60점 이상 합격</p>
+      <div class="einfo-row">
+        <div class="einfo-box"><div class="eib-val">100</div><div class="eib-lbl">총 문항</div></div>
+        <div class="einfo-box"><div class="eib-val">120분</div><div class="eib-lbl">제한 시간</div></div>
+        <div class="einfo-box"><div class="eib-val">60점</div><div class="eib-lbl">합격 기준</div></div>
+      </div>
+      ${pastHtml ? `<div class="past-row">${pastHtml}</div>` : ''}
+      <br><button class="start-btn" onclick="startExam()">🚀 시험 시작</button>
+    </div>
+    <div class="einprog" id="examProg"></div>
+    <div class="eresult" id="examResult"></div>`;
+}
+
+function startExam() {
+  examAnswers = {}; examCurrent = 0; examTimeLeft = 7200; examStarted = true; examSubmitted = false;
+  document.querySelector('.estart').style.display = 'none';
+  document.getElementById('examProg').classList.add('show');
+  renderExamQuestion();
+  startTimer();
+}
+
+function startTimer() {
+  if (examTimer) clearInterval(examTimer);
+  examTimer = setInterval(() => {
+    examTimeLeft--;
+    updateTimer();
+    if (examTimeLeft <= 0) { clearInterval(examTimer); submitExam(); }
+  }, 1000);
+}
+
+function updateTimer() {
+  const m = Math.floor(examTimeLeft / 60).toString().padStart(2, '0');
+  const s = (examTimeLeft % 60).toString().padStart(2, '0');
+  const el = document.getElementById('timerVal');
+  if (el) {
+    el.textContent = m + ':' + s;
+    el.className = 'timer-val' + (examTimeLeft < 300 ? ' warn' : '');
+  }
+}
+
+function renderExamQuestion() {
+  const total = MOCK_EXAM.qs.length;
+  const answered = Object.keys(examAnswers).length;
+  const m = Math.floor(examTimeLeft / 60).toString().padStart(2, '0');
+  const s = (examTimeLeft % 60).toString().padStart(2, '0');
+
+  // 과목 구분선 계산
+  const subj = MOCK_EXAM.qs[examCurrent].s;
+  const q = MOCK_EXAM.qs[examCurrent];
+  const sel = examAnswers[examCurrent];
+
+  // 네비게이션 그리드
+  const navHtml = MOCK_EXAM.qs.map((_, i) => {
+    let cls = 'enb';
+    if (examAnswers[i] !== undefined) cls += ' ans';
+    if (i === examCurrent) cls += ' cur';
+    return `<button class="${cls}" onclick="goExamQ(${i})">${i+1}</button>`;
+  }).join('');
+
+  const optsHtml = q.o.map((o, oi) =>
+    `<button class="eopt${sel === oi ? ' sel' : ''}" onclick="selectExamOpt(${oi})">` +
+    ['①','②','③','④'][oi] + ' ' + o + '</button>'
+  ).join('');
+
+  document.getElementById('examProg').innerHTML = `
+    <div class="etimer-bar">
+      <div><span id="timerVal" class="timer-val${examTimeLeft < 300 ? ' warn' : ''}">${m}:${s}</span> <span style="font-size:11px;color:#8a6a3a">남은 시간</span></div>
+      <div style="font-size:12px;color:#5a85aa">응답: ${answered}/${total}</div>
+    </div>
+    <div class="enav">${navHtml}</div>
+    <div class="eq-box">
+      <div class="eq-meta">
+        <span style="color:#f39c12;font-weight:700">${q.s}</span>
+        <span style="color:#5a85aa">Q${examCurrent+1} / ${total}</span>
+      </div>
+      <div class="eq-text">${q.q}</div>
+      <div class="eopts">${optsHtml}</div>
+    </div>
+    <div class="ebot">
+      <button class="nav-btn" onclick="goExamQ(${examCurrent-1})" ${examCurrent===0?'disabled':''}>◀ 이전</button>
+      <div style="font-size:11px;color:#5a85aa">${examCurrent+1} / ${total}</div>
+      ${examCurrent < total-1
+        ? `<button class="nav-btn nxt" onclick="goExamQ(${examCurrent+1})">다음 ▶</button>`
+        : `<button class="nav-btn sub" onclick="confirmSubmit()">📋 제출</button>`}
+    </div>`;
+}
+
+function selectExamOpt(oi) {
+  if (examSubmitted) return;
+  examAnswers[examCurrent] = oi;
+  renderExamQuestion();
+}
+
+function goExamQ(i) {
+  if (i < 0 || i >= MOCK_EXAM.qs.length) return;
+  examCurrent = i;
+  renderExamQuestion();
+}
+
+function confirmSubmit() {
+  const unanswered = MOCK_EXAM.qs.length - Object.keys(examAnswers).length;
+  const msg = unanswered > 0
+    ? `미응답 문항이 ${unanswered}개 있습니다.\n그래도 제출하시겠습니까?`
+    : '시험을 제출하시겠습니까?';
+  if (confirm(msg)) submitExam();
+}
+
+function submitExam() {
+  if (examTimer) clearInterval(examTimer);
+  examSubmitted = true;
+  document.getElementById('examProg').classList.remove('show');
+
+  // 채점
+  const qs = MOCK_EXAM.qs;
+  let total = 0;
+  const subjScores = {};
+  MOCK_EXAM.subjects.forEach(s => { subjScores[s] = { correct: 0, total: 0 }; });
+
+  qs.forEach((q, i) => {
+    const subjKey = MOCK_EXAM.subjects.find(s => s.startsWith(q.s)) || q.s;
+    if (!subjScores[subjKey]) subjScores[subjKey] = { correct: 0, total: 0 };
+    subjScores[subjKey].total++;
+    if (examAnswers[i] === q.a) { total++; subjScores[subjKey].correct++; }
+  });
+
+  const passed = total >= 60;
+  const today = new Date().toLocaleDateString('ko-KR');
+  const saved = JSON.parse(localStorage.getItem('exam1_scores') || '[]');
+  saved.push({ date: today, score: total });
+  localStorage.setItem('exam1_scores', JSON.stringify(saved.slice(-10)));
+
+  const brkdHtml = Object.entries(subjScores).map(([name, v]) =>
+    `<div class="rbd"><div class="rbd-name">${name}</div><div class="rbd-score">${v.correct}<span style="font-size:13px;color:#5a85aa">/${v.total}</span></div><div class="rbd-detail">${Math.round(v.correct/v.total*100)}%</div></div>`
+  ).join('');
+
+  // 오답 리뷰
+  const wrongItems = qs.map((q, i) => ({ q, i, sel: examAnswers[i], correct: examAnswers[i] === q.a }));
+
+  const reviewHtml = wrongItems.map(({ q, i, sel, correct }) => {
+    const cls = correct ? 'rvc' : 'rvw';
+    const icon = correct ? '✅' : '❌';
+    const myAns = sel !== undefined ? ['①','②','③','④'][sel] + ' ' + q.o[sel] : '미응답';
+    const corrAns = ['①','②','③','④'][q.a] + ' ' + q.o[q.a];
+    return `<div class="rv-card ${cls}">
+      <div class="rv-hdr"><span>${icon} Q${i+1} · ${q.s}</span></div>
+      <div class="rv-q">${q.q}</div>
+      <div class="rv-ans" style="color:${correct?'#2ecc71':'#e74c3c'}">내 답: ${myAns}</div>
+      ${!correct ? `<div class="rv-ans" style="color:#2ecc71">정답: ${corrAns}</div>` : ''}
+      <div class="rv-exp">💡 ${q.e}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('examResult').innerHTML = `
+    <div class="res-hdr">
+      <h3>${MOCK_EXAM.title} 결과</h3>
+      <div class="res-big">${total}<span style="font-size:24px;color:#8a6a3a">/100</span></div>
+      <div class="res-sub">${passed ? '🎉 합격!' : '😢 불합격'} · 정답률 ${total}%</div>
+    </div>
+    <div class="res-brkd">${brkdHtml}</div>
+    <button class="rv-tog" onclick="toggleReview()">📝 전체 해설 보기/숨기기</button>
+    <div class="rv-list" id="reviewList" style="display:none">${reviewHtml}</div>
+    <br><button class="retry-btn" onclick="retryExam()">🔄 다시 시도</button>`;
+
+  document.getElementById('examResult').classList.add('show');
+  document.getElementById('ew1').querySelector('.estart').style.display = 'none';
+}
+
+function toggleReview() {
+  const el = document.getElementById('reviewList');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+  el.style.flexDirection = 'column';
+}
+
+function retryExam() {
+  examAnswers = {}; examCurrent = 0; examTimeLeft = 7200; examStarted = false; examSubmitted = false;
+  document.getElementById('examResult').classList.remove('show');
+  document.getElementById('examResult').innerHTML = '';
+  renderExamStart();
+}
+
+// ===== 초기화 =====
+async function init() {
   updateSidebarCounts();
-  // 로컬 캐시 먼저
-  const local=JSON.parse(localStorage.getItem('quiz_state2')||'{}')
-;
-  Object.entries(local).forEach(([qi,result])=>parseResult(parseInt(qi),result));
+  const local = JSON.parse(localStorage.getItem('quiz_state2') || '{}');
+  Object.entries(local).forEach(([qi, result]) => parseResult(parseInt(qi), result));
   render();
-  // DB 로드
   await loadProgress();
   render();
 }
