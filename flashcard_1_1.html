@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어 암기 카드</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#f5f6f8;color:#2d3748;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.top{background:linear-gradient(135deg,#ffffff,#f0f2f5);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;flex-shrink:0;gap:10px;flex-wrap:wrap}
+.top-title{font-size:15px;font-weight:700;color:#2563eb}
+.top-sub{font-size:10px;color:#64748b;margin-top:2px}
+.top-btns{display:flex;gap:6px}
+.top-btn{padding:6px 14px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-size:12px;transition:.15s}
+.top-btn.on{background:#eff6ff;border-color:#2563eb;color:#2563eb;font-weight:700}
+.sync-bar{padding:4px 20px;font-size:11px;display:flex;align-items:center;gap:6px;flex-shrink:0;background:#f0fdf4;border-bottom:1px solid #bbf7d0;color:#16a34a}
+.sync-bar.loading{background:#f8fafc;border-color:#e2e8f0;color:#64748b}
+.sync-bar.error{background:#fef2f2;color:#dc2626}
+.sync-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.body-wrap{display:flex;flex:1;overflow:hidden}
+.side{background:#ffffff;border-right:1px solid #e2e8f0;padding:12px;overflow-y:auto;width:210px;flex-shrink:0}
+.side-h{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;margin-top:8px}
+.side-h:first-child{margin-top:0}
+.cat-btn{width:100%;text-align:left;padding:8px 10px;margin-bottom:3px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;color:#475569;cursor:pointer;font-size:12px;transition:.15s}
+.cat-btn:hover,.cat-btn.on{background:#eff6ff;border-color:#2563eb;color:#2563eb}
+.cat-btn .cnt{float:right;font-size:10px;opacity:.5}
+.side-btn{width:100%;padding:7px 10px;margin-bottom:3px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-size:11px;text-align:left;transition:.15s}
+.side-btn:hover{border-color:#2563eb;color:#2563eb}
+.divider{border-top:1px solid #e2e8f0;margin:8px 0}
+.mini-stat{display:flex;gap:5px;margin-bottom:6px}
+.ms{flex:1;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:4px 2px}
+.ms .n{font-size:13px;font-weight:700;color:#2563eb}
+.ms .l{font-size:9px;color:#64748b}
+.prog-label{font-size:10px;color:#94a3b8;margin-bottom:4px;display:flex;justify-content:space-between}
+.prog-track{background:#e2e8f0;border-radius:3px;height:4px;overflow:hidden}
+.prog-fill{background:linear-gradient(90deg,#3b82f6,#2563eb);height:100%;transition:.4s;border-radius:3px;width:0%}
+.main{flex:1;overflow-y:auto;padding:24px;display:flex;justify-content:center}
+.main-inner{width:100%;max-width:640px}
+/* 카드 */
+.study-prog{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:14px}
+.streak{color:#d97706;font-weight:700}
+.card-scene{width:100%;height:220px;perspective:1200px;cursor:pointer;margin-bottom:16px}
+.card-3d{width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d;position:relative}
+.card-3d.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}
+.front{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe}
+.back{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;transform:rotateY(180deg)}
+.c-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin-bottom:12px}
+.c-main{font-size:18px;font-weight:600;color:#1e293b;line-height:1.55}
+.c-sub{font-size:12px;color:#475569;margin-top:8px;line-height:1.5}
+.c-hint{font-size:11px;color:#94a3b8;margin-top:14px}
+.btn-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.abtn{padding:11px 26px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:.15s}
+.abtn.bad{background:#fff5f5;color:#dc2626;border:1px solid #fecaca}
+.abtn.bad:hover{background:#dc2626;color:#fff}
+.abtn.good{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.abtn.good:hover{background:#16a34a;color:#fff}
+.abtn.skip{background:#f8fafc;color:#475569;border:1px solid #e2e8f0}
+.abtn.skip:hover{background:#2563eb;color:#fff}
+.nav-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.nbtn{padding:7px 16px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-size:12px;transition:.15s}
+.nbtn:hover{border-color:#2563eb;color:#2563eb}
+.nbtn.bm-on{border-color:#ca8a04;color:#ca8a04}
+.done-box{text-align:center;padding:50px 20px}
+.done-box .ico{font-size:52px;margin-bottom:14px}
+.done-box h2{font-size:20px;color:#2563eb;margin-bottom:8px}
+.done-box p{color:#64748b;font-size:13px;line-height:1.7;margin-bottom:20px}
+/* 목록 모드 */
+.list-top{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.sbox{flex:1;padding:8px 12px;border-radius:6px;border:1px solid #e2e8f0;background:#ffffff;color:#2d3748;font-size:13px;outline:none}
+.sbox:focus{border-color:#2563eb}
+.lcnt{font-size:11px;color:#64748b;white-space:nowrap}
+.lcard{background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;display:flex;gap:10px;margin-bottom:7px;align-items:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.lcard.ok{border-color:#bbf7d0;background:#f0fdf4}
+.lcard.fail{border-color:#fecaca;background:#fff5f5}
+.lnum{font-size:10px;color:#94a3b8;min-width:24px;padding-top:2px}
+.len{font-size:13px;color:#1e293b;font-weight:500;line-height:1.5}
+.lko{font-size:12px;color:#64748b;margin-top:3px;line-height:1.4}
+.lbadges{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.bdg{padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700}
+.bdg.ok{background:#f0fdf4;color:#16a34a}
+.bdg.fail{background:#fff5f5;color:#dc2626}
+.bdg.bm{background:#fefce8;color:#ca8a04}
+.bdg.new{background:#f1f5f9;color:#64748b}
+.lbtn{padding:3px 8px;border-radius:4px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;font-size:10px;flex-shrink:0;transition:.15s}
+.lbtn:hover{border-color:#2563eb;color:#2563eb}
+.lbtn.on{border-color:#ca8a04;color:#ca8a04}
+@media(max-width:600px){.side{display:none}.main{padding:14px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <div class="top-title">📚 영어 암기 카드</div>
+    <div class="top-sub">400문장 · 이메일 · 물류 · 비즈니스 · 일상 · 스페이스드 리피티션</div>
+  </div>
+  <div class="top-btns">
+    <button class="top-btn on" id="btnStudy" onclick="setMode('study')">📖 학습</button>
+    <button class="top-btn" id="btnList" onclick="setMode('list')">📋 목록</button>
+  </div>
+</div>
+<div class="sync-bar loading" id="syncBar">
+  <div class="sync-dot"></div><span id="syncMsg">DB 연결 중...</span>
+</div>
+<div class="body-wrap">
+  <div class="side">
+    <div class="side-h">카테고리</div>
+    <button class="cat-btn on" onclick="setCat('all',this)">🌐 전체 <span class="cnt">400</span></button>
+    <button class="cat-btn" onclick="setCat('email',this)">📧 비즈니스 이메일 <span class="cnt">100</span></button>
+    <button class="cat-btn" onclick="setCat('logistics',this)">🚢 해운물류 회화 <span class="cnt">100</span></button>
+    <button class="cat-btn" onclick="setCat('biz',this)">💼 비즈니스 회화 <span class="cnt">100</span></button>
+    <button class="cat-btn" onclick="setCat('daily',this)">☀️ 일상 회화 <span class="cnt">100</span></button>
+    <div class="divider"></div>
+    <div class="side-h">세션 시작</div>
+    <button class="side-btn" onclick="startSession('all')">▶ 전체 학습</button>
+    <button class="side-btn" onclick="startSession('unseen')">🆕 안 본 것만</button>
+    <button class="side-btn" onclick="startSession('fail')">🔥 틀린 것만</button>
+    <button class="side-btn" onclick="startSession('bookmark')">⭐ 북마크만</button>
+    <button class="side-btn" onclick="startSession('random')">🔀 랜덤 50장</button>
+    <div class="divider"></div>
+    <div class="side-h">진도</div>
+    <div class="mini-stat">
+      <div class="ms"><div class="n" id="mDone">0</div><div class="l">학습</div></div>
+      <div class="ms"><div class="n" id="mMastered" style="color:#16a34a">0</div><div class="l">완벽</div></div>
+      <div class="ms"><div class="n" id="mFail" style="color:#dc2626">0</div><div class="l">복습</div></div>
+    </div>
+    <div class="prog-label"><span>암기율</span><span id="progPct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="divider"></div>
+    <button class="side-btn" style="color:#dc2626" onclick="resetAll()">🗑 전체 초기화</button>
+  </div>
+  <div class="main">
+    <div class="main-inner" id="mainInner">
+      <div style="text-align:center;padding:60px 20px;color:#94a3b8">
+        <div style="font-size:36px;margin-bottom:12px">📚</div>
+        <div>왼쪽에서 세션을 선택하세요</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SUPABASE =====
+const SB_URL='https://pdoelwybbnrdyitoeqrb.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI';
+function getDevId(){let id=localStorage.getItem('fc_dev2');if(!id){id='fc2_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);localStorage.setItem('fc_dev2',id);}return id;}
+const DEV=getDevId();
+
+async function sbReq(method,path,body=null){
+  try{
+    const opts={method,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};
+    if(body)opts.body=JSON.stringify(body);
+    const r=await fetch(SB_URL+'/rest/v1/'+path,opts);
+    const t=await r.text();return t?JSON.parse(t):[];
+  }catch(e){return[];}
+}
+
+function setSyncStatus(type,msg){
+  const b=document.getElementById('syncBar');
+  b.className='sync-bar'+(type==='error'?' error':type==='loading'?' loading':'');
+  document.getElementById('syncMsg').textContent=msg;
+}
+
+async function loadProgress(){
+  setSyncStatus('loading','기록 불러오는 중...');
+  try{
+    const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEV)}&question_index=gte.20000&select=question_index,result`);
+    rows.forEach(r=>{
+      const id=r.question_index-20000;
+      try{state[id]=JSON.parse(r.result);}catch(e){}
+    });
+    setSyncStatus('ok','✓ 연결됨 · '+DEV.slice(0,12)+'...');
+  }catch(e){setSyncStatus('error','DB 연결 실패');}
+  updateSidebar();
+}
+
+async function saveCard(id){
+  localStorage.setItem('fc_state2',JSON.stringify(state));
+  try{
+    await sbReq('POST','quiz_progress',{device_id:DEV,question_index:id+20000,result:JSON.stringify(state[id])});
+    setSyncStatus('ok','✓ 저장됨 · '+new Date().toLocaleTimeString('ko-KR'));
+  }catch(e){setSyncStatus('error','저장 실패');}
+}
+
+async function resetAll(){
+  if(!confirm('모든 암기 기록을 초기화합니까?'))return;
+  state={};
+  localStorage.removeItem('fc_state2');
+  try{await sbReq('DELETE',`quiz_progress?device_id=eq.${encodeURIComponent(DEV)}&question_index=gte.20000`);}catch(e){}
+  updateSidebar();
+  setSyncStatus('ok','초기화 완료');
+  renderWelcome();
+}
+
+// ===== CARDS =====
+const CARDS=[
+// ── 📧 비즈니스 이메일 (1-100) ──
+{id:0,cat:'email',en:'I hope this email finds you well.',ko:'이 이메일이 잘 전달되기를 바랍니다.'},
+{id:1,cat:'email',en:'I am writing to inquire about the shipment status.',ko:'화물 현황을 문의드리고자 메일 드립니다.'},
+{id:2,cat:'email',en:'Please find the attached invoice for your reference.',ko:'참고용으로 첨부된 인보이스를 확인해 주세요.'},
+{id:3,cat:'email',en:'Could you please confirm the booking details?',ko:'부킹 내용을 확인해 주실 수 있을까요?'},
+{id:4,cat:'email',en:'We would like to request a quotation for the following cargo.',ko:'아래 화물에 대한 견적을 요청드립니다.'},
+{id:5,cat:'email',en:'Please advise the estimated time of departure.',ko:'예상 출발 일정을 알려주시기 바랍니다.'},
+{id:6,cat:'email',en:'Kindly acknowledge receipt of this email.',ko:'이 이메일 수신 확인 부탁드립니다.'},
+{id:7,cat:'email',en:'We regret to inform you that the shipment has been delayed.',ko:'유감스럽게도 화물이 지연되었음을 알려드립니다.'},
+{id:8,cat:'email',en:'Please issue the Bill of Lading at your earliest convenience.',ko:'가능한 빨리 선하증권을 발행해 주시기 바랍니다.'},
+{id:9,cat:'email',en:'Could you provide the tracking number for this shipment?',ko:'이 화물의 추적 번호를 제공해 주실 수 있나요?'},
+{id:10,cat:'email',en:'We acknowledge receipt of your purchase order.',ko:'구매 주문서 수령을 확인드립니다.'},
+{id:11,cat:'email',en:'Please submit the VGM information before the cut-off.',ko:'마감 전에 VGM 정보를 제출해 주세요.'},
+{id:12,cat:'email',en:'We apologize for any inconvenience caused.',ko:'불편을 드려 죄송합니다.'},
+{id:13,cat:'email',en:'Could you amend the Shipping Instruction accordingly?',ko:'그에 맞게 선적 지시서를 수정해 주실 수 있을까요?'},
+{id:14,cat:'email',en:'Please send us the draft B/L for our review.',ko:'검토를 위해 B/L 초안을 보내주세요.'},
+{id:15,cat:'email',en:'We confirm the booking as per the details below.',ko:'아래 내용으로 부킹을 확인합니다.'},
+{id:16,cat:'email',en:'Kindly arrange the inland transportation to the CY.',ko:'CY까지의 내륙 운송을 준비해 주시기 바랍니다.'},
+{id:17,cat:'email',en:'Please note that the CY cut-off is tomorrow at 18:00.',ko:'CY 마감이 내일 18:00임을 참고하시기 바랍니다.'},
+{id:18,cat:'email',en:'We look forward to your prompt response.',ko:'빠른 답변 부탁드립니다.'},
+{id:19,cat:'email',en:'Please revert with the revised schedule at your earliest.',ko:'가능한 빨리 변경된 스케줄로 회신 부탁드립니다.'},
+{id:20,cat:'email',en:'The cargo is ready for shipment and awaiting your confirmation.',ko:'화물이 선적 준비 완료되었으며 확인을 기다리고 있습니다.'},
+{id:21,cat:'email',en:'We need the original B/L to be surrendered at origin.',ko:'원본 B/L을 출발지에서 서렌더 처리해 주셔야 합니다.'},
+{id:22,cat:'email',en:'Please include the HS code in the commercial invoice.',ko:'상업 인보이스에 HS 코드를 포함해 주세요.'},
+{id:23,cat:'email',en:'The shipment is currently on hold pending customs clearance.',ko:'화물이 현재 통관 보류 중입니다.'},
+{id:24,cat:'email',en:'Could you share the vessel schedule for next month?',ko:'다음 달 선박 스케줄을 공유해 주실 수 있나요?'},
+{id:25,cat:'email',en:'We will revert to you shortly after checking internally.',ko:'내부 확인 후 곧 회신 드리겠습니다.'},
+{id:26,cat:'email',en:'Please ensure the packing list matches the invoice.',ko:'패킹리스트가 인보이스와 일치하는지 확인해 주세요.'},
+{id:27,cat:'email',en:'We have received the Delivery Order from the shipping line.',ko:'선사로부터 D/O를 수령하였습니다.'},
+{id:28,cat:'email',en:'Please arrange cargo insurance before shipment.',ko:'선적 전에 화물 보험을 준비해 주세요.'},
+{id:29,cat:'email',en:'Kindly update us on the ETA at destination port.',ko:'목적항 ETA를 업데이트해 주시기 바랍니다.'},
+{id:30,cat:'email',en:'We require the Certificate of Origin for customs purposes.',ko:'통관을 위해 원산지증명서가 필요합니다.'},
+{id:31,cat:'email',en:'Please confirm if the vessel is on schedule.',ko:'선박이 예정대로 운항 중인지 확인해 주세요.'},
+{id:32,cat:'email',en:'We are following up on our previous email dated last Monday.',ko:'지난 월요일자 이전 이메일에 대해 팔로업 드립니다.'},
+{id:33,cat:'email',en:'The Demurrage charges will be waived this time as a goodwill gesture.',ko:'이번에는 선의로 체선료를 면제해 드리겠습니다.'},
+{id:34,cat:'email',en:'Please provide a written confirmation of the rate agreement.',ko:'운임 합의에 대한 서면 확인서를 제공해 주세요.'},
+{id:35,cat:'email',en:'We regret that we are unable to accommodate your request at this time.',ko:'현재로서는 귀하의 요청을 수용할 수 없어 유감입니다.'},
+{id:36,cat:'email',en:'Please arrange for the empty container to be returned by Friday.',ko:'금요일까지 공컨테이너를 반납해 주세요.'},
+{id:37,cat:'email',en:'We will proceed with the booking once we receive your approval.',ko:'승인을 받는 즉시 부킹을 진행하겠습니다.'},
+{id:38,cat:'email',en:'Attached please find the commercial invoice and packing list.',ko:'상업 인보이스와 패킹리스트를 첨부해 드립니다.'},
+{id:39,cat:'email',en:'Please advise the detention free time allowed at destination.',ko:'목적지에서 허용되는 컨테이너 무료 사용 기간을 알려주세요.'},
+{id:40,cat:'email',en:'We have noted your concerns and will investigate the matter.',ko:'귀하의 우려를 확인하였으며 해당 사항을 조사하겠습니다.'},
+{id:41,cat:'email',en:'Could you send us the freight invoice for our records?',ko:'기록 보관을 위해 운임 청구서를 보내주실 수 있나요?'},
+{id:42,cat:'email',en:'We would appreciate it if you could expedite the process.',ko:'절차를 신속히 진행해 주시면 감사하겠습니다.'},
+{id:43,cat:'email',en:'Please be advised that the port is currently congested.',ko:'현재 항만이 혼잡하다는 점을 참고하시기 바랍니다.'},
+{id:44,cat:'email',en:'We will keep you posted on any further developments.',ko:'추가 진행 사항이 있으면 계속 알려드리겠습니다.'},
+{id:45,cat:'email',en:'Please double-check the container number before submission.',ko:'제출 전에 컨테이너 번호를 다시 확인해 주세요.'},
+{id:46,cat:'email',en:'We have escalated this issue to our management team.',ko:'이 문제를 관리팀에 에스컬레이션하였습니다.'},
+{id:47,cat:'email',en:'Kindly sign and return the service contract at your earliest.',ko:'가능한 빨리 서비스 계약서에 서명하여 반송해 주세요.'},
+{id:48,cat:'email',en:'We trust this resolves the matter to your satisfaction.',ko:'이로써 문제가 만족스럽게 해결되기를 바랍니다.'},
+{id:49,cat:'email',en:'Please note that additional charges may apply for hazardous cargo.',ko:'위험물 화물에는 추가 요금이 부과될 수 있음을 참고하세요.'},
+{id:50,cat:'email',en:'We would like to schedule a call to discuss the details.',ko:'세부 사항 논의를 위해 통화 일정을 잡고 싶습니다.'},
+{id:51,cat:'email',en:'Please send the original documents via courier to our office.',ko:'원본 서류를 택배로 저희 사무실에 보내주세요.'},
+{id:52,cat:'email',en:'We have arranged the customs broker to handle the clearance.',ko:'통관 처리를 위해 관세사를 준비해 두었습니다.'},
+{id:53,cat:'email',en:'Kindly confirm the final cargo weight before the SI cut-off.',ko:'SI 마감 전에 최종 화물 중량을 확인해 주세요.'},
+{id:54,cat:'email',en:'We sincerely apologize for the error in the previous invoice.',ko:'이전 인보이스의 오류에 대해 진심으로 사과드립니다.'},
+{id:55,cat:'email',en:'Please arrange a pre-shipment inspection for this cargo.',ko:'이 화물에 대해 선적 전 검사를 준비해 주세요.'},
+{id:56,cat:'email',en:'We are pleased to inform you that the shipment has been loaded.',ko:'화물이 선적되었음을 알려드리게 되어 기쁩니다.'},
+{id:57,cat:'email',en:'Please update the consignee information in the Shipping Instruction.',ko:'선적 지시서의 수하인 정보를 업데이트해 주세요.'},
+{id:58,cat:'email',en:'We will not be able to meet the original delivery schedule.',ko:'당초 배송 일정을 맞추기 어려울 것 같습니다.'},
+{id:59,cat:'email',en:'Could you confirm the freight terms — prepaid or collect?',ko:'운임 조건이 선불인지 착불인지 확인해 주시겠어요?'},
+{id:60,cat:'email',en:'Please be informed that we have nominated the below forwarder.',ko:'아래 포워더를 지정하였음을 알려드립니다.'},
+{id:61,cat:'email',en:'We require your bank details for the wire transfer.',ko:'계좌 이체를 위해 은행 계좌 정보가 필요합니다.'},
+{id:62,cat:'email',en:'Please share the loading plan before vessel departure.',ko:'선박 출항 전에 선적 계획을 공유해 주세요.'},
+{id:63,cat:'email',en:'We kindly ask for your patience while we look into this.',ko:'검토하는 동안 기다려 주시면 감사하겠습니다.'},
+{id:64,cat:'email',en:'Please ensure all documents are submitted before the deadline.',ko:'마감 전에 모든 서류가 제출되도록 확인해 주세요.'},
+{id:65,cat:'email',en:'We have successfully completed the customs clearance.',ko:'통관이 성공적으로 완료되었습니다.'},
+{id:66,cat:'email',en:'Could you advise the surcharges applicable for this lane?',ko:'이 항로에 적용되는 할증료를 알려주실 수 있나요?'},
+{id:67,cat:'email',en:'We will send a revised quotation by end of business today.',ko:'오늘 업무 종료 전에 수정된 견적서를 보내드리겠습니다.'},
+{id:68,cat:'email',en:'Please find enclosed the signed Service Level Agreement.',ko:'서명된 서비스 수준 협약서를 첨부하여 드립니다.'},
+{id:69,cat:'email',en:'We have placed the booking with the carrier as discussed.',ko:'논의한 대로 선사에 부킹을 진행하였습니다.'},
+{id:70,cat:'email',en:'Please advise if there are any special requirements for this cargo.',ko:'이 화물에 특별 요건이 있는지 알려주세요.'},
+{id:71,cat:'email',en:'We will arrange for the container to be stuffed by tomorrow.',ko:'내일까지 컨테이너에 화물을 적입하도록 준비하겠습니다.'},
+{id:72,cat:'email',en:'Kindly note that the free time at the CY is 3 days.',ko:'CY의 무료 보관 기간이 3일임을 참고하세요.'},
+{id:73,cat:'email',en:'We have received the D/O and will proceed with cargo pickup.',ko:'D/O를 수령하였으며 화물 픽업을 진행할 예정입니다.'},
+{id:74,cat:'email',en:'Please submit the Shipping Instruction by noon tomorrow.',ko:'내일 정오까지 선적 지시서를 제출해 주세요.'},
+{id:75,cat:'email',en:'We are currently awaiting customs release for your cargo.',ko:'귀하의 화물에 대한 통관 허가를 기다리고 있습니다.'},
+{id:76,cat:'email',en:'Could you arrange a survey for the damaged cargo?',ko:'손상된 화물에 대한 검정을 준비해 주실 수 있나요?'},
+{id:77,cat:'email',en:'Please note that our office will be closed on the public holiday.',ko:'공휴일에 저희 사무소가 휴무임을 참고하시기 바랍니다.'},
+{id:78,cat:'email',en:'We have issued the B/L and will send the original by courier.',ko:'B/L을 발행하였으며 원본을 택배로 발송하겠습니다.'},
+{id:79,cat:'email',en:'Please advise the port of discharge for the new shipment.',ko:'새로운 화물의 목적항을 알려주시기 바랍니다.'},
+{id:80,cat:'email',en:'We would like to propose a long-term service contract.',ko:'장기 서비스 계약을 제안하고 싶습니다.'},
+{id:81,cat:'email',en:'Please confirm that the cargo has been received in good condition.',ko:'화물이 양호한 상태로 수령되었는지 확인해 주세요.'},
+{id:82,cat:'email',en:'We will apply the GRI effective from next month.',ko:'다음 달부터 GRI를 적용하겠습니다.'},
+{id:83,cat:'email',en:'Kindly arrange the fumigation certificate before export.',ko:'수출 전에 훈증 증명서를 준비해 주세요.'},
+{id:84,cat:'email',en:'Please send us the letter of credit for our review.',ko:'검토를 위해 신용장을 보내주시기 바랍니다.'},
+{id:85,cat:'email',en:'We would like to add one more container to the existing booking.',ko:'기존 부킹에 컨테이너 1개를 추가하고 싶습니다.'},
+{id:86,cat:'email',en:'Please provide proof of delivery for our records.',ko:'기록 보관을 위한 배송 완료 증빙을 제공해 주세요.'},
+{id:87,cat:'email',en:'We have noted the amendment and will update the records.',ko:'수정 사항을 확인하였으며 기록을 업데이트하겠습니다.'},
+{id:88,cat:'email',en:'Please let us know if you require any further information.',ko:'추가 정보가 필요하시면 알려주세요.'},
+{id:89,cat:'email',en:'We apologize for the late response and thank you for your patience.',ko:'늦은 답변에 사과드리며 기다려 주셔서 감사합니다.'},
+{id:90,cat:'email',en:'Could you confirm the container seal number after stuffing?',ko:'화물 적입 후 컨테이너 봉인 번호를 확인해 주실 수 있나요?'},
+{id:91,cat:'email',en:'We will coordinate with the terminal for priority berthing.',ko:'우선 선석 배정을 위해 터미널과 조율하겠습니다.'},
+{id:92,cat:'email',en:'Please ensure the refrigerated container is pre-cooled before loading.',ko:'선적 전 냉동 컨테이너를 사전 냉각해 주세요.'},
+{id:93,cat:'email',en:'We have received your complaint and will respond within 24 hours.',ko:'귀하의 불만을 접수하였으며 24시간 이내에 답변 드리겠습니다.'},
+{id:94,cat:'email',en:'Please arrange for the container to be returned to the depot.',ko:'컨테이너를 데포로 반납해 주세요.'},
+{id:95,cat:'email',en:'We are pleased to confirm the rate as per our agreement.',ko:'합의한 운임을 확인드리게 되어 기쁩니다.'},
+{id:96,cat:'email',en:'Please keep us informed of any changes to the shipment details.',ko:'화물 세부 사항에 변경이 있으면 알려주세요.'},
+{id:97,cat:'email',en:'We will follow up with the carrier regarding the delay.',ko:'지연과 관련하여 선사에 팔로업하겠습니다.'},
+{id:98,cat:'email',en:'Could you send us the master airway bill copy for our reference?',ko:'참고를 위해 MAWB 사본을 보내주실 수 있나요?'},
+{id:99,cat:'email',en:'We thank you for your continued business and look forward to a long-term partnership.',ko:'지속적인 거래에 감사드리며 장기적인 파트너십을 기대합니다.'},
+// ── 🚢 해운물류 실무 회화 (100-199) ──
+{id:100,cat:'logistics',en:"Do you have any available slots on the vessel sailing next Friday?",ko:"다음 주 금요일 출항하는 선박에 선적 공간이 있나요?"},
+{id:101,cat:'logistics',en:"What is the all-in rate for a 40-foot container to Los Angeles?",ko:"LA행 40피트 컨테이너의 all-in 운임이 얼마인가요?"},
+{id:102,cat:'logistics',en:"We need to book two TEUs on the next available vessel to Rotterdam.",ko:"로테르담행 차기 선박에 TEU 2개를 부킹해야 합니다."},
+{id:103,cat:'logistics',en:"Can you check the cargo tracking for container number MSCU1234567?",ko:"컨테이너 번호 MSCU1234567의 화물 추적을 확인해 주실 수 있나요?"},
+{id:104,cat:'logistics',en:"The vessel arrived at the port of discharge yesterday afternoon.",ko:"선박이 어제 오후 목적항에 도착하였습니다."},
+{id:105,cat:'logistics',en:"When is the SI cut-off for the vessel departing on the 15th?",ko:"15일 출항하는 선박의 SI 마감은 언제인가요?"},
+{id:106,cat:'logistics',en:"The cargo is under customs hold and we are waiting for release.",ko:"화물이 세관 보류 중이며 해제를 기다리고 있습니다."},
+{id:107,cat:'logistics',en:"We need to arrange a stripping and re-stuffing of the container.",ko:"컨테이너의 화물 적출 후 재적입이 필요합니다."},
+{id:108,cat:'logistics',en:"Please confirm whether the container is a dry box or a reefer.",ko:"컨테이너가 일반 컨테이너인지 냉동 컨테이너인지 확인해 주세요."},
+{id:109,cat:'logistics',en:"The vessel was omitted at our port due to schedule optimization.",ko:"스케줄 최적화로 인해 선박이 우리 항에서 생략 기항하였습니다."},
+{id:110,cat:'logistics',en:"How many free days are included for container detention at destination?",ko:"목적지 컨테이너 Detention 무료 기간이 며칠인가요?"},
+{id:111,cat:'logistics',en:"The cargo must be delivered to the CY before the cut-off time.",ko:"화물은 마감 시간 전에 CY에 반입되어야 합니다."},
+{id:112,cat:'logistics',en:"We need to declare this cargo as dangerous goods under IMDG Class 3.",ko:"이 화물을 IMDG Class 3 위험물로 신고해야 합니다."},
+{id:113,cat:'logistics',en:"Can you provide a sailing schedule from Busan to Hamburg?",ko:"부산에서 함부르크까지의 출항 스케줄을 제공해 주실 수 있나요?"},
+{id:114,cat:'logistics',en:"The transshipment will be done at Singapore with a connecting vessel.",ko:"환적은 싱가포르에서 연결 선박으로 진행될 예정입니다."},
+{id:115,cat:'logistics',en:"We need an on-board Bill of Lading, not a received B/L.",ko:"수취 B/L이 아닌 선적 B/L이 필요합니다."},
+{id:116,cat:'logistics',en:"The shipper has requested a freight prepaid B/L.",ko:"화주가 운임 선불 B/L을 요청하였습니다."},
+{id:117,cat:'logistics',en:"The container has been returned to the depot empty.",ko:"컨테이너가 공컨테이너로 데포에 반납되었습니다."},
+{id:118,cat:'logistics',en:"Can you check if the vessel is on time or if there is any delay?",ko:"선박이 정시 운항 중인지, 지연이 있는지 확인해 주실 수 있나요?"},
+{id:119,cat:'logistics',en:"We would like to amend the consignee name on the draft B/L.",ko:"B/L 초안의 수하인 이름을 수정하고 싶습니다."},
+{id:120,cat:'logistics',en:"The LCL cargo will be consolidated at the CFS tomorrow morning.",ko:"LCL 화물은 내일 아침 CFS에서 혼재될 예정입니다."},
+{id:121,cat:'logistics',en:"Please arrange a pre-alert to the destination agent.",ko:"목적지 에이전트에게 사전 통보를 준비해 주세요."},
+{id:122,cat:'logistics',en:"What is the transit time from Incheon to Long Beach?",ko:"인천에서 롱비치까지의 운송 기간이 얼마나 되나요?"},
+{id:123,cat:'logistics',en:"The cargo was loaded on the mother vessel at the hub port.",ko:"화물이 허브항에서 모선에 선적되었습니다."},
+{id:124,cat:'logistics',en:"We need to file the export declaration before loading.",ko:"선적 전에 수출 신고를 해야 합니다."},
+{id:125,cat:'logistics',en:"The container is currently sitting at the yard waiting for inspection.",ko:"컨테이너가 현재 검사 대기 중으로 야드에 있습니다."},
+{id:126,cat:'logistics',en:"Can you send me the vessel schedule for the Asia-Europe route?",ko:"아시아-유럽 항로의 선박 스케줄을 보내주실 수 있나요?"},
+{id:127,cat:'logistics',en:"The cargo weight exceeds the container's maximum payload.",ko:"화물 중량이 컨테이너 최대 적재 하중을 초과합니다."},
+{id:128,cat:'logistics',en:"We will arrange a surveyor to inspect the damaged goods.",ko:"손상된 화물 검사를 위해 검정인을 준비하겠습니다."},
+{id:129,cat:'logistics',en:"The port is experiencing heavy congestion due to vessel bunching.",ko:"선박 집중으로 인해 항만에 심한 혼잡이 발생하고 있습니다."},
+{id:130,cat:'logistics',en:"Please provide the MSDS for the hazardous cargo.",ko:"위험물 화물에 대한 MSDS를 제공해 주세요."},
+{id:131,cat:'logistics',en:"We need to split the shipment into two separate containers.",ko:"화물을 두 개의 컨테이너로 분할 선적해야 합니다."},
+{id:132,cat:'logistics',en:"The delivery order has been released and the cargo can be picked up.",ko:"D/O가 발급되었으며 화물을 픽업할 수 있습니다."},
+{id:133,cat:'logistics',en:"Can you check if our container has been gated in at the terminal?",ko:"우리 컨테이너가 터미널에 반입되었는지 확인해 주실 수 있나요?"},
+{id:134,cat:'logistics',en:"We need to extend the free time due to customs clearance delays.",ko:"통관 지연으로 인해 무료 기간 연장이 필요합니다."},
+{id:135,cat:'logistics',en:"The shipper has opted for a CIF price term on this contract.",ko:"화주가 이번 계약에서 CIF 가격 조건을 선택하였습니다."},
+{id:136,cat:'logistics',en:"Please ensure the reefer is set at minus 18 degrees Celsius.",ko:"냉동 컨테이너 온도가 영하 18도로 설정되도록 확인해 주세요."},
+{id:137,cat:'logistics',en:"The vessel arrived at anchorage and is waiting for a berth.",ko:"선박이 묘박지에 도착하여 선석을 기다리고 있습니다."},
+{id:138,cat:'logistics',en:"We need to arrange inland transportation from the factory to the CY.",ko:"공장에서 CY까지 내륙 운송을 준비해야 합니다."},
+{id:139,cat:'logistics',en:"Can you advise the demurrage rate after the free days expire?",ko:"무료 기간 만료 후 체선료율을 알려주실 수 있나요?"},
+{id:140,cat:'logistics',en:"The cargo has arrived at the port and is being unloaded now.",ko:"화물이 항만에 도착하여 현재 양하 작업 중입니다."},
+{id:141,cat:'logistics',en:"We need the Surrender B/L for this short-sea shipment.",ko:"이번 단거리 해상 운송에 서렌더 B/L이 필요합니다."},
+{id:142,cat:'logistics',en:"Please advise if there are any port surcharges applicable.",ko:"적용되는 항만 할증료가 있으면 알려주세요."},
+{id:143,cat:'logistics',en:"The cargo is FCL, so it will go directly to the CY at destination.",ko:"화물은 FCL이라 목적지 CY로 직접 반입됩니다."},
+{id:144,cat:'logistics',en:"We need to check the AMS filing status for the US-bound cargo.",ko:"미국행 화물의 AMS 신고 현황을 확인해야 합니다."},
+{id:145,cat:'logistics',en:"The shipper's load and count disclaimer is noted on the B/L.",ko:"화주 적입 및 계수 면책 문구가 B/L에 기재되어 있습니다."},
+{id:146,cat:'logistics',en:"We will arrange an OOG cargo shipment with special equipment.",ko:"특수 장비를 이용한 초과 규격(OOG) 화물 선적을 준비하겠습니다."},
+{id:147,cat:'logistics',en:"The container dwell time at the terminal is currently three days.",ko:"현재 터미널 내 컨테이너 체류 기간은 3일입니다."},
+{id:148,cat:'logistics',en:"Please confirm the booking reference number for this shipment.",ko:"이 화물의 부킹 참조 번호를 확인해 주세요."},
+{id:149,cat:'logistics',en:"We need to arrange a bonded warehouse for the transit cargo.",ko:"환적 화물을 위한 보세창고를 준비해야 합니다."},
+{id:150,cat:'logistics',en:"The feeder vessel will connect to the mother ship at Busan Hub.",ko:"피더 선박이 부산 허브에서 모선과 연결됩니다."},
+{id:151,cat:'logistics',en:"Can you check the gate-out time for this container at the terminal?",ko:"이 컨테이너의 터미널 게이트 반출 시간을 확인해 주실 수 있나요?"},
+{id:152,cat:'logistics',en:"We need the weight certificate before we can finalize the VGM.",ko:"VGM을 확정하기 전에 중량 증명서가 필요합니다."},
+{id:153,cat:'logistics',en:"The port authority has imposed a General Rate Increase next month.",ko:"항만 당국이 다음 달 GRI를 시행합니다."},
+{id:154,cat:'logistics',en:"We are looking for a slot charter on the Asia-North America lane.",ko:"아시아-북미 항로에서 선복 대선을 찾고 있습니다."},
+{id:155,cat:'logistics',en:"Please confirm whether this is a port-to-port or door-to-door service.",ko:"이것이 항구 간 서비스인지 문전 배송 서비스인지 확인해 주세요."},
+{id:156,cat:'logistics',en:"The shipping line has issued a blank sailing notice for next week.",ko:"선사가 다음 주 공백 운항(Blank Sailing) 공지를 발표했습니다."},
+{id:157,cat:'logistics',en:"We need to rebook the cargo to the next available vessel.",ko:"다음 가용 선박으로 화물을 재부킹해야 합니다."},
+{id:158,cat:'logistics',en:"Can you provide the bill of lading instruction template?",ko:"B/L 지시서 양식을 제공해 주실 수 있나요?"},
+{id:159,cat:'logistics',en:"The stuffing will take place at our warehouse on Thursday.",ko:"화물 적입은 목요일 저희 창고에서 진행됩니다."},
+{id:160,cat:'logistics',en:"We would like to arrange a back-to-back booking for the return leg.",ko:"귀항 구간을 위한 백투백 부킹을 준비하고 싶습니다."},
+{id:161,cat:'logistics',en:"The forwarder has confirmed the booking and sent the booking confirmation.",ko:"포워더가 부킹을 확인하고 부킹 확인서를 보내왔습니다."},
+{id:162,cat:'logistics',en:"We need to file the import declaration within 24 hours of arrival.",ko:"입항 후 24시간 이내에 수입 신고를 해야 합니다."},
+{id:163,cat:'logistics',en:"The cargo is subject to phytosanitary inspection at the port of entry.",ko:"화물은 입항항에서 식물검역 검사 대상입니다."},
+{id:164,cat:'logistics',en:"Can you arrange a truck to pick up the container from the port?",ko:"항만에서 컨테이너를 픽업할 트럭을 준비해 주실 수 있나요?"},
+{id:165,cat:'logistics',en:"The shipper has provided the wrong HS code — please amend.",ko:"화주가 잘못된 HS 코드를 제공하였으니 수정 부탁드립니다."},
+{id:166,cat:'logistics',en:"We need to check if the cargo is on the restricted commodity list.",ko:"화물이 제한 품목 목록에 있는지 확인해야 합니다."},
+{id:167,cat:'logistics',en:"The container will be available for pickup from the CY tomorrow.",ko:"컨테이너는 내일 CY에서 픽업 가능합니다."},
+{id:168,cat:'logistics',en:"Please confirm the lead time for booking equipment.",ko:"장비 부킹의 리드타임을 확인해 주세요."},
+{id:169,cat:'logistics',en:"The vessel will call at three ports before reaching the final destination.",ko:"선박은 최종 목적지에 도착하기 전 3개 항구에 기항합니다."},
+{id:170,cat:'logistics',en:"We need to arrange the export license before shipment.",ko:"선적 전에 수출 허가를 준비해야 합니다."},
+{id:171,cat:'logistics',en:"Can you send me the arrival notice for this shipment?",ko:"이 화물의 도착 통지서를 보내주실 수 있나요?"},
+{id:172,cat:'logistics',en:"The cargo was short-shipped due to a weight discrepancy.",ko:"중량 차이로 인해 화물이 부족 선적되었습니다."},
+{id:173,cat:'logistics',en:"We need to arrange cargo insurance with an ICC(A) condition.",ko:"ICC(A) 조건으로 화물 보험을 준비해야 합니다."},
+{id:174,cat:'logistics',en:"The container has been placed on a customs examination queue.",ko:"컨테이너가 세관 검사 대기 목록에 등재되었습니다."},
+{id:175,cat:'logistics',en:"Please confirm the CFS cut-off for LCL cargo this week.",ko:"이번 주 LCL 화물의 CFS 마감을 확인해 주세요."},
+{id:176,cat:'logistics',en:"We will arrange a multi-modal transport solution for this shipment.",ko:"이 화물에 대해 복합 운송 솔루션을 준비하겠습니다."},
+{id:177,cat:'logistics',en:"The cargo arrived short — three pallets are missing from the shipment.",ko:"화물이 부족하게 도착했습니다 — 팔레트 3개가 누락되었습니다."},
+{id:178,cat:'logistics',en:"Can you arrange an urgent booking for tomorrow's vessel?",ko:"내일 출항하는 선박에 긴급 부킹을 준비해 주실 수 있나요?"},
+{id:179,cat:'logistics',en:"We need to re-export the cargo under the bonded procedure.",ko:"보세 절차를 통해 화물을 재수출해야 합니다."},
+{id:180,cat:'logistics',en:"The terminal handling charge is included in the quoted freight.",ko:"견적 운임에 터미널 하역료(THC)가 포함되어 있습니다."},
+{id:181,cat:'logistics',en:"Please send the pre-alert and all documents to our destination agent.",ko:"목적지 에이전트에게 사전 통보와 모든 서류를 보내주세요."},
+{id:182,cat:'logistics',en:"We are facing a shortage of empty containers in this region.",ko:"이 지역에서 공컨테이너 부족 현상이 발생하고 있습니다."},
+{id:183,cat:'logistics',en:"The cargo has passed customs and is ready for delivery.",ko:"화물이 통관을 마쳤으며 배송 준비가 완료되었습니다."},
+{id:184,cat:'logistics',en:"Please confirm whether the port accepts oversized cargo.",ko:"항만에서 초과 규격 화물을 취급하는지 확인해 주세요."},
+{id:185,cat:'logistics',en:"We need to arrange a fumigation certificate for wooden packing.",ko:"목재 포장재에 대한 훈증 증명서를 준비해야 합니다."},
+{id:186,cat:'logistics',en:"The vessel ETD has been changed to next Tuesday due to weather.",ko:"기상 악화로 선박 ETD가 다음 주 화요일로 변경되었습니다."},
+{id:187,cat:'logistics',en:"Can you confirm the incoterm and freight responsibility for this order?",ko:"이 주문의 인코텀즈와 운임 책임을 확인해 주실 수 있나요?"},
+{id:188,cat:'logistics',en:"We would like to switch from sea freight to air freight for urgent cargo.",ko:"긴급 화물은 해상 운송에서 항공 운송으로 전환하고 싶습니다."},
+{id:189,cat:'logistics',en:"The packing list does not match the cargo received at the warehouse.",ko:"패킹리스트가 창고에서 수령한 화물과 일치하지 않습니다."},
+{id:190,cat:'logistics',en:"Please note the vessel will be arriving two days earlier than expected.",ko:"선박이 예상보다 2일 일찍 도착할 예정임을 참고하세요."},
+{id:191,cat:'logistics',en:"We need to file the ENS declaration before the vessel departs.",ko:"선박 출항 전에 ENS 신고를 해야 합니다."},
+{id:192,cat:'logistics',en:"The empty container pickup order has been issued to the trucking company.",ko:"공컨테이너 픽업 지시서가 운송 업체에 발급되었습니다."},
+{id:193,cat:'logistics',en:"Can you check if the bill of lading has been telex-released?",ko:"B/L이 텔렉스 릴리즈 처리되었는지 확인해 주실 수 있나요?"},
+{id:194,cat:'logistics',en:"The cargo was damaged during transit and we need to file a claim.",ko:"화물이 운송 중 손상되어 클레임을 제기해야 합니다."},
+{id:195,cat:'logistics',en:"We have arranged the phytosanitary inspection for next Monday.",ko:"다음 월요일 식물검역 검사를 준비하였습니다."},
+{id:196,cat:'logistics',en:"Please send us the port dues and terminal tariff schedule.",ko:"항만 사용료 및 터미널 요금표를 보내주세요."},
+{id:197,cat:'logistics',en:"The cargo is in transit through the free trade zone.",ko:"화물이 자유무역지역을 통과하는 중입니다."},
+{id:198,cat:'logistics',en:"We need to arrange a weight bridge certificate for the cargo.",ko:"화물에 대한 계근 증명서를 준비해야 합니다."},
+{id:199,cat:'logistics',en:"The shipment has been confirmed and the booking number is 12345.",ko:"화물 부킹이 확인되었으며 부킹 번호는 12345입니다."},
+// ── 💼 비즈니스 회화 (200-299) ──
+{id:200,cat:'biz',en:"Let's get the meeting started — we have a lot to cover today.",ko:"회의를 시작하겠습니다 — 오늘 다룰 내용이 많습니다."},
+{id:201,cat:'biz',en:"Could you walk us through the key points of your proposal?",ko:"제안서의 핵심 사항을 설명해 주실 수 있나요?"},
+{id:202,cat:'biz',en:"I'd like to circle back to that point a bit later.",ko:"그 부분은 나중에 다시 다루고 싶습니다."},
+{id:203,cat:'biz',en:"Let's take a five-minute break and reconvene at half past.",ko:"5분 휴식 후 30분에 다시 모이겠습니다."},
+{id:204,cat:'biz',en:"Can we table this discussion for the next meeting?",ko:"이 논의는 다음 회의로 미룰 수 있을까요?"},
+{id:205,cat:'biz',en:"I'm afraid we're running a bit over schedule.",ko:"일정보다 조금 늦어지고 있는 것 같습니다."},
+{id:206,cat:'biz',en:"That's a fair point — let me address that.",ko:"맞는 말씀입니다 — 그 부분을 설명해 드리겠습니다."},
+{id:207,cat:'biz',en:"We need to align on the priorities before moving forward.",ko:"진행하기 전에 우선순위에 대한 합의가 필요합니다."},
+{id:208,cat:'biz',en:"Could you take the lead on this project?",ko:"이 프로젝트를 맡아주실 수 있나요?"},
+{id:209,cat:'biz',en:"Let's touch base again after you've had a chance to review it.",ko:"검토해 보신 후 다시 이야기 나눠보겠습니다."},
+{id:210,cat:'biz',en:"We're trying to streamline the process to reduce turnaround time.",ko:"처리 시간을 줄이기 위해 프로세스를 간소화하려고 합니다."},
+{id:211,cat:'biz',en:"I'll loop in our legal team on this matter.",ko:"법무팀을 이 사안에 포함시키겠습니다."},
+{id:212,cat:'biz',en:"The deadline is firm — we cannot extend it further.",ko:"마감 기한은 확정적입니다 — 더 이상 연장할 수 없습니다."},
+{id:213,cat:'biz',en:"Let me run this by my manager before we commit.",ko:"확정하기 전에 상관에게 보고해 보겠습니다."},
+{id:214,cat:'biz',en:"We need to get everyone on the same page before launch.",ko:"출시 전에 모든 사람이 같은 이해를 갖도록 해야 합니다."},
+{id:215,cat:'biz',en:"Could you send me a recap of today's discussion?",ko:"오늘 논의 내용을 요약해서 보내주실 수 있나요?"},
+{id:216,cat:'biz',en:"I appreciate your transparency on this issue.",ko:"이 문제에 대해 솔직하게 말씀해 주셔서 감사합니다."},
+{id:217,cat:'biz',en:"We're looking for a win-win solution for both parties.",ko:"양측 모두에게 유리한 해결책을 찾고 있습니다."},
+{id:218,cat:'biz',en:"That's outside the scope of our current agreement.",ko:"그것은 현재 계약 범위를 벗어나는 내용입니다."},
+{id:219,cat:'biz',en:"Let's schedule a follow-up call for Thursday afternoon.",ko:"목요일 오후에 팔로업 통화 일정을 잡겠습니다."},
+{id:220,cat:'biz',en:"I need this report on my desk by end of day.",ko:"오늘 업무 종료 전까지 이 보고서가 필요합니다."},
+{id:221,cat:'biz',en:"We've exceeded our quarterly targets — great job, everyone.",ko:"분기 목표를 초과 달성했습니다 — 모두 수고하셨습니다."},
+{id:222,cat:'biz',en:"The budget for this quarter has already been allocated.",ko:"이번 분기 예산은 이미 배정되었습니다."},
+{id:223,cat:'biz',en:"Could you give me a ballpark figure for the total cost?",ko:"총 비용에 대한 대략적인 수치를 알려주실 수 있나요?"},
+{id:224,cat:'biz',en:"We need to put together a business case for the board.",ko:"이사회를 위한 사업 계획서를 작성해야 합니다."},
+{id:225,cat:'biz',en:"I'll get back to you on that by the end of the week.",ko:"이번 주 말까지 그 부분에 대해 답변 드리겠습니다."},
+{id:226,cat:'biz',en:"Let's not reinvent the wheel — we can adapt the existing process.",ko:"처음부터 다시 만들 필요는 없습니다 — 기존 프로세스를 조정하면 됩니다."},
+{id:227,cat:'biz',en:"We are committed to delivering on time and within budget.",ko:"저희는 기간 내 예산 안에서 납품할 것을 약속합니다."},
+{id:228,cat:'biz',en:"Can you share the latest version of the spreadsheet?",ko:"스프레드시트 최신 버전을 공유해 주실 수 있나요?"},
+{id:229,cat:'biz',en:"We need to bring in more resources to meet the timeline.",ko:"일정을 맞추기 위해 추가 자원을 투입해야 합니다."},
+{id:230,cat:'biz',en:"I'd like to get your buy-in before we proceed.",ko:"진행하기 전에 귀하의 동의를 받고 싶습니다."},
+{id:231,cat:'biz',en:"Let's take this offline and discuss in more detail later.",ko:"이 부분은 오프라인에서 나중에 더 자세히 논의하겠습니다."},
+{id:232,cat:'biz',en:"We need to manage client expectations from the very start.",ko:"처음부터 고객 기대를 잘 관리해야 합니다."},
+{id:233,cat:'biz',en:"The ROI on this project is projected at 25% over two years.",ko:"이 프로젝트의 ROI는 2년간 25%로 예상됩니다."},
+{id:234,cat:'biz',en:"Please make sure the deliverables are clearly defined.",ko:"산출물이 명확하게 정의되도록 해주세요."},
+{id:235,cat:'biz',en:"We're at a critical juncture and need to make a decision soon.",ko:"중요한 시점에 있으며 곧 결정을 내려야 합니다."},
+{id:236,cat:'biz',en:"Could you prepare a SWOT analysis for the next board meeting?",ko:"다음 이사회 회의를 위해 SWOT 분석을 준비해 주실 수 있나요?"},
+{id:237,cat:'biz',en:"We need to benchmark our performance against industry standards.",ko:"업계 기준에 맞게 성과를 벤치마킹해야 합니다."},
+{id:238,cat:'biz',en:"I appreciate your flexibility on the payment terms.",ko:"결제 조건에 유연하게 대응해 주셔서 감사합니다."},
+{id:239,cat:'biz',en:"Let's set up a KPI dashboard to track the key metrics.",ko:"핵심 지표를 추적하기 위한 KPI 대시보드를 설정하겠습니다."},
+{id:240,cat:'biz',en:"We are targeting a 15% market share in the Asia-Pacific region.",ko:"아시아태평양 지역에서 15% 시장 점유율을 목표로 하고 있습니다."},
+{id:241,cat:'biz',en:"Could you escalate this to the decision-maker on your side?",ko:"귀측의 의사결정권자에게 에스컬레이션해 주실 수 있나요?"},
+{id:242,cat:'biz',en:"We'll need a signed NDA before sharing any proprietary information.",ko:"독점 정보를 공유하기 전에 서명된 NDA가 필요합니다."},
+{id:243,cat:'biz',en:"Let's debrief after the client presentation and assess how it went.",ko:"고객 프레젠테이션 후 결과를 평가하는 디브리핑을 진행합시다."},
+{id:244,cat:'biz',en:"We'll reach out to potential partners to explore collaboration opportunities.",ko:"잠재 파트너에게 협력 기회를 탐색하기 위해 연락할 것입니다."},
+{id:245,cat:'biz',en:"Could you share your thoughts on the draft agreement?",ko:"계약서 초안에 대한 귀하의 의견을 공유해 주실 수 있나요?"},
+{id:246,cat:'biz',en:"We need to address the bottlenecks in our supply chain.",ko:"공급망의 병목 지점을 해결해야 합니다."},
+{id:247,cat:'biz',en:"The project is on track and we expect to deliver on time.",ko:"프로젝트는 순조롭게 진행 중이며 기한 내 납품을 예상합니다."},
+{id:248,cat:'biz',en:"I'm happy to jump on a call whenever is convenient for you.",ko:"편하신 시간에 언제든지 통화할 준비가 되어 있습니다."},
+{id:249,cat:'biz',en:"We need to document all action items and assign ownership.",ko:"모든 실행 항목을 문서화하고 담당자를 지정해야 합니다."},
+{id:250,cat:'biz',en:"Could you give us a status update on the pending deliverables?",ko:"미결 산출물에 대한 진행 상황을 업데이트해 주실 수 있나요?"},
+{id:251,cat:'biz',en:"We're seeing a significant uptick in demand this quarter.",ko:"이번 분기 수요가 상당히 증가하고 있습니다."},
+{id:252,cat:'biz',en:"Let's pilot this in one region before rolling it out globally.",ko:"전사적으로 출시하기 전에 한 지역에서 먼저 파일럿을 진행합시다."},
+{id:253,cat:'biz',en:"We need to make this process more scalable for future growth.",ko:"미래 성장을 위해 이 프로세스를 더 확장 가능하게 만들어야 합니다."},
+{id:254,cat:'biz',en:"Can you confirm the headcount approved for this project?",ko:"이 프로젝트에 승인된 인원수를 확인해 주실 수 있나요?"},
+{id:255,cat:'biz',en:"The contract will be renewed automatically unless either party objects.",ko:"어느 한쪽이 이의를 제기하지 않는 한 계약은 자동으로 갱신됩니다."},
+{id:256,cat:'biz',en:"We have a hard cap on spending this fiscal year.",ko:"올 회계연도에는 지출 한도가 엄격히 정해져 있습니다."},
+{id:257,cat:'biz',en:"I'd like to propose a phased approach to implementation.",ko:"단계적 접근 방식으로 시행하는 것을 제안합니다."},
+{id:258,cat:'biz',en:"Could you share the meeting agenda before Thursday?",ko:"목요일 전에 회의 안건을 공유해 주실 수 있나요?"},
+{id:259,cat:'biz',en:"We appreciate your proactive communication on this matter.",ko:"이 사안에 대해 선제적으로 소통해 주셔서 감사합니다."},
+{id:260,cat:'biz',en:"The deal is contingent on board approval next week.",ko:"이 거래는 다음 주 이사회 승인을 조건으로 합니다."},
+{id:261,cat:'biz',en:"Let me put together a one-pager summarizing the key points.",ko:"핵심 사항을 요약한 한 장짜리 자료를 준비하겠습니다."},
+{id:262,cat:'biz',en:"We're looking to onboard three new clients this quarter.",ko:"이번 분기에 신규 고객 3곳을 확보하려고 합니다."},
+{id:263,cat:'biz',en:"Could you confirm the terms and conditions of the revised offer?",ko:"수정된 제안의 조건 사항을 확인해 주실 수 있나요?"},
+{id:264,cat:'biz',en:"Let's keep the momentum going — we're almost there.",ko:"계속 속도를 유지합시다 — 거의 다 왔습니다."},
+{id:265,cat:'biz',en:"We'll need to revisit the pricing model for the next fiscal year.",ko:"다음 회계연도를 위한 가격 모델을 재검토해야 합니다."},
+{id:266,cat:'biz',en:"Can we push the deadline by two days to ensure quality?",ko:"품질을 보장하기 위해 마감을 이틀 늦출 수 있을까요?"},
+{id:267,cat:'biz',en:"We need executive sign-off before we can proceed.",ko:"진행하기 전에 경영진의 서명 승인이 필요합니다."},
+{id:268,cat:'biz',en:"Let's put a contingency plan in place just in case.",ko:"만일을 대비한 비상 계획을 마련해 두겠습니다."},
+{id:269,cat:'biz',en:"That's a valid concern — we'll factor it into the planning.",ko:"타당한 우려입니다 — 계획에 반영하겠습니다."},
+{id:270,cat:'biz',en:"We are fully aligned with your strategic direction.",ko:"귀사의 전략적 방향에 완전히 동의합니다."},
+{id:271,cat:'biz',en:"Could you share the competitive analysis your team prepared?",ko:"팀에서 준비한 경쟁 분석 자료를 공유해 주실 수 있나요?"},
+{id:272,cat:'biz',en:"We're focused on driving efficiency across all operations.",ko:"모든 운영 전반에 걸쳐 효율성을 높이는 데 집중하고 있습니다."},
+{id:273,cat:'biz',en:"Let's make sure we have a clear exit strategy if things don't work out.",ko:"일이 잘 되지 않을 경우를 대비한 명확한 출구 전략이 있는지 확인합시다."},
+{id:274,cat:'biz',en:"The proposal looks solid — just a few minor tweaks needed.",ko:"제안서가 탄탄해 보입니다 — 약간의 수정만 필요합니다."},
+{id:275,cat:'biz',en:"We'd like to lock in the pricing before the end of the quarter.",ko:"분기 말 이전에 가격을 확정하고 싶습니다."},
+{id:276,cat:'biz',en:"Can we get a verbal confirmation now and a written one later?",ko:"지금 구두 확인을 받고 나중에 서면 확인을 받을 수 있을까요?"},
+{id:277,cat:'biz',en:"We need to identify risks and put mitigation plans in place.",ko:"리스크를 파악하고 완화 계획을 수립해야 합니다."},
+{id:278,cat:'biz',en:"The project sponsor has signed off on the revised timeline.",ko:"프로젝트 스폰서가 수정된 타임라인을 승인하였습니다."},
+{id:279,cat:'biz',en:"Let's move forward with the pilot and review results in 30 days.",ko:"파일럿을 진행하고 30일 후 결과를 검토하겠습니다."},
+{id:280,cat:'biz',en:"Please keep this information strictly confidential for now.",ko:"지금은 이 정보를 엄격히 기밀로 유지해 주세요."},
+{id:281,cat:'biz',en:"We'll send a formal offer letter by the end of the week.",ko:"이번 주 말까지 공식 제안서를 발송하겠습니다."},
+{id:282,cat:'biz',en:"Could you introduce me to the right person on your team?",ko:"귀팀의 담당자를 소개해 주실 수 있나요?"},
+{id:283,cat:'biz',en:"We need to finalize the scope of work before signing the contract.",ko:"계약 서명 전에 업무 범위를 확정해야 합니다."},
+{id:284,cat:'biz',en:"Let's reconvene on Monday with everyone's input incorporated.",ko:"모든 의견을 반영하여 월요일에 다시 만납시다."},
+{id:285,cat:'biz',en:"The client has expressed interest but hasn't committed yet.",ko:"고객이 관심을 표명했지만 아직 확정하지 않았습니다."},
+{id:286,cat:'biz',en:"We're hitting a wall on this — let's think outside the box.",ko:"막혀 있는 상황입니다 — 창의적으로 생각해 봅시다."},
+{id:287,cat:'biz',en:"I want to make sure we're all rowing in the same direction.",ko:"우리 모두가 같은 방향으로 나아가고 있는지 확인하고 싶습니다."},
+{id:288,cat:'biz',en:"We'll need to renegotiate if the scope changes significantly.",ko:"범위가 크게 변경되면 재협상이 필요합니다."},
+{id:289,cat:'biz',en:"The market is shifting quickly — we need to adapt our strategy.",ko:"시장이 빠르게 변화하고 있으니 전략을 조정해야 합니다."},
+{id:290,cat:'biz',en:"Could you share a timeline for when this will be ready?",ko:"언제 준비가 완료될지 일정을 공유해 주실 수 있나요?"},
+{id:291,cat:'biz',en:"We need full transparency on the cost breakdown.",ko:"비용 내역에 대한 완전한 투명성이 필요합니다."},
+{id:292,cat:'biz',en:"I'll send the minutes of the meeting by tomorrow morning.",ko:"내일 아침까지 회의록을 발송하겠습니다."},
+{id:293,cat:'biz',en:"Let's make sure all stakeholders are kept in the loop.",ko:"모든 이해관계자가 계속 정보를 공유받도록 합시다."},
+{id:294,cat:'biz',en:"We are open to negotiating the terms within reason.",ko:"합리적인 범위 내에서 조건 협상에 열려 있습니다."},
+{id:295,cat:'biz',en:"The go-live date is set for the first of next month.",ko:"가동 시작일은 다음 달 1일로 정해져 있습니다."},
+{id:296,cat:'biz',en:"I'd like to set clear expectations on both sides.",ko:"양측 모두 명확한 기대치를 설정하고 싶습니다."},
+{id:297,cat:'biz',en:"We'll handle the project management end-to-end.",ko:"저희가 프로젝트 관리를 처음부터 끝까지 담당하겠습니다."},
+{id:298,cat:'biz',en:"Can we agree to a minimum order quantity for the contract?",ko:"계약에 최소 주문 수량을 합의할 수 있을까요?"},
+{id:299,cat:'biz',en:"Thank you for your time today — it was very productive.",ko:"오늘 시간 내주셔서 감사합니다 — 매우 생산적인 시간이었습니다."},
+// ── ☀️ 일상 회화 (300-399) ──
+{id:300,cat:'daily',en:"How's your day going so far?",ko:"오늘 하루 어떠세요?"},
+{id:301,cat:'daily',en:"Not bad at all — things are actually going quite smoothly.",ko:"나쁘지 않아요 — 사실 꽤 순조롭게 진행되고 있어요."},
+{id:302,cat:'daily',en:"It's been a hectic week — I'm looking forward to the weekend.",ko:"바쁜 한 주였어요 — 주말이 기대됩니다."},
+{id:303,cat:'daily',en:"Did you catch the game last night?",ko:"어젯밤 경기 보셨나요?"},
+{id:304,cat:'daily',en:"I'm absolutely starving — shall we grab some lunch?",ko:"배가 너무 고파요 — 점심 먹으러 갈까요?"},
+{id:305,cat:'daily',en:"I've been meaning to call you — sorry for the delay.",ko:"연락하려고 했는데 — 늦어서 미안해요."},
+{id:306,cat:'daily',en:"Long time no see! How have you been keeping?",ko:"오랜만이에요! 그동안 어떻게 지내셨어요?"},
+{id:307,cat:'daily',en:"I was stuck in traffic for almost an hour this morning.",ko:"오늘 아침 거의 한 시간 동안 교통 체증에 갇혔어요."},
+{id:308,cat:'daily',en:"Any plans for the long weekend?",ko:"긴 주말에 계획이 있으신가요?"},
+{id:309,cat:'daily',en:"I'm exhausted — I didn't sleep well last night.",ko:"너무 피곤해요 — 어젯밤에 잘 못 잤어요."},
+{id:310,cat:'daily',en:"Do you know a good restaurant around here?",ko:"이 근처에 좋은 식당 아세요?"},
+{id:311,cat:'daily',en:"I just got back from a business trip to Singapore.",ko:"싱가포르 출장에서 방금 돌아왔어요."},
+{id:312,cat:'daily',en:"Could you recommend a good coffee shop nearby?",ko:"근처에 좋은 카페를 추천해 주실 수 있나요?"},
+{id:313,cat:'daily',en:"The weather has been all over the place lately.",ko:"요즘 날씨가 정말 변덕스럽네요."},
+{id:314,cat:'daily',en:"I've been hitting the gym more regularly these days.",ko:"요즘 헬스장을 더 규칙적으로 다니고 있어요."},
+{id:315,cat:'daily',en:"Have you tried that new Korean BBQ place downtown?",ko:"시내에 새로 생긴 한국 BBQ 식당 가보셨어요?"},
+{id:316,cat:'daily',en:"I need to get a haircut — it's been way too long.",ko:"머리를 잘라야 해요 — 너무 오래됐어요."},
+{id:317,cat:'daily',en:"I'm thinking of taking a short trip somewhere this month.",ko:"이번 달에 어딘가 짧은 여행을 갈까 생각 중이에요."},
+{id:318,cat:'daily',en:"Do you prefer working from home or coming into the office?",ko:"재택근무와 출근 중 어느 쪽을 더 좋아하세요?"},
+{id:319,cat:'daily',en:"I finally finished that book I've been reading for months.",ko:"몇 달째 읽고 있던 책을 드디어 다 읽었어요."},
+{id:320,cat:'daily',en:"Can you believe how fast this year has gone by?",ko:"올해가 얼마나 빨리 지나갔는지 믿기지 않죠?"},
+{id:321,cat:'daily',en:"I'm trying to cut back on coffee — it's harder than it sounds.",ko:"커피를 줄이려고 노력 중인데 — 말처럼 쉽지가 않아요."},
+{id:322,cat:'daily',en:"What time do you usually head home after work?",ko:"보통 퇴근 후 몇 시에 집에 가세요?"},
+{id:323,cat:'daily',en:"I've been watching a really good series on Netflix lately.",ko:"요즘 넷플릭스에서 정말 재미있는 시리즈를 보고 있어요."},
+{id:324,cat:'daily',en:"Mind if I join you for lunch?",ko:"점심 같이 먹어도 될까요?"},
+{id:325,cat:'daily',en:"Is this seat taken? Would you mind if I sat here?",ko:"이 자리 비어있나요? 여기 앉아도 될까요?"},
+{id:326,cat:'daily',en:"I'm thinking of learning a new language this year.",ko:"올해 새로운 언어를 배워볼까 생각하고 있어요."},
+{id:327,cat:'daily',en:"How do you usually commute to work?",ko:"보통 어떻게 출퇴근하세요?"},
+{id:328,cat:'daily',en:"I just moved to a new apartment closer to the office.",ko:"최근에 회사와 더 가까운 새 아파트로 이사했어요."},
+{id:329,cat:'daily',en:"Do you have any hobbies you do on the weekends?",ko:"주말에 취미 활동 하시는 게 있나요?"},
+{id:330,cat:'daily',en:"I started running in the mornings — it's been a game changer.",ko:"아침에 달리기를 시작했는데 — 정말 큰 변화가 생겼어요."},
+{id:331,cat:'daily',en:"What do you usually do for lunch — eat out or bring your own?",ko:"점심은 보통 어떻게 하세요 — 사 드시나요 아니면 도시락 싸오시나요?"},
+{id:332,cat:'daily',en:"I'm a bit of a night owl — I do my best work late at night.",ko:"저는 올빼미 스타일이에요 — 밤늦게 가장 집중이 잘 돼요."},
+{id:333,cat:'daily',en:"Have you been to Busan? It's definitely worth a visit.",ko:"부산에 가보셨나요? 정말 가볼 만한 곳이에요."},
+{id:334,cat:'daily',en:"I can't believe how expensive everything has gotten.",ko:"모든 것이 얼마나 비싸졌는지 믿기지 않아요."},
+{id:335,cat:'daily',en:"Did you hear about the new policy the company announced?",ko:"회사에서 발표한 새 정책 들으셨나요?"},
+{id:336,cat:'daily',en:"I'm trying to be more mindful and take things one step at a time.",ko:"좀 더 여유를 갖고 한 번에 한 가지씩 해나가려고 노력 중이에요."},
+{id:337,cat:'daily',en:"What's the best way to get to the nearest subway station?",ko:"가장 가까운 지하철역까지 가는 가장 좋은 방법이 뭔가요?"},
+{id:338,cat:'daily',en:"I've been trying to eat healthier and get more sleep.",ko:"더 건강하게 먹고 수면을 충분히 취하려고 노력 중이에요."},
+{id:339,cat:'daily',en:"It's nice to finally put a face to the name.",ko:"드디어 직접 뵙게 되어 반갑습니다."},
+{id:340,cat:'daily',en:"I'm really into podcasts these days — any recommendations?",ko:"요즘 팟캐스트에 빠져 있는데 — 추천해 주실 게 있나요?"},
+{id:341,cat:'daily',en:"Is the Wi-Fi password written somewhere?",ko:"와이파이 비밀번호가 어딘가에 적혀 있나요?"},
+{id:342,cat:'daily',en:"I've been so swamped lately that I haven't had any downtime.",ko:"요즘 너무 바빠서 쉴 틈이 전혀 없었어요."},
+{id:343,cat:'daily',en:"What are you up to after work today?",ko:"오늘 퇴근 후에 뭐 하실 예정이에요?"},
+{id:344,cat:'daily',en:"Do you want to grab a drink after work?",ko:"퇴근 후에 한 잔 하러 갈까요?"},
+{id:345,cat:'daily',en:"I heard the new ramen place around the corner is amazing.",ko:"코너 근처에 새로 생긴 라멘집이 정말 맛있다고 들었어요."},
+{id:346,cat:'daily',en:"Sorry, could you say that again? I didn't quite catch it.",ko:"죄송한데, 다시 한 번 말씀해 주시겠어요? 잘 못 들었어요."},
+{id:347,cat:'daily',en:"I'm not really a morning person — I need at least two coffees to function.",ko:"저는 아침형 인간이 아니에요 — 커피 두 잔은 마셔야 제대로 돌아가요."},
+{id:348,cat:'daily',en:"Congratulations! I heard you got promoted.",ko:"축하드려요! 승진하셨다고 들었어요."},
+{id:349,cat:'daily',en:"Thank you so much — that really means a lot to me.",ko:"정말 감사합니다 — 그 말이 저에게 정말 큰 의미가 있어요."},
+{id:350,cat:'daily',en:"I'm a huge fan of CrossFit — it's totally changed my fitness level.",ko:"저는 크로스핏을 정말 좋아해요 — 체력이 완전히 바뀌었어요."},
+{id:351,cat:'daily',en:"Do you work out regularly? Any sports you enjoy?",ko:"규칙적으로 운동하시나요? 즐기시는 스포츠가 있나요?"},
+{id:352,cat:'daily',en:"I'm saving up for a trip to Europe next summer.",ko:"내년 여름 유럽 여행을 위해 저축하고 있어요."},
+{id:353,cat:'daily',en:"What did you get up to over the weekend?",ko:"주말에 뭐 하셨어요?"},
+{id:354,cat:'daily',en:"I totally lost track of time — the meeting went way over.",ko:"시간 가는 줄 몰랐어요 — 회의가 훨씬 길어졌어요."},
+{id:355,cat:'daily',en:"I'm in the mood for something spicy tonight.",ko:"오늘 저녁은 매운 게 먹고 싶네요."},
+{id:356,cat:'daily',en:"Do you have any good book recommendations?",ko:"좋은 책 추천해 주실 게 있나요?"},
+{id:357,cat:'daily',en:"I've been trying to get into a consistent reading habit.",ko:"꾸준한 독서 습관을 들이려고 노력 중이에요."},
+{id:358,cat:'daily',en:"It's raining cats and dogs outside — did you bring an umbrella?",ko:"밖에 비가 엄청 오는데 — 우산 가져오셨어요?"},
+{id:359,cat:'daily',en:"I feel like time flies when you're busy.",ko:"바쁘면 시간이 정말 빨리 가는 것 같아요."},
+{id:360,cat:'daily',en:"I've been meaning to visit Japan for years — maybe next spring.",ko:"몇 년째 일본에 가고 싶었는데 — 아마 내년 봄에 갈 것 같아요."},
+{id:361,cat:'daily',en:"I'm trying to be better about work-life balance.",ko:"일과 생활의 균형을 더 잘 맞추려고 노력하고 있어요."},
+{id:362,cat:'daily',en:"Can I borrow your charger for a few minutes?",ko:"잠깐 충전기 빌릴 수 있을까요?"},
+{id:363,cat:'daily',en:"What's your go-to comfort food on a stressful day?",ko:"스트레스 받는 날에 가장 먹고 싶은 음식이 뭔가요?"},
+{id:364,cat:'daily',en:"I didn't realize it was already 6 PM — time really flies!",ko:"벌써 오후 6시인지 몰랐어요 — 시간이 정말 빠르네요!"},
+{id:365,cat:'daily',en:"Are you free this Saturday? A few of us are thinking of hiking.",ko:"이번 토요일 시간 있으세요? 몇몇이 등산 갈까 생각 중인데요."},
+{id:366,cat:'daily',en:"I tend to overthink things — I'm working on that.",ko:"저는 너무 많이 생각하는 경향이 있는데 — 고치려고 노력 중이에요."},
+{id:367,cat:'daily',en:"I love that café — the coffee there is unbeatable.",ko:"그 카페 정말 좋아요 — 거기 커피는 정말 최고예요."},
+{id:368,cat:'daily',en:"Is there a convenience store around here?",ko:"이 근처에 편의점이 있나요?"},
+{id:369,cat:'daily',en:"I'm trying to spend less time on my phone before bed.",ko:"자기 전에 스마트폰을 덜 보려고 노력 중이에요."},
+{id:370,cat:'daily',en:"Could you take a photo of us? That'd be great.",ko:"저희 사진 좀 찍어주실 수 있나요? 감사하겠습니다."},
+{id:371,cat:'daily',en:"I'm thinking of getting a dog once I have a bigger place.",ko:"더 넓은 공간이 생기면 강아지를 키울까 생각 중이에요."},
+{id:372,cat:'daily',en:"The commute was rough today — there was an accident on the highway.",ko:"오늘 출퇴근이 힘들었어요 — 고속도로에서 사고가 있었어요."},
+{id:373,cat:'daily',en:"I'm thinking of signing up for an online course this month.",ko:"이번 달에 온라인 강좌를 등록할까 생각 중이에요."},
+{id:374,cat:'daily',en:"Do you have any tips for dealing with jet lag?",ko:"시차 적응에 대한 팁이 있으신가요?"},
+{id:375,cat:'daily',en:"I finally got around to cleaning my apartment last weekend.",ko:"지난 주말에 드디어 아파트 청소를 했어요."},
+{id:376,cat:'daily',en:"I've been meal prepping on Sundays to save time during the week.",ko:"주중 시간을 절약하기 위해 일요일에 식사를 미리 준비하고 있어요."},
+{id:377,cat:'daily',en:"What's on your bucket list for this year?",ko:"올해 버킷리스트에 뭐가 있나요?"},
+{id:378,cat:'daily',en:"I overslept this morning and barely made it to the office on time.",ko:"오늘 아침에 늦잠을 자서 겨우 제시간에 사무실에 도착했어요."},
+{id:379,cat:'daily',en:"Have you tried any new restaurants lately?",ko:"최근에 새로운 식당에 가보신 적 있나요?"},
+{id:380,cat:'daily',en:"I need to take a proper vacation — I haven't had one in over a year.",ko:"제대로 된 휴가가 필요해요 — 1년 넘게 쉰 적이 없어요."},
+{id:381,cat:'daily',en:"Is there any good street food near here?",ko:"이 근처에 맛있는 길거리 음식이 있나요?"},
+{id:382,cat:'daily',en:"I love the autumn weather here — it's so refreshing.",ko:"여기 가을 날씨를 정말 좋아해요 — 너무 상쾌해요."},
+{id:383,cat:'daily',en:"Sorry, I didn't mean to interrupt — please continue.",ko:"죄송해요, 끊으려던 게 아닌데 — 계속하세요."},
+{id:384,cat:'daily',en:"I've been really into cooking lately — trying new recipes every week.",ko:"요즘 요리에 푹 빠져 있어요 — 매주 새로운 레시피를 시도하고 있어요."},
+{id:385,cat:'daily',en:"Happy birthday! Hope you have a wonderful day.",ko:"생일 축하해요! 멋진 하루 보내세요."},
+{id:386,cat:'daily',en:"I can't make it tonight — something came up at work.",ko:"오늘 저녁에 못 갈 것 같아요 — 회사에 갑자기 일이 생겼어요."},
+{id:387,cat:'daily',en:"I feel like we don't hang out enough these days.",ko:"요즘 우리가 너무 못 만나는 것 같아요."},
+{id:388,cat:'daily',en:"It's been ages since I've had a proper home-cooked meal.",ko:"오랜만에 제대로 된 집밥을 먹어본 것 같아요."},
+{id:389,cat:'daily',en:"Let's plan something for next weekend — it's been too long.",ko:"다음 주말에 뭔가 계획을 세워요 — 너무 오래됐어요."},
+{id:390,cat:'daily',en:"I've been trying to save money by cutting back on unnecessary spending.",ko:"불필요한 지출을 줄여서 돈을 모으려고 노력 중이에요."},
+{id:391,cat:'daily',en:"I'm so full — I think I overdid it a little.",ko:"너무 배불러요 — 조금 과하게 먹은 것 같아요."},
+{id:392,cat:'daily',en:"You look tired — are you getting enough rest?",ko:"피곤해 보이는데 — 충분히 쉬고 있나요?"},
+{id:393,cat:'daily',en:"I can't believe I left my phone at home again.",ko:"또 집에 폰을 두고 왔다니 믿기지 않아요."},
+{id:394,cat:'daily',en:"Do you have a good doctor you can recommend in this area?",ko:"이 지역에서 좋은 의사 선생님 추천해 주실 수 있나요?"},
+{id:395,cat:'daily',en:"I think I'm coming down with a cold — my throat is a bit sore.",ko:"감기에 걸리는 것 같아요 — 목이 조금 따가워요."},
+{id:396,cat:'daily',en:"What time does this place close? I don't want to rush.",ko:"여기 몇 시에 닫나요? 서두르고 싶지 않아서요."},
+{id:397,cat:'daily',en:"I'm going to grab some food on the way home — want anything?",ko:"집에 가는 길에 뭐 사 가려고요 — 필요한 것 있어요?"},
+{id:398,cat:'daily',en:"It's so good to see you — let's not leave it so long next time.",ko:"보니까 너무 반가워요 — 다음엔 이렇게 오래 간격을 두지 말아요."},
+{id:399,cat:'daily',en:"See you around — take care of yourself!",ko:"또 봐요 — 몸 잘 챙기세요!"}
+];
+
+// ===== STATE =====
+let state={};
+let catFilter='all', viewMode='study';
+let session=[], sessionIdx=0, flipped=false, streak=0;
+
+function getS(id){
+  if(!state[id])state[id]={seen:false,correct:0,fail:0,bookmarked:false,nextReview:0};
+  return state[id];
+}
+
+const SR=[1,10,60,1440,4320,10080];
+function nextInterval(n){return SR[Math.min(n,SR.length-1)]*60000;}
+
+function getCatCards(){
+  return catFilter==='all'?CARDS:CARDS.filter(c=>c.cat===catFilter);
+}
+
+// ===== SESSION =====
+function startSession(type){
+  viewMode='study';
+  document.getElementById('btnStudy').className='top-btn on';
+  document.getElementById('btnList').className='top-btn';
+
+  let pool=[...getCatCards()];
+  if(type==='unseen') pool=pool.filter(c=>!getS(c.id).seen);
+  else if(type==='fail') pool=pool.filter(c=>getS(c.id).fail>0);
+  else if(type==='bookmark') pool=pool.filter(c=>getS(c.id).bookmarked);
+  else if(type==='random'){pool.sort(()=>Math.random()-.5);pool=pool.slice(0,50);}
+  else pool.sort((a,b)=>getS(a.id).nextReview-getS(b.id).nextReview);
+
+  if(!pool.length){
+    document.getElementById('mainInner').innerHTML=`<div class="done-box"><div class="ico">🎉</div><h2>해당 카드 없음</h2><p>조건에 맞는 카드가 없습니다.<br>다른 필터를 선택해보세요.</p><button class="nbtn" onclick="startSession('all')">전체 학습 시작</button></div>`;
+    return;
+  }
+  session=pool; sessionIdx=0; streak=0; flipped=false;
+  renderCard();
+}
+
+function renderWelcome(){
+  document.getElementById('mainInner').innerHTML=`<div class="done-box"><div class="ico">📚</div><h2>시작해보세요!</h2><p>왼쪽에서 카테고리와 세션 유형을 선택하세요.</p><button class="nbtn" onclick="startSession('all')" style="margin-top:8px">▶ 전체 학습 시작</button></div>`;
+}
+
+function renderCard(){
+  const mi=document.getElementById('mainInner');
+  if(sessionIdx>=session.length){
+    mi.innerHTML=`<div class="done-box"><div class="ico">🏆</div><h2>세션 완료!</h2><p>총 ${session.length}장 완료<br>연속 정답 최고 ${streak}회</p><button class="nbtn" onclick="startSession('all')" style="margin-top:8px">🔄 다시 시작</button></div>`;
+    return;
+  }
+  const card=session[sessionIdx];
+  const s=getS(card.id);
+  const catL={email:'📧 이메일',logistics:'🚢 물류',biz:'💼 비즈니스',daily:'☀️ 일상'}[card.cat];
+  const bmCls=s.bookmarked?'nbtn bm-on':'nbtn';
+  const bmTxt=s.bookmarked?'⭐ 북마크':'☆ 북마크';
+
+  mi.innerHTML=`
+    <div class="study-prog">
+      <span>${sessionIdx+1} / ${session.length} · ${catL}</span>
+      <span class="streak">${streak>0?'🔥 '+streak+'연속':''}</span>
+      <span>정답 ${s.correct} · 오답 ${s.fail}</span>
+    </div>
+    <div class="card-scene" onclick="flipCard()">
+      <div class="card-3d${flipped?' flipped':''}" id="card3d">
+        <div class="card-face front">
+          <div class="c-label">🇰🇷 한국어</div>
+          <div class="c-main">${card.ko}</div>
+          <div class="c-hint">탭하여 영어 정답 확인 👆</div>
+        </div>
+        <div class="card-face back">
+          <div class="c-label">🇬🇧 영어 정답</div>
+          <div class="c-main">${card.en}</div>
+          <div class="c-sub">${card.ko}</div>
+        </div>
+      </div>
+    </div>
+    ${flipped?`
+    <div class="btn-row">
+      <button class="abtn bad" onclick="markCard(${card.id},false)">❌ 몰랐다</button>
+      <button class="abtn skip" onclick="nextCard()">⏭ 넘기기</button>
+      <button class="abtn good" onclick="markCard(${card.id},true)">✅ 알았다!</button>
+    </div>`:`
+    <div class="btn-row">
+      <button class="abtn skip" onclick="flipCard()">👆 뒤집어서 확인하기</button>
+    </div>`}
+    <div class="nav-row">
+      <button class="${bmCls}" onclick="toggleBm(${card.id})">${bmTxt}</button>
+      <button class="nbtn" onclick="prevCard()">◀ 이전</button>
+      <button class="nbtn" onclick="nextCard()">다음 ▶</button>
+    </div>`;
+}
+
+function flipCard(){flipped=!flipped;renderCard();}
+function nextCard(){sessionIdx++;flipped=false;renderCard();}
+function prevCard(){if(sessionIdx>0){sessionIdx--;flipped=false;renderCard();}}
+
+async function markCard(id,correct){
+  const s=getS(id);
+  s.seen=true;
+  if(correct){s.correct++;streak++;s.nextReview=Date.now()+nextInterval(s.correct);}
+  else{s.fail++;streak=0;s.nextReview=Date.now()+nextInterval(0);}
+  state[id]=s;
+  updateSidebar();
+  sessionIdx++;flipped=false;renderCard();
+  await saveCard(id);
+}
+
+async function toggleBm(id){
+  const s=getS(id);
+  s.bookmarked=!s.bookmarked;
+  state[id]=s;
+  renderCard();
+  updateSidebar();
+  await saveCard(id);
+}
+
+// ===== LIST MODE =====
+function setMode(m){
+  viewMode=m;
+  document.getElementById('btnStudy').className='top-btn'+(m==='study'?' on':'');
+  document.getElementById('btnList').className='top-btn'+(m==='list'?' on':'');
+  if(m==='study') renderWelcome();
+  else renderList();
+}
+
+function renderList(){
+  const mi=document.getElementById('mainInner');
+  const kw='';
+  let pool=getCatCards();
+  mi.innerHTML=`
+    <div class="list-top">
+      <input class="sbox" id="listSearch" placeholder="🔍 영어·한국어 검색..." oninput="filterList()">
+      <span class="lcnt" id="listCnt">${pool.length}개</span>
+    </div>
+    <div id="listBody">${renderListItems(pool)}</div>`;
+}
+
+function filterList(){
+  const kw=document.getElementById('listSearch').value.toLowerCase();
+  let pool=getCatCards().filter(c=>!kw||c.en.toLowerCase().includes(kw)||c.ko.includes(kw));
+  document.getElementById('listCnt').textContent=pool.length+'개';
+  document.getElementById('listBody').innerHTML=renderListItems(pool);
+}
+
+function renderListItems(pool){
+  return pool.map((c,i)=>{
+    const s=getS(c.id);
+    const cls=s.correct>=3&&!s.fail?'lcard ok':s.fail?'lcard fail':'lcard';
+    const catL={email:'📧',logistics:'🚢',biz:'💼',daily:'☀️'}[c.cat];
+    return `<div class="${cls}">
+      <div class="lnum">${catL}${i+1}</div>
+      <div style="flex:1">
+        <div class="len">${c.en}</div>
+        <div class="lko">${c.ko}</div>
+        <div class="lbadges">
+          ${s.correct?`<span class="bdg ok">✓ ${s.correct}회</span>`:''}
+          ${s.fail?`<span class="bdg fail">✗ ${s.fail}회</span>`:''}
+          ${s.bookmarked?'<span class="bdg bm">⭐</span>':''}
+          ${!s.seen?'<span class="bdg new">미학습</span>':''}
+        </div>
+      </div>
+      <button class="lbtn${s.bookmarked?' on':''}" onclick="toggleBmList(${c.id})">${s.bookmarked?'⭐':'☆'}</button>
+    </div>`;
+  }).join('');
+}
+
+async function toggleBmList(id){
+  const s=getS(id);s.bookmarked=!s.bookmarked;state[id]=s;
+  filterList();updateSidebar();
+  await saveCard(id);
+}
+
+// ===== SIDEBAR =====
+function setCat(v,btn){
+  catFilter=v;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(viewMode==='list') renderList();
+  else renderWelcome();
+}
+
+function updateSidebar(){
+  const all=CARDS.map(c=>getS(c.id));
+  const done=all.filter(s=>s.seen).length;
+  const mastered=all.filter(s=>s.correct>=3&&!s.fail).length;
+  const needWork=all.filter(s=>s.fail>0).length;
+  const pct=Math.round(mastered/CARDS.length*100);
+  document.getElementById('mDone').textContent=done;
+  document.getElementById('mMastered').textContent=mastered;
+  document.getElementById('mFail').textContent=needWork;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+}
+
+// ===== INIT =====
+async function init(){
+  // 로컬 캐시 먼저 적용
+  try{
+    const local=JSON.parse(localStorage.getItem('fc_state2')||'{}');
+    Object.keys(local).forEach(id=>{state[parseInt(id)]=local[parseInt(id)];});
+  }catch(e){}
+  updateSidebar();
+  renderWelcome();
+  // DB 로드
+  await loadProgress();
+}
+init();
+</script>
+</body>
+</html>
