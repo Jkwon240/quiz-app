@@ -365,7 +365,14 @@ function changeCode(){
 }
 
 let DEVICE_ID=getUserCode()||'guest_'+Date.now();
-async function sbReq(method,path,body=null){const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};if(body)opts.body=JSON.stringify(body);const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);const text=await res.text();return text?JSON.parse(text):[];}
+async function sbReq(method,path,body=null){
+  const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);
+  const text=await res.text();
+  if(!res.ok) console.error('[sbReq] HTTP',res.status,path,text);
+  return text?JSON.parse(text):[];
+}
 async function loadProgress(){
   setSyncStatus('loading','기록 불러오는 중...');
   try{
@@ -392,7 +399,19 @@ async function loadProgress(){
     setSyncStatus('ok','✓ 연동됨 · 코드: '+getUserCode());
   }catch(e){console.error('[DB] 오류:', e);setSyncStatus('error','DB 연결 실패 (로컬 저장 중)');}}
 function parseResult(qi,result){if(!state[qi])state[qi]={lastResult:null,wrongCount:0,correctCount:0,bookmarked:false};if(result.startsWith('bookmark:')){state[qi].bookmarked=result.includes('true');}else if(result.startsWith('wrong')){const parts=result.split(':');state[qi].lastResult='wrong';state[qi].wrongCount=parts[1]?parseInt(parts[1]):(state[qi].wrongCount||0)+1;}else if(result.startsWith('correct')){const parts=result.split(':');state[qi].lastResult='correct';state[qi].correctCount=parts[1]?parseInt(parts[1]):(state[qi].correctCount||0)+1;}}
-async function saveToDb(qi,resultStr){const code=getUserCode();const local=JSON.parse(localStorage.getItem('quiz_state_'+(code||'default'))||'{}');local[qi]=resultStr;const _c=getUserCode();localStorage.setItem('quiz_state_'+(_c||'default'),JSON.stringify(local));try{await sbReq('POST','quiz_progress',{device_id:DEVICE_ID,question_index:qi,result:resultStr});}catch(e){}}
+async function saveToDb(qi,resultStr){
+  const code=getUserCode();
+  const local=JSON.parse(localStorage.getItem('quiz_state_'+(code||'default'))||'{}');
+  local[qi]=resultStr;
+  localStorage.setItem('quiz_state_'+(code||'default'),JSON.stringify(local));
+  console.log('[SAVE] DEVICE_ID:',DEVICE_ID,'qi:',qi,'result:',resultStr);
+  try{
+    const res=await sbReq('POST','quiz_progress',{device_id:DEVICE_ID,question_index:qi,result:resultStr});
+    console.log('[SAVE] DB 응답:',res);
+  }catch(e){
+    console.error('[SAVE] DB 저장 실패:',e);
+  }
+}
 function setSyncStatus(type,msg){
   const bar=document.getElementById('syncBar');
   bar.className='sync-bar '+(type==='error'?'error':type==='loading'?'loading':'');
