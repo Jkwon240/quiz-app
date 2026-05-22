@@ -369,19 +369,19 @@ async function sbReq(method,path,body=null){const opts={method,headers:{'apikey'
 async function loadProgress(){
   setSyncStatus('loading','기록 불러오는 중...');
   try{
-    // 현재 코드로 로드
+    console.log('[DB] DEVICE_ID:', DEVICE_ID);
     const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`);
+    console.log('[DB] 코드로 가져온 rows:', rows.length, rows);
     rows.forEach(r=>{if(!state[r.question_index])state[r.question_index]={};parseResult(r.question_index,r.result)});
 
-    // 기존 device_id 기록이 있으면 마이그레이션
     const legacyId=getLegacyId();
+    console.log('[DB] legacyId:', legacyId);
     if(legacyId && legacyId!==DEVICE_ID && rows.length===0){
       setSyncStatus('loading','기존 기록 가져오는 중...');
       const oldRows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(legacyId)}&select=question_index,result`);
+      console.log('[DB] legacyId rows:', oldRows.length, oldRows);
       if(oldRows.length>0){
-        // 기존 기록을 새 코드로 복사
         oldRows.forEach(r=>{if(!state[r.question_index])state[r.question_index]={};parseResult(r.question_index,r.result)});
-        // 새 코드로 일괄 저장
         for(const r of oldRows){
           await sbReq('POST','quiz_progress',{device_id:DEVICE_ID,question_index:r.question_index,result:r.result});
         }
@@ -390,7 +390,7 @@ async function loadProgress(){
       }
     }
     setSyncStatus('ok','✓ 연동됨 · 코드: '+getUserCode());
-  }catch(e){setSyncStatus('error','DB 연결 실패 (로컬 저장 중)');}}
+  }catch(e){console.error('[DB] 오류:', e);setSyncStatus('error','DB 연결 실패 (로컬 저장 중)');}}
 function parseResult(qi,result){if(!state[qi])state[qi]={lastResult:null,wrongCount:0,correctCount:0,bookmarked:false};if(result.startsWith('bookmark:')){state[qi].bookmarked=result.includes('true');}else if(result.startsWith('wrong')){const parts=result.split(':');state[qi].lastResult='wrong';state[qi].wrongCount=parts[1]?parseInt(parts[1]):(state[qi].wrongCount||0)+1;}else if(result.startsWith('correct')){const parts=result.split(':');state[qi].lastResult='correct';state[qi].correctCount=parts[1]?parseInt(parts[1]):(state[qi].correctCount||0)+1;}}
 async function saveToDb(qi,resultStr){const code=getUserCode();const local=JSON.parse(localStorage.getItem('quiz_state_'+(code||'default'))||'{}');local[qi]=resultStr;const _c=getUserCode();localStorage.setItem('quiz_state_'+(_c||'default'),JSON.stringify(local));try{await sbReq('POST','quiz_progress',{device_id:DEVICE_ID,question_index:qi,result:resultStr});}catch(e){}}
 function setSyncStatus(type,msg){
