@@ -255,7 +255,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#f5f6f8;co
   <button class="tab-btn exam-tab" onclick="switchTab('exam2',this)">📋 모의고사 2회</button>
   <button class="tab-btn exam-tab" onclick="switchTab('exam3',this)">📋 모의고사 3회</button>
 </div>
-<div class="sync-bar loading" id="syncBar"><div class="sync-dot"></div><span id="syncMsg">기록 불러오는 중...</span></div>
+<div class="sync-bar loading" id="syncBar"><div class="sync-dot"></div><span id="syncMsg">기록 불러오는 중...</span><span id="syncCode" style="margin-left:auto;font-weight:700;color:#2563eb;background:#eff6ff;padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer" onclick="changeCode()" title="클릭하여 코드 변경"></span></div>
 
 <!-- 스트릭 캘린더 -->
 <div class="streak-panel" id="streakPanel">
@@ -349,6 +349,8 @@ function confirmCode(){
   DEVICE_ID=code;
   document.getElementById('codeOverlay').style.display='none';
   document.getElementById('sideCode').textContent=code;
+  const sc2=document.getElementById('syncCode');
+  if(sc2) sc2.textContent='🔑 '+code;
   state={};
   loadMemos();
   init();
@@ -363,10 +365,17 @@ function changeCode(){
 
 let DEVICE_ID=getUserCode()||'guest_'+Date.now();
 async function sbReq(method,path,body=null){const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};if(body)opts.body=JSON.stringify(body);const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);const text=await res.text();return text?JSON.parse(text):[];}
-async function loadProgress(){setSyncStatus('loading','기록 불러오는 중...');try{const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`);rows.forEach(r=>{if(!state[r.question_index])state[r.question_index]={};parseResult(r.question_index,r.result)});setSyncStatus('ok','✓ 연동됨 · 코드: '+getUserCode());}catch(e){setSyncStatus('error','DB 연결 실패 — 로컬에서만 저장');}}
+async function loadProgress(){setSyncStatus('loading','기록 불러오는 중...');try{const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEVICE_ID)}&select=question_index,result`);rows.forEach(r=>{if(!state[r.question_index])state[r.question_index]={};parseResult(r.question_index,r.result)});setSyncStatus('ok','✓ 연동됨 · 코드: '+getUserCode());}catch(e){setSyncStatus('error','DB 연결 실패 (로컬 저장 중)');}}
 function parseResult(qi,result){if(!state[qi])state[qi]={lastResult:null,wrongCount:0,correctCount:0,bookmarked:false};if(result.startsWith('bookmark:')){state[qi].bookmarked=result.includes('true');}else if(result.startsWith('wrong')){const parts=result.split(':');state[qi].lastResult='wrong';state[qi].wrongCount=parts[1]?parseInt(parts[1]):(state[qi].wrongCount||0)+1;}else if(result.startsWith('correct')){const parts=result.split(':');state[qi].lastResult='correct';state[qi].correctCount=parts[1]?parseInt(parts[1]):(state[qi].correctCount||0)+1;}}
 async function saveToDb(qi,resultStr){const code=getUserCode();const local=JSON.parse(localStorage.getItem('quiz_state_'+(code||'default'))||'{}');local[qi]=resultStr;const _c=getUserCode();localStorage.setItem('quiz_state_'+(_c||'default'),JSON.stringify(local));try{await sbReq('POST','quiz_progress',{device_id:DEVICE_ID,question_index:qi,result:resultStr});}catch(e){}}
-function setSyncStatus(type,msg){const bar=document.getElementById('syncBar');bar.className='sync-bar '+(type==='error'?'error':type==='loading'?'loading':'');const code=getUserCode();const codeTag=code?` <span style="font-weight:700;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:4px;margin-left:4px">🔑 ${code}</span>`:'';document.getElementById('syncMsg').innerHTML=msg+codeTag;}
+function setSyncStatus(type,msg){
+  const bar=document.getElementById('syncBar');
+  bar.className='sync-bar '+(type==='error'?'error':type==='loading'?'loading':'');
+  document.getElementById('syncMsg').textContent=msg;
+  const code=getUserCode();
+  const sc=document.getElementById('syncCode');
+  if(sc) sc.textContent=code?'🔑 '+code:'코드 없음';
+}
 
 const QS=[
 /* ===== 해운론 (1-35) ===== */
@@ -1463,8 +1472,10 @@ async function init() {
     showCodePopup();
     return;
   }
-  DEVICE_ID = code;  // 코드로 DEVICE_ID 갱신
+  DEVICE_ID = code;
   document.getElementById('sideCode').textContent = code;
+  const sc=document.getElementById('syncCode');
+  if(sc) sc.textContent='🔑 '+code;
   updateSidebarCounts();
   const local = JSON.parse(localStorage.getItem('quiz_state_'+code) || '{}');
   Object.entries(local).forEach(([qi, result]) => parseResult(parseInt(qi), result));
