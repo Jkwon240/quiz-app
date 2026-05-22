@@ -6,89 +6,116 @@
 <title>영어 암기 카드</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;color:#d4e4f0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-.top{background:linear-gradient(135deg,#0d1f3c,#0a3060);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a4a80;flex-shrink:0;gap:10px;flex-wrap:wrap}
-.top-title{font-size:15px;font-weight:700;color:#4db8ff}
-.top-sub{font-size:10px;color:#5a85aa;margin-top:2px}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#f5f6f8;color:#2d3748;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.top{background:linear-gradient(135deg,#ffffff,#f0f2f5);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;flex-shrink:0;gap:10px;flex-wrap:wrap}
+.top-title{font-size:15px;font-weight:700;color:#2563eb}
+.top-sub{font-size:10px;color:#64748b;margin-top:2px}
 .top-btns{display:flex;gap:6px}
-.top-btn{padding:6px 14px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s}
-.top-btn.on{background:#0d3a70;border-color:#4db8ff;color:#4db8ff;font-weight:700}
-.sync-bar{padding:4px 20px;font-size:11px;display:flex;align-items:center;gap:6px;flex-shrink:0;background:#0a1a10;border-bottom:1px solid #1a4a30;color:#3a8a5a}
-.sync-bar.loading{background:#0a0f1a;border-color:#1a3355;color:#5a85aa}
-.sync-bar.error{background:#1a0a0a;color:#8a3a3a}
+.top-btn{padding:6px 14px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-size:12px;transition:.15s}
+.top-btn.on{background:#eff6ff;border-color:#2563eb;color:#2563eb;font-weight:700}
+.sync-bar{padding:4px 20px;font-size:11px;display:flex;align-items:center;gap:6px;flex-shrink:0;background:#f0fdf4;border-bottom:1px solid #bbf7d0;color:#16a34a}
+.sync-bar.loading{background:#f8fafc;border-color:#e2e8f0;color:#64748b}
+.sync-bar.error{background:#fef2f2;color:#dc2626}
 .sync-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
 .body-wrap{display:flex;flex:1;overflow:hidden}
-.side{background:#0d1622;border-right:1px solid #1a3355;padding:12px;overflow-y:auto;width:210px;flex-shrink:0}
-.side-h{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#4a6a8a;margin-bottom:6px;margin-top:8px}
+.side{background:#ffffff;border-right:1px solid #e2e8f0;padding:12px;overflow-y:auto;width:210px;flex-shrink:0}
+.side-h{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;margin-top:8px}
 .side-h:first-child{margin-top:0}
-.cat-btn{width:100%;text-align:left;padding:8px 10px;margin-bottom:3px;background:#111d30;border:1px solid #1a3a5c;border-radius:6px;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s}
-.cat-btn:hover,.cat-btn.on{background:#0d3060;border-color:#4db8ff;color:#4db8ff}
+.cat-btn{width:100%;text-align:left;padding:8px 10px;margin-bottom:3px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;color:#475569;cursor:pointer;font-size:12px;transition:.15s}
+.cat-btn:hover,.cat-btn.on{background:#eff6ff;border-color:#2563eb;color:#2563eb}
 .cat-btn .cnt{float:right;font-size:10px;opacity:.5}
-.side-btn{width:100%;padding:7px 10px;margin-bottom:3px;border-radius:6px;border:1px solid #1a3a5c;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:11px;text-align:left;transition:.15s}
-.side-btn:hover{border-color:#4db8ff;color:#4db8ff}
-.divider{border-top:1px solid #1a3355;margin:8px 0}
+.side-btn{width:100%;padding:7px 10px;margin-bottom:3px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-size:11px;text-align:left;transition:.15s}
+.side-btn:hover{border-color:#2563eb;color:#2563eb}
+.divider{border-top:1px solid #e2e8f0;margin:8px 0}
 .mini-stat{display:flex;gap:5px;margin-bottom:6px}
-.ms{flex:1;text-align:center;background:#111d30;border:1px solid #1a3a5c;border-radius:5px;padding:4px 2px}
-.ms .n{font-size:13px;font-weight:700;color:#4db8ff}
-.ms .l{font-size:9px;color:#5a85aa}
-.prog-label{font-size:10px;color:#5a85aa;margin-bottom:4px;display:flex;justify-content:space-between}
-.prog-track{background:#111d30;border-radius:3px;height:4px;overflow:hidden}
-.prog-fill{background:linear-gradient(90deg,#1a6ab0,#4db8ff);height:100%;transition:.4s;border-radius:3px;width:0%}
+.ms{flex:1;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:4px 2px}
+.ms .n{font-size:13px;font-weight:700;color:#2563eb}
+.ms .l{font-size:9px;color:#64748b}
+.prog-label{font-size:10px;color:#94a3b8;margin-bottom:4px;display:flex;justify-content:space-between}
+.prog-track{background:#e2e8f0;border-radius:3px;height:4px;overflow:hidden}
+.prog-fill{background:linear-gradient(90deg,#3b82f6,#2563eb);height:100%;transition:.4s;border-radius:3px;width:0%}
 .main{flex:1;overflow-y:auto;padding:24px;display:flex;justify-content:center}
 .main-inner{width:100%;max-width:640px}
 /* 카드 */
-.study-prog{display:flex;justify-content:space-between;font-size:12px;color:#5a85aa;margin-bottom:14px}
-.streak{color:#f39c12;font-weight:700}
+.study-prog{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:14px}
+.streak{color:#d97706;font-weight:700}
 .card-scene{width:100%;height:220px;perspective:1200px;cursor:pointer;margin-bottom:16px}
 .card-3d{width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d;position:relative}
 .card-3d.flipped{transform:rotateY(180deg)}
 .card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}
-.front{background:linear-gradient(135deg,#0d2040,#0a3060);border:1px solid #1a4a80}
-.back{background:linear-gradient(135deg,#0a2018,#0a3020);border:1px solid #1a5a30;transform:rotateY(180deg)}
-.c-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#3a6a9a;margin-bottom:12px}
-.c-main{font-size:18px;font-weight:600;color:#d4e4f0;line-height:1.55}
-.c-sub{font-size:12px;color:#4a7a9a;margin-top:8px;line-height:1.5}
-.c-hint{font-size:11px;color:#1a3a5a;margin-top:14px}
+.front{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe}
+.back{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;transform:rotateY(180deg)}
+.c-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin-bottom:12px}
+.c-main{font-size:18px;font-weight:600;color:#1e293b;line-height:1.55}
+.c-sub{font-size:12px;color:#475569;margin-top:8px;line-height:1.5}
+.c-hint{font-size:11px;color:#94a3b8;margin-top:14px}
 .btn-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
 .abtn{padding:11px 26px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:.15s}
-.abtn.bad{background:#3a1010;color:#e74c3c;border:1px solid #c0392b}
-.abtn.bad:hover{background:#c0392b;color:#fff}
-.abtn.good{background:#0a2e18;color:#2ecc71;border:1px solid #27ae60}
-.abtn.good:hover{background:#27ae60;color:#fff}
-.abtn.skip{background:#111d30;color:#8ab2cc;border:1px solid #2a4a6a}
-.abtn.skip:hover{background:#2a4a6a;color:#fff}
+.abtn.bad{background:#fff5f5;color:#dc2626;border:1px solid #fecaca}
+.abtn.bad:hover{background:#dc2626;color:#fff}
+.abtn.good{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.abtn.good:hover{background:#16a34a;color:#fff}
+.abtn.skip{background:#f8fafc;color:#475569;border:1px solid #e2e8f0}
+.abtn.skip:hover{background:#2563eb;color:#fff}
 .nav-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.nbtn{padding:7px 16px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#8ab2cc;cursor:pointer;font-size:12px;transition:.15s}
-.nbtn:hover{border-color:#4db8ff;color:#4db8ff}
-.nbtn.bm-on{border-color:#b8860b;color:#f1c40f}
+.nbtn{padding:7px 16px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-size:12px;transition:.15s}
+.nbtn:hover{border-color:#2563eb;color:#2563eb}
+.nbtn.bm-on{border-color:#ca8a04;color:#ca8a04}
 .done-box{text-align:center;padding:50px 20px}
 .done-box .ico{font-size:52px;margin-bottom:14px}
-.done-box h2{font-size:20px;color:#4db8ff;margin-bottom:8px}
-.done-box p{color:#5a85aa;font-size:13px;line-height:1.7;margin-bottom:20px}
+.done-box h2{font-size:20px;color:#2563eb;margin-bottom:8px}
+.done-box p{color:#64748b;font-size:13px;line-height:1.7;margin-bottom:20px}
 /* 목록 모드 */
 .list-top{display:flex;gap:8px;margin-bottom:12px;align-items:center}
-.sbox{flex:1;padding:8px 12px;border-radius:6px;border:1px solid #1a4a80;background:#111d30;color:#d4e4f0;font-size:13px;outline:none}
-.sbox:focus{border-color:#4db8ff}
-.lcnt{font-size:11px;color:#5a85aa;white-space:nowrap}
-.lcard{background:#0d1a2e;border:1px solid #1a3a5c;border-radius:8px;padding:12px 14px;display:flex;gap:10px;margin-bottom:7px;align-items:flex-start}
-.lcard.ok{border-color:#1a5c30;background:#0a1810}
-.lcard.fail{border-color:#5c1a1a;background:#180a0a}
-.lnum{font-size:10px;color:#3a5a7a;min-width:24px;padding-top:2px}
-.len{font-size:13px;color:#c8ddef;font-weight:500;line-height:1.5}
-.lko{font-size:12px;color:#5a85aa;margin-top:3px;line-height:1.4}
+.sbox{flex:1;padding:8px 12px;border-radius:6px;border:1px solid #e2e8f0;background:#ffffff;color:#2d3748;font-size:13px;outline:none}
+.sbox:focus{border-color:#2563eb}
+.lcnt{font-size:11px;color:#64748b;white-space:nowrap}
+.lcard{background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;display:flex;gap:10px;margin-bottom:7px;align-items:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.lcard.ok{border-color:#bbf7d0;background:#f0fdf4}
+.lcard.fail{border-color:#fecaca;background:#fff5f5}
+.lnum{font-size:10px;color:#94a3b8;min-width:24px;padding-top:2px}
+.len{font-size:13px;color:#1e293b;font-weight:500;line-height:1.5}
+.lko{font-size:12px;color:#64748b;margin-top:3px;line-height:1.4}
 .lbadges{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
 .bdg{padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700}
-.bdg.ok{background:#0d3020;color:#2ecc71}
-.bdg.fail{background:#3a0d0d;color:#e74c3c}
-.bdg.bm{background:#3a2e00;color:#f1c40f}
-.bdg.new{background:#1a2535;color:#5a85aa}
-.lbtn{padding:3px 8px;border-radius:4px;border:1px solid #1a3a5c;background:transparent;color:#5a85aa;cursor:pointer;font-size:10px;flex-shrink:0;transition:.15s}
-.lbtn:hover{border-color:#4db8ff;color:#4db8ff}
-.lbtn.on{border-color:#b8860b;color:#f1c40f}
+.bdg.ok{background:#f0fdf4;color:#16a34a}
+.bdg.fail{background:#fff5f5;color:#dc2626}
+.bdg.bm{background:#fefce8;color:#ca8a04}
+.bdg.new{background:#f1f5f9;color:#64748b}
+.lbtn{padding:3px 8px;border-radius:4px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;font-size:10px;flex-shrink:0;transition:.15s}
+.lbtn:hover{border-color:#2563eb;color:#2563eb}
+.lbtn.on{border-color:#ca8a04;color:#ca8a04}
 @media(max-width:600px){.side{display:none}.main{padding:14px}}
+
+.code-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center}
+.code-box{background:#ffffff;border-radius:14px;padding:30px 28px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.15);text-align:center}
+.code-box h2{font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px}
+.code-box p{font-size:12px;color:#64748b;line-height:1.6;margin-bottom:20px}
+.code-input{width:100%;padding:12px 16px;border-radius:8px;border:2px solid #e2e8f0;font-size:18px;font-weight:700;text-align:center;letter-spacing:4px;outline:none;color:#1e293b;font-family:inherit;text-transform:uppercase}
+.code-input:focus{border-color:#2563eb}
+.code-confirm-btn{width:100%;margin-top:12px;padding:12px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.code-confirm-btn:hover{background:#1d4ed8}
+.code-hint{font-size:10px;color:#94a3b8;margin-top:10px}
+.code-badge{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:6px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.code-badge .cb-label{font-size:10px;color:#64748b}
+.code-badge .cb-code{font-size:13px;font-weight:700;color:#2563eb;letter-spacing:2px}
+.code-badge .cb-change{font-size:10px;color:#94a3b8;cursor:pointer;text-decoration:underline}
+.code-badge .cb-change:hover{color:#2563eb}
 </style>
 </head>
 <body>
+
+<div class="code-overlay" id="codeOverlay" style="display:none">
+  <div class="code-box">
+    <div style="font-size:32px;margin-bottom:10px">🔑</div>
+    <h2>학습 코드 설정</h2>
+    <p>모든 기기에서 학습 기록을 공유하려면<br>나만의 코드를 설정하세요.<br>영문+숫자 조합 추천 (예: JAY001)</p>
+    <input class="code-input" id="codeInput" maxlength="10" placeholder="코드 입력" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')confirmCode()">
+    <button class="code-confirm-btn" onclick="confirmCode()">✓ 이 코드로 시작하기</button>
+    <div class="code-hint">※ 같은 코드를 입력하면 어느 기기에서든 기록이 연동됩니다</div>
+  </div>
+</div>
+
 <div class="top">
   <div>
     <div class="top-title">📚 영어 암기 카드</div>
@@ -121,17 +148,23 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
     <div class="side-h">진도</div>
     <div class="mini-stat">
       <div class="ms"><div class="n" id="mDone">0</div><div class="l">학습</div></div>
-      <div class="ms"><div class="n" id="mMastered" style="color:#2ecc71">0</div><div class="l">완벽</div></div>
-      <div class="ms"><div class="n" id="mFail" style="color:#e74c3c">0</div><div class="l">복습</div></div>
+      <div class="ms"><div class="n" id="mMastered" style="color:#16a34a">0</div><div class="l">완벽</div></div>
+      <div class="ms"><div class="n" id="mFail" style="color:#dc2626">0</div><div class="l">복습</div></div>
     </div>
     <div class="prog-label"><span>암기율</span><span id="progPct">0%</span></div>
     <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
     <div class="divider"></div>
-    <button class="side-btn" style="color:#e05050" onclick="resetAll()">🗑 전체 초기화</button>
+    <div class="side-h">내 학습 코드</div>
+    <div class="code-badge">
+      <div><div class="cb-label">현재 코드</div><div class="cb-code" id="sideCode">-</div></div>
+      <span class="cb-change" onclick="changeCode()">변경</span>
+    </div>
+    <div class="divider"></div>
+    <button class="side-btn" style="color:#dc2626" onclick="resetAll()">🗑 전체 초기화</button>
   </div>
   <div class="main">
     <div class="main-inner" id="mainInner">
-      <div style="text-align:center;padding:60px 20px;color:#3a5a7a">
+      <div style="text-align:center;padding:60px 20px;color:#94a3b8">
         <div style="font-size:36px;margin-bottom:12px">📚</div>
         <div>왼쪽에서 세션을 선택하세요</div>
       </div>
@@ -143,8 +176,28 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#0a0f1a;co
 // ===== SUPABASE =====
 const SB_URL='https://pdoelwybbnrdyitoeqrb.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI';
-function getDevId(){let id=localStorage.getItem('fc_dev2');if(!id){id='fc2_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);localStorage.setItem('fc_dev2',id);}return id;}
-const DEV=getDevId();
+function getUserCode(){return localStorage.getItem('quiz_user_code')||'';}
+function setUserCode(code){localStorage.setItem('quiz_user_code',code);}
+
+function showCodePopup(){
+  document.getElementById('codeOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('codeInput').focus(),100);
+}
+function confirmCode(){
+  const code=document.getElementById('codeInput').value.trim().toUpperCase();
+  if(code.length<2){alert('코드를 2자 이상 입력해주세요!');return;}
+  setUserCode(code);
+  document.getElementById('codeOverlay').style.display='none';
+  document.getElementById('sideCode').textContent=code;
+  state={};
+  init();
+}
+function changeCode(){
+  document.getElementById('codeInput').value=getUserCode();
+  document.getElementById('codeOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('codeInput').focus(),100);
+}
+const DEV=getUserCode()||'fc_guest_'+Date.now();
 
 async function sbReq(method,path,body=null){
   try{
@@ -164,7 +217,7 @@ function setSyncStatus(type,msg){
 async function loadProgress(){
   setSyncStatus('loading','기록 불러오는 중...');
   try{
-    const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(DEV)}&question_index=gte.20000&select=question_index,result`);
+    const rows=await sbReq('GET',`quiz_progress?device_id=eq.${encodeURIComponent(getUserCode()||DEV)}&question_index=gte.20000&select=question_index,result`);
     rows.forEach(r=>{
       const id=r.question_index-20000;
       try{state[id]=JSON.parse(r.result);}catch(e){}
@@ -175,9 +228,9 @@ async function loadProgress(){
 }
 
 async function saveCard(id){
-  localStorage.setItem('fc_state2',JSON.stringify(state));
+  const _sc=getUserCode();localStorage.setItem('fc_state_'+(_sc||'default'),JSON.stringify(state));
   try{
-    await sbReq('POST','quiz_progress',{device_id:DEV,question_index:id+20000,result:JSON.stringify(state[id])});
+    await sbReq('POST','quiz_progress',{device_id:getUserCode()||DEV,question_index:id+20000,result:JSON.stringify(state[id])});
     setSyncStatus('ok','✓ 저장됨 · '+new Date().toLocaleTimeString('ko-KR'));
   }catch(e){setSyncStatus('error','저장 실패');}
 }
@@ -186,7 +239,7 @@ async function resetAll(){
   if(!confirm('모든 암기 기록을 초기화합니까?'))return;
   state={};
   localStorage.removeItem('fc_state2');
-  try{await sbReq('DELETE',`quiz_progress?device_id=eq.${encodeURIComponent(DEV)}&question_index=gte.20000`);}catch(e){}
+  try{await sbReq('DELETE',`quiz_progress?device_id=eq.${encodeURIComponent(getUserCode()||DEV)}&question_index=gte.20000`);}catch(e){}
   updateSidebar();
   setSyncStatus('ok','초기화 완료');
   renderWelcome();
@@ -794,14 +847,15 @@ function updateSidebar(){
 
 // ===== INIT =====
 async function init(){
-  // 로컬 캐시 먼저 적용
+  const code=getUserCode();
+  if(!code){showCodePopup();return;}
+  document.getElementById('sideCode').textContent=code;
   try{
-    const local=JSON.parse(localStorage.getItem('fc_state2')||'{}');
+    const local=JSON.parse(localStorage.getItem('fc_state_'+code)||'{}');
     Object.keys(local).forEach(id=>{state[parseInt(id)]=local[parseInt(id)];});
   }catch(e){}
   updateSidebar();
   renderWelcome();
-  // DB 로드
   await loadProgress();
 }
 init();
