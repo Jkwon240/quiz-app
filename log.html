@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Voyage Log · JAY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#F6F9FB;
+    --surface-2:#EEF3F7;
+    --panel:#FFFFFF;
+    --line:#E2E9EF;
+    --line-soft:#EAF0F4;
+    --ink:#0E2438;
+    --ink-2:#33506A;
+    --fog:#5E7688;
+    --fog-dim:#93A7B5;
+    --navy:#0F2740;
+    --starboard:#12A867;   /* progress / streak (darker for white bg) */
+    --heading:#0E90B4;     /* interactive teal */
+    --amber:#B9820C;       /* expression highlight */
+    --danger:#D0402F;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'Pretendard', system-ui, -apple-system, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, monospace;
+    --r:14px;
+    --shadow:0 1px 2px rgba(14,36,56,.05), 0 4px 14px rgba(14,36,56,.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 560px at 82% -12%, rgba(14,144,180,.05), transparent 60%),
+      radial-gradient(900px 480px at -10% 108%, rgba(18,168,103,.05), transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 18px 64px;}
+  h2,h3{margin:0;}
+
+  /* Header */
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .brand{display:flex;flex-direction:column;gap:3px;}
+  .brand .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--heading);}
+  .brand h1{font-family:var(--font-display);font-weight:700;font-size:25px;letter-spacing:-.01em;margin:0;line-height:1.05;color:var(--navy);}
+  .brand h1 .k{color:var(--fog);font-weight:500;}
+  .phase-badge{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);box-shadow:var(--shadow);}
+  .phase-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--heading);box-shadow:0 0 0 4px rgba(14,144,180,.12);}
+
+  /* Voyage — dark hero card on white */
+  .voyage{background:linear-gradient(180deg,#14324F,#0C2138);border:1px solid #14324F;border-radius:var(--r);padding:18px 20px 14px;margin-bottom:16px;position:relative;overflow:hidden;color:#EAF3F9;box-shadow:0 8px 26px rgba(15,39,64,.16);}
+  .voyage .vhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .voyage .vhead .label{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#8FADC4;}
+  .voyage .vhead .dest{font-family:var(--font-mono);font-size:12px;color:#8FADC4;}
+  .voyage .vhead .dest b{color:#38D08A;}
+  .track{position:relative;height:64px;margin:6px 2px 2px;}
+  .track .rail{position:absolute;left:0;right:0;top:36px;height:2px;background:#20456A;}
+  .track .wake{position:absolute;left:0;top:36px;height:2px;background:linear-gradient(90deg,rgba(56,208,138,.15),#38D08A);border-radius:2px;transition:width .9s cubic-bezier(.22,.61,.36,1);}
+  .track .tick{position:absolute;top:29px;width:2px;height:16px;background:#20456A;transform:translateX(-1px);}
+  .track .tick.hit{background:#38D08A;}
+  .track .tlabel{position:absolute;top:50px;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;color:#6E8CA3;white-space:nowrap;}
+  .track .tlabel.hit{color:#8FADC4;}
+  .track .ship{position:absolute;top:24px;transform:translate(-50%,0);transition:left .9s cubic-bezier(.22,.61,.36,1);z-index:3;}
+  .track .ship svg{display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));}
+  .track .port{position:absolute;top:28px;font-family:var(--font-mono);font-size:10px;color:#8FADC4;}
+  .track .port.start{left:0;}
+  .voyage .vfoot{display:flex;gap:16px;align-items:baseline;font-family:var(--font-mono);font-size:12px;color:#8FADC4;flex-wrap:wrap;}
+  .voyage .vfoot b{color:#EAF3F9;}
+  .next-port{display:none;font-family:var(--font-mono);font-size:11px;color:#8FADC4;margin-top:8px;}
+  .next-port b{color:#4FC5DE;}
+
+  /* Tabs */
+  .tabbar{display:flex;gap:6px;overflow-x:auto;margin-bottom:18px;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto;appearance:none;cursor:pointer;background:var(--panel);border:1px solid var(--line);color:var(--fog);border-radius:10px;padding:10px 16px;font-family:var(--font-body);font-size:14px;font-weight:500;white-space:nowrap;transition:all .15s;box-shadow:var(--shadow);}
+  .tab:hover{color:var(--ink);border-color:var(--heading);}
+  .tab.active{background:var(--heading);border-color:var(--heading);color:#fff;}
+  .tab:focus-visible{outline:2px solid var(--heading);outline-offset:2px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* Panels */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);}
+  .panel + .panel{margin-top:16px;}
+  .panel > h2{font-family:var(--font-display);font-weight:600;font-size:15px;margin:0 0 2px;letter-spacing:.01em;color:var(--navy);}
+  .panel > h2 .en{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--fog-dim);margin-left:8px;font-weight:400;}
+  .panel .hint{color:var(--fog);font-size:12.5px;margin:2px 0 14px;}
+  .grid{display:grid;gap:16px;}
+  .g-auto{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:16px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px 14px;box-shadow:var(--shadow);}
+  .kpi .klabel{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--fog);display:flex;align-items:center;gap:6px;}
+  .kpi .kval{font-family:var(--font-display);font-weight:700;font-size:29px;line-height:1.05;margin-top:8px;letter-spacing:-.02em;color:var(--navy);}
+  .kpi .kval .unit{font-size:13px;font-family:var(--font-mono);font-weight:500;color:var(--fog);margin-left:3px;}
+  .kpi .ksub{font-family:var(--font-mono);font-size:11px;color:var(--fog-dim);margin-top:5px;}
+  .kpi.accent .kval{color:var(--starboard);}
+
+  /* Weekly ring */
+  .ring-wrap{display:flex;align-items:center;gap:18px;}
+  .ring-wrap svg{flex:0 0 auto;}
+  .ring-meta .rm-big{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--navy);}
+  .ring-meta .rm-sub{font-family:var(--font-mono);font-size:12px;color:var(--fog);margin-top:3px;}
+  .ring-goal-edit{margin-top:8px;font-family:var(--font-mono);font-size:11px;color:var(--fog-dim);}
+
+  /* Calendar */
+  .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .cal-head .mnav{background:var(--surface);border:1px solid var(--line);color:var(--fog);border-radius:8px;width:30px;height:30px;cursor:pointer;font-family:var(--font-mono);}
+  .cal-head .mnav:hover{color:var(--heading);border-color:var(--heading);}
+  .cal-title{font-family:var(--font-mono);font-size:13px;color:var(--ink);letter-spacing:.04em;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .cal-grid .dow{font-family:var(--font-mono);font-size:10px;color:var(--fog-dim);text-align:center;padding-bottom:4px;}
+  .cal-cell{aspect-ratio:1/1;border-radius:7px;background:var(--surface-2);border:1px solid transparent;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--fog);cursor:pointer;transition:transform .1s;}
+  .cal-cell:hover{transform:scale(1.06);}
+  .cal-cell.empty{background:transparent;cursor:default;}
+  .cal-cell.empty:hover{transform:none;}
+  .cal-cell.today{border-color:var(--heading);color:var(--navy);font-weight:600;}
+  .cal-cell.l1{background:rgba(18,168,103,.16);color:#0C7A4C;}
+  .cal-cell.l2{background:rgba(18,168,103,.36);color:#075437;}
+  .cal-cell.l3{background:rgba(18,168,103,.62);color:#fff;font-weight:700;}
+  .cal-legend{display:flex;gap:10px;align-items:center;margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--fog-dim);flex-wrap:wrap;}
+  .cal-legend .sw{display:inline-flex;align-items:center;gap:5px;}
+  .cal-legend .box{width:11px;height:11px;border-radius:3px;border:1px solid var(--line);}
+
+  /* Skill bars + radar */
+  .skill-row{margin-bottom:12px;}
+  .skill-row:last-child{margin-bottom:0;}
+  .skill-row .stop{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+  .skill-row .stop .sn{color:var(--ink);}
+  .skill-row .stop .sm{font-family:var(--font-mono);color:var(--fog);font-size:11.5px;}
+  .bar{height:9px;background:var(--surface-2);border-radius:6px;overflow:hidden;}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,#3FB6A0,var(--starboard));border-radius:6px;transition:width .7s cubic-bezier(.22,.61,.36,1);}
+  .focus-note{margin-top:14px;padding:11px 13px;background:rgba(14,144,180,.07);border:1px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--ink-2);}
+  .focus-note b{color:var(--heading);}
+  .radar-wrap{display:flex;justify-content:center;}
+
+  /* ===== LOG: date + summary ===== */
+  .entry-date{display:flex;align-items:center;gap:10px;margin:2px 0 14px;flex-wrap:wrap;}
+  .entry-date input[type=date]{background:var(--surface);border:1px solid var(--line);color:var(--ink);font-family:var(--font-mono);font-size:13px;border-radius:9px;padding:8px 10px;color-scheme:light;}
+  .entry-date .today-flag{font-family:var(--font-mono);font-size:11px;color:var(--starboard);}
+  .day-summary{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;}
+  .day-summary .ds-main{font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);}
+  .day-summary .ds-main .u{font-size:12px;color:var(--fog);font-family:var(--font-mono);font-weight:500;margin-left:2px;}
+  .day-summary .ds-item{font-family:var(--font-mono);font-size:12px;color:var(--fog);}
+
+  .field{margin-bottom:18px;}
+  .field > .flabel{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fog);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;}
+  .field > .flabel .sub{text-transform:none;letter-spacing:0;color:var(--fog-dim);font-size:10.5px;}
+
+  /* Session builder */
+  .sess-builder{border:1px dashed var(--line);border-radius:12px;padding:14px;background:var(--surface);}
+  .sb-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .sb-cell label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--fog);display:block;margin-bottom:5px;}
+  select.sel{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:9px 10px;font-family:var(--font-body);font-size:13.5px;color-scheme:light;cursor:pointer;}
+  select.sel:focus{outline:none;border-color:var(--heading);}
+  .mini-min{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  .mini-min button{background:none;border:none;color:var(--fog);font-size:16px;width:34px;height:38px;cursor:pointer;font-family:var(--font-mono);}
+  .mini-min button:hover{color:var(--heading);}
+  .mini-min input{flex:1;background:none;border:none;color:var(--ink);text-align:center;font-family:var(--font-mono);font-size:15px;font-weight:500;width:100%;padding:8px 0;-moz-appearance:textfield;}
+  .mini-min input::-webkit-outer-spin-button,.mini-min input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .mini-min input:focus{outline:none;}
+  .mini-min .sfx{font-family:var(--font-mono);font-size:11px;color:var(--fog-dim);padding-right:10px;}
+  .quick-min{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .quick-min button{background:var(--panel);border:1px solid var(--line);color:var(--fog);font-family:var(--font-mono);font-size:11px;border-radius:7px;padding:5px 10px;cursor:pointer;}
+  .quick-min button:hover{color:var(--heading);border-color:var(--heading);}
+  input.text{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--font-body);font-size:14px;padding:10px 12px;}
+  input.text:focus,textarea:focus{outline:none;border-color:var(--heading);}
+  input.text::placeholder,textarea::placeholder{color:var(--fog-dim);}
+  .sb-add{margin-top:12px;width:100%;appearance:none;cursor:pointer;border:1px solid var(--heading);background:rgba(14,144,180,.08);color:var(--heading);border-radius:10px;padding:11px;font-family:var(--font-body);font-weight:600;font-size:14px;}
+  .sb-add:hover{background:rgba(14,144,180,.14);}
+
+  /* Session list */
+  .sess-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+  .sess-item{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;}
+  .sess-item .si-emoji{font-size:17px;flex:0 0 auto;}
+  .sess-item .si-body{flex:1;min-width:0;}
+  .sess-item .si-line1{font-size:13.5px;color:var(--ink);}
+  .sess-item .si-line1 b{color:var(--navy);}
+  .sess-item .si-skill{font-family:var(--font-mono);font-size:11px;color:var(--starboard);margin-left:6px;}
+  .sess-item .si-mat{font-size:12px;color:var(--fog);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sess-item .si-min{font-family:var(--font-mono);font-size:13px;color:var(--ink-2);flex:0 0 auto;}
+  .sess-item .si-del{flex:0 0 auto;background:none;border:none;color:var(--fog-dim);cursor:pointer;font-family:var(--font-mono);font-size:13px;}
+  .sess-item .si-del:hover{color:var(--danger);}
+  .sess-empty{font-family:var(--font-mono);font-size:12px;color:var(--fog-dim);padding:8px 2px;}
+
+  /* feel dots */
+  .feel-dots{display:flex;gap:8px;align-items:center;}
+  .feel-dots .fd{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--panel);cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--fog-dim);display:flex;align-items:center;justify-content:center;transition:all .12s;}
+  .feel-dots .fd:hover{border-color:var(--heading);}
+  .feel-dots .fd.on{background:var(--starboard);border-color:var(--starboard);color:#fff;}
+  .feel-clear{background:none;border:none;color:var(--fog-dim);font-family:var(--font-mono);font-size:11px;cursor:pointer;margin-left:6px;}
+
+  /* expressions */
+  .expr-add{display:flex;gap:8px;}
+  .expr-add input{flex:1;font-family:var(--font-mono);color:#8A6608;}
+  .expr-add button{flex:0 0 auto;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);border-radius:9px;padding:0 16px;font-family:var(--font-body);font-size:13px;cursor:pointer;}
+  .expr-add button:hover{border-color:var(--amber);color:var(--amber);}
+  .expr-list{display:flex;flex-direction:column;gap:7px;margin-top:10px;}
+  .expr-chip{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;background:rgba(185,130,12,.06);border:1px solid rgba(185,130,12,.2);border-radius:9px;padding:9px 12px;}
+  .expr-chip .ec-t{font-family:var(--font-mono);font-size:13px;color:#8A6608;line-height:1.5;}
+  .expr-chip .ec-x{background:none;border:none;color:var(--fog-dim);cursor:pointer;font-family:var(--font-mono);font-size:12px;flex:0 0 auto;}
+  .expr-chip .ec-x:hover{color:var(--danger);}
+
+  textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--font-body);font-size:14px;padding:11px 12px;resize:vertical;}
+
+  .num-inline{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;overflow:hidden;max-width:200px;}
+  .num-inline button{background:none;border:none;color:var(--fog);font-size:17px;width:38px;height:42px;cursor:pointer;font-family:var(--font-mono);}
+  .num-inline button:hover{color:var(--heading);}
+  .num-inline input{flex:1;background:none;border:none;color:var(--ink);text-align:center;font-family:var(--font-mono);font-size:15px;font-weight:500;width:100%;padding:9px 0;-moz-appearance:textfield;}
+  .num-inline input::-webkit-outer-spin-button,.num-inline input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .num-inline input:focus{outline:none;}
+  .num-inline .sfx{font-family:var(--font-mono);font-size:11px;color:var(--fog-dim);padding-right:12px;}
+
+  .save-row{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;}
+  .btn-save{appearance:none;cursor:pointer;border:none;border-radius:11px;background:var(--starboard);color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;padding:12px 24px;transition:transform .12s, box-shadow .2s;box-shadow:0 6px 16px rgba(18,168,103,.24);}
+  .btn-save:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(18,168,103,.32);}
+  .btn-save:active{transform:translateY(0);}
+  .btn-save:focus-visible{outline:2px solid var(--navy);outline-offset:3px;}
+  .btn-ghost{appearance:none;cursor:pointer;background:var(--surface);border:1px solid var(--line);color:var(--fog);border-radius:11px;padding:12px 16px;font-family:var(--font-body);font-size:14px;}
+  .btn-ghost:hover{color:var(--ink);border-color:var(--heading);}
+  .saved-toast{font-family:var(--font-mono);font-size:12px;color:var(--starboard);opacity:0;transition:opacity .3s;}
+  .saved-toast.show{opacity:1;}
+
+  /* Recent list */
+  .log-list{display:flex;flex-direction:column;gap:10px;}
+  .log-item{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:13px 14px;position:relative;}
+  .log-item .li-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .log-item .li-date{font-family:var(--font-mono);font-size:12px;color:var(--heading);cursor:pointer;font-weight:500;}
+  .log-item .li-date:hover{text-decoration:underline;}
+  .log-item .li-mins{font-family:var(--font-mono);font-size:11.5px;color:var(--fog);}
+  .log-item .li-sess{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+  .li-sess .lss{font-size:12.5px;color:var(--ink-2);}
+  .li-sess .lss .em{margin-right:5px;}
+  .li-sess .lss .mn{font-family:var(--font-mono);color:var(--fog);font-size:11px;}
+  .log-item .li-expr{font-family:var(--font-mono);font-size:12.5px;color:#8A6608;margin:2px 0;padding-left:10px;border-left:2px solid var(--amber);}
+  .log-item .li-refl{font-size:12.5px;color:var(--fog);margin-top:6px;}
+  .log-item .li-del{position:absolute;top:11px;right:12px;background:none;border:none;color:var(--fog-dim);cursor:pointer;font-family:var(--font-mono);font-size:12px;}
+  .log-item .li-del:hover{color:var(--danger);}
+  .empty-state{text-align:center;padding:26px 10px;color:var(--fog-dim);}
+  .empty-state .anchor{font-size:26px;opacity:.5;margin-bottom:8px;}
+  .empty-state .es-t{color:var(--fog);font-size:13.5px;}
+
+  /* Phrasebook */
+  .pb-search{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+  .pb-search input{flex:1;min-width:180px;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:var(--font-body);font-size:14px;padding:10px 12px;}
+  .pb-search input:focus{outline:none;border-color:var(--heading);}
+  .pb-count{font-family:var(--font-mono);font-size:11px;color:var(--fog);}
+  .pb-list{display:flex;flex-direction:column;gap:8px;}
+  .pb-item{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .pb-item .pb-text{font-family:var(--font-mono);font-size:13.5px;color:#8A6608;line-height:1.5;}
+  .pb-item .pb-date{font-family:var(--font-mono);font-size:10px;color:var(--fog-dim);margin-top:5px;}
+  .pb-item .pb-copy{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--fog);border-radius:7px;padding:5px 10px;font-family:var(--font-mono);font-size:11px;cursor:pointer;}
+  .pb-item .pb-copy:hover{color:var(--heading);border-color:var(--heading);}
+
+  /* Stats */
+  .trend-chart{width:100%;height:auto;}
+  .records{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+  .rec{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:14px;}
+  .rec .rl{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fog);}
+  .rec .rv{font-family:var(--font-display);font-weight:700;font-size:22px;margin-top:6px;color:var(--navy);}
+  .rec .rv .u{font-size:12px;color:var(--fog);font-family:var(--font-mono);font-weight:500;margin-left:2px;}
+  .rec .rs{font-family:var(--font-mono);font-size:10.5px;color:var(--fog-dim);margin-top:4px;}
+  .month-cmp{display:flex;gap:20px;flex-wrap:wrap;margin-top:6px;}
+  .month-cmp .mc{flex:1;min-width:130px;}
+  .mc .mct{font-family:var(--font-mono);font-size:11px;color:var(--fog);}
+  .mc .mcv{font-family:var(--font-display);font-weight:700;font-size:20px;margin-top:4px;color:var(--navy);}
+  .mc .mcd{font-family:var(--font-mono);font-size:11px;margin-top:3px;}
+  .mcd.up{color:var(--starboard);} .mcd.down{color:var(--danger);}
+
+  /* Settings */
+  .set-field{margin-bottom:18px;}
+  .set-field label{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fog);display:block;margin-bottom:8px;}
+  .set-field input.text{max-width:220px;}
+  .ms-list{display:flex;flex-direction:column;gap:8px;}
+  .ms-row{display:flex;gap:10px;align-items:center;}
+  .ms-row .msh{width:70px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--font-mono);font-size:13px;padding:8px;color-scheme:light;}
+  .ms-row .msl{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--font-body);font-size:13px;padding:8px 10px;}
+  .ms-row input:focus{outline:none;border-color:var(--heading);}
+  .io-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .io-btns button{background:var(--surface);border:1px solid var(--line);color:var(--fog);font-family:var(--font-mono);font-size:12px;border-radius:9px;padding:10px 14px;cursor:pointer;}
+  .io-btns button:hover{color:var(--ink);border-color:var(--heading);}
+  .io-btns button.reset:hover{color:var(--danger);border-color:var(--danger);}
+  .io-note{font-family:var(--font-mono);font-size:11px;color:var(--fog-dim);margin-top:10px;line-height:1.6;}
+
+  /* Sync badge */
+  .utils{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap;}
+  .sync-note{font-family:var(--font-mono);font-size:11px;color:var(--fog-dim);display:flex;align-items:center;gap:6px;}
+  .sync-note .sdot{width:7px;height:7px;border-radius:50%;background:var(--starboard);}
+  .sync-note .sdot.off{background:var(--amber);}
+  .backup-btn{background:var(--panel);border:1px solid var(--line);color:var(--fog);font-family:var(--font-mono);font-size:11.5px;border-radius:8px;padding:8px 12px;cursor:pointer;}
+  .backup-btn:hover{color:var(--ink);border-color:var(--heading);}
+
+  @media (max-width:560px){
+    .wrap{padding:18px 13px 48px;}
+    .brand h1{font-size:21px;}
+    .track .tlabel{display:none;}
+    .next-port{display:block;}
+    .sb-row{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <span class="eyebrow">English Voyage Log</span>
+      <h1>제이의 영어 항해 일지 <span class="k">/ toward the US</span></h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="phase-badge" id="codeBadge" style="cursor:pointer" title="동기화 코드 변경">
+        <span class="dot" id="codeDot" style="background:#B9820C"></span>
+        <span id="codeText">코드 미설정</span>
+      </div>
+      <div class="phase-badge"><span class="dot"></span><span id="phaseText">출항 준비</span></div>
+    </div>
+  </div>
+
+  <div class="voyage">
+    <div class="vhead">
+      <span class="label">Cumulative course</span>
+      <span class="dest">목적지 · <b>SJ Global Logis (US)</b></span>
+    </div>
+    <div class="track" id="track">
+      <div class="rail"></div>
+      <div class="wake" id="wake" style="width:0%"></div>
+      <div class="port start">서울/부산</div>
+      <div class="ship" id="ship" style="left:0%">
+        <svg width="26" height="20" viewBox="0 0 26 20" fill="none">
+          <path d="M2 12 L24 12 L20 18 L6 18 Z" fill="#4FC5DE"/>
+          <rect x="12" y="3" width="1.6" height="9" fill="#EAF3F9"/>
+          <path d="M13.6 3 L21 9 L13.6 9 Z" fill="#38D08A"/>
+        </svg>
+      </div>
+    </div>
+    <div class="vfoot">
+      <span>누적 <b id="cumHoursV">0.0</b> h</span>
+      <span>목표 <b id="targetV">300</b> h · US-ready</span>
+      <span>진행 <b id="voyPct">0</b>%</span>
+    </div>
+    <div class="next-port" id="nextPort"></div>
+  </div>
+
+  <div class="tabbar" role="tablist">
+    <button class="tab active" data-tab="dash" role="tab">대시보드</button>
+    <button class="tab" data-tab="log" role="tab">기록</button>
+    <button class="tab" data-tab="phrase" role="tab">표현집</button>
+    <button class="tab" data-tab="stats" role="tab">통계</button>
+    <button class="tab" data-tab="settings" role="tab">설정</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dash">
+    <div class="kpis">
+      <div class="kpi accent"><div class="klabel">🔥 Streak</div><div class="kval"><span id="kStreak">0</span><span class="unit">일</span></div><div class="ksub">최장 <span id="kBest">0</span>일</div></div>
+      <div class="kpi"><div class="klabel">Total time</div><div class="kval"><span id="kHours">0.0</span><span class="unit">h</span></div><div class="ksub"><span id="kSessions">0</span>회 세션</div></div>
+      <div class="kpi"><div class="klabel">This week</div><div class="kval"><span id="kWeekDays">0</span><span class="unit">/7</span></div><div class="ksub"><span id="kWeekMin">0</span>분 기록</div></div>
+      <div class="kpi"><div class="klabel">Vocab</div><div class="kval"><span id="kVocab">0</span></div><div class="ksub">누적 신규 단어</div></div>
+    </div>
+
+    <div class="grid g-auto">
+      <div class="panel">
+        <h2>주간 목표 <span class="en">Weekly goal</span></h2>
+        <p class="hint">이번 주 학습량. 목표는 설정에서 조정돼요.</p>
+        <div class="ring-wrap">
+          <svg width="104" height="104" viewBox="0 0 104 104">
+            <circle cx="52" cy="52" r="42" fill="none" stroke="#EEF3F7" stroke-width="10"/>
+            <circle id="ringFg" cx="52" cy="52" r="42" fill="none" stroke="#12A867" stroke-width="10" stroke-linecap="round" transform="rotate(-90 52 52)" stroke-dasharray="263.9" stroke-dashoffset="263.9" style="transition:stroke-dashoffset .8s ease"/>
+            <text id="ringPct" x="52" y="57" text-anchor="middle" font-family="Space Grotesk" font-size="22" font-weight="700" fill="#0E2438">0%</text>
+          </svg>
+          <div class="ring-meta">
+            <div class="rm-big"><span id="ringMin">0</span> / <span id="ringGoal">150</span> min</div>
+            <div class="rm-sub" id="ringRemain">목표까지 150분</div>
+            <div class="ring-goal-edit" id="ringDays">이번 주 0일 기록</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="cal-head">
+          <button class="mnav" id="prevMonth" aria-label="이전 달">‹</button>
+          <span class="cal-title" id="calTitle">—</span>
+          <button class="mnav" id="nextMonth" aria-label="다음 달">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-legend">
+          <span>기록 강도</span>
+          <span class="sw"><span class="box" style="background:var(--surface-2)"></span>없음</span>
+          <span class="sw"><span class="box" style="background:rgba(18,168,103,.16)"></span>~20m</span>
+          <span class="sw"><span class="box" style="background:rgba(18,168,103,.36)"></span>~45m</span>
+          <span class="sw"><span class="box" style="background:rgba(18,168,103,.62)"></span>45m+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h2>스킬 밸런스 <span class="en">Skill balance · 14d</span></h2>
+      <p class="hint">최근 14일 스킬별 시간과 다음 초점 제안.</p>
+      <div id="skillBars"></div>
+      <div class="focus-note" id="focusNote">첫 기록을 남기면 다음 초점을 제안해 드릴게요.</div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="view" id="view-log">
+    <div class="panel">
+      <h2>오늘의 기록 <span class="en">Log sessions</span></h2>
+      <p class="hint">하루 안에 여러 세션을 쌓아보세요. 슬롯·스킬·시간·내용을 세션마다 따로 기록합니다.</p>
+
+      <div class="entry-date">
+        <input type="date" id="entryDate" />
+        <span class="today-flag" id="todayFlag">TODAY</span>
+      </div>
+
+      <div class="day-summary">
+        <span class="ds-main"><span id="dsMin">0</span><span class="u">분</span></span>
+        <span class="ds-item">세션 <span id="dsSess">0</span></span>
+        <span class="ds-item">단어 <span id="dsVocab">0</span></span>
+        <span class="ds-item">표현 <span id="dsExpr">0</span></span>
+      </div>
+
+      <div class="field">
+        <span class="flabel">세션 추가 <span class="sub">Add a study session</span></span>
+        <div class="sess-builder">
+          <div class="sb-row">
+            <div class="sb-cell">
+              <label>언제/어디서 · Slot</label>
+              <select class="sel" id="sbSlot"></select>
+            </div>
+            <div class="sb-cell">
+              <label>스킬 · Skill</label>
+              <select class="sel" id="sbSkill"></select>
+            </div>
+          </div>
+          <div class="sb-row">
+            <div class="sb-cell">
+              <label>시간 · Minutes</label>
+              <div class="mini-min">
+                <button type="button" data-mstep="-5">−</button>
+                <input type="number" id="sbMin" value="20" min="0" step="5" inputmode="numeric"/>
+                <button type="button" data-mstep="5">+</button>
+                <span class="sfx">min</span>
+              </div>
+            </div>
+            <div class="sb-cell">
+              <label>내용 · 자료/메모</label>
+              <input class="text" id="sbMat" placeholder="예: 6 Minute English / 부킹 컨펌 롤플레이"/>
+            </div>
+          </div>
+          <div class="quick-min">
+            <button type="button" data-mset="10">10</button>
+            <button type="button" data-mset="15">15</button>
+            <button type="button" data-mset="20">20</button>
+            <button type="button" data-mset="30">30</button>
+            <button type="button" data-mset="45">45</button>
+          </div>
+          <button class="sb-add" id="sbAdd">+ 이 세션 추가</button>
+        </div>
+
+        <div class="sess-list" id="sessList"></div>
+      </div>
+
+      <div class="field">
+        <span class="flabel">체감 컨디션 <span class="sub">Feel · 선택</span></span>
+        <div class="feel-dots" id="feelDots">
+          <div class="fd" data-f="1">1</div><div class="fd" data-f="2">2</div><div class="fd" data-f="3">3</div><div class="fd" data-f="4">4</div><div class="fd" data-f="5">5</div>
+          <button class="feel-clear" id="feelClear">지움</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="flabel">신규 단어 · Anki</span>
+        <div class="num-inline">
+          <button type="button" data-vstep="-1">−</button>
+          <input type="number" id="vocab" value="0" min="0" step="1" inputmode="numeric"/>
+          <button type="button" data-vstep="1">+</button>
+          <span class="sfx">words</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="flabel">오늘의 표현 <span class="sub">Expressions · 여러 개 가능</span></span>
+        <div class="expr-add">
+          <input class="text" id="exprInput" placeholder="e.g. Let's circle back on the ETA once the vessel berths." maxlength="180"/>
+          <button id="exprAdd">추가</button>
+        </div>
+        <div class="expr-list" id="exprList"></div>
+      </div>
+
+      <div class="field">
+        <span class="flabel">회고 · Reflection</span>
+        <textarea id="reflection" rows="2" placeholder="막힌 부분, 느낌, 내일 이어갈 것…"></textarea>
+      </div>
+
+      <div class="save-row">
+        <button class="btn-save" id="saveBtn">기록 저장</button>
+        <button class="btn-ghost" id="clearBtn">입력 비우기</button>
+        <span class="saved-toast" id="savedToast">✓ 항로에 반영됨</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>최근 기록 <span class="en">Recent entries</span></h2>
+      <div class="log-list" id="logList"></div>
+    </div>
+  </section>
+
+  <!-- PHRASEBOOK -->
+  <section class="view" id="view-phrase">
+    <div class="panel">
+      <h2>표현집 <span class="en">Phrasebook</span></h2>
+      <p class="hint">매일 저장한 표현이 검색 가능한 나만의 비즈니스 영어 사전으로.</p>
+      <div class="pb-search">
+        <input id="pbSearch" placeholder="표현 검색… (예: ETA, booking)" />
+        <span class="pb-count" id="pbCount">0개</span>
+      </div>
+      <div class="pb-list" id="pbList"></div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="view" id="view-stats">
+    <div class="panel">
+      <h2>최근 30일 추이 <span class="en">30-day trend</span></h2>
+      <p class="hint">하루 학습 분(minute). 점선은 일일 목표선.</p>
+      <svg class="trend-chart" id="trendChart" viewBox="0 0 320 120" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="grid g-auto">
+      <div class="panel">
+        <h2>스킬 레이더 <span class="en">Skill radar · 30d</span></h2>
+        <div class="radar-wrap"><svg id="radar" width="220" height="220" viewBox="0 0 220 220"></svg></div>
+      </div>
+      <div class="panel">
+        <h2>이번 달 vs 지난 달 <span class="en">Monthly</span></h2>
+        <div class="month-cmp">
+          <div class="mc"><div class="mct">이번 달</div><div class="mcv"><span id="mThis">0</span>분</div><div class="mcd" id="mDelta">—</div></div>
+          <div class="mc"><div class="mct">지난 달</div><div class="mcv"><span id="mLast">0</span>분</div><div class="mcd" style="color:var(--fog-dim)"><span id="mThisDays">0</span>일 기록</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>개인 기록 <span class="en">Records</span></h2>
+      <div class="records" id="records"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" id="view-settings">
+    <div class="panel">
+      <h2>목표 설정 <span class="en">Goals</span></h2>
+      <div class="set-field"><label>항해 목표 · Target hours</label><input class="text" id="setTarget" type="number" min="10" step="10" inputmode="numeric"/></div>
+      <div class="set-field"><label>주간 목표 · Weekly minutes</label><input class="text" id="setWeekly" type="number" min="10" step="10" inputmode="numeric"/></div>
+      <div class="set-field"><label>마일스톤 · Milestones (누적 시간 · 라벨)</label><div class="ms-list" id="msList"></div></div>
+      <button class="btn-save" id="setSave">설정 저장</button>
+    </div>
+    <div class="panel">
+      <h2>데이터 <span class="en">Data · own it</span></h2>
+      <p class="hint">언제든 엑셀·Supabase로 옮길 수 있게 내보내기/가져오기를 지원합니다.</p>
+      <div class="io-btns">
+        <button id="expCsv">CSV 내보내기</button>
+        <button id="expJson">JSON 내보내기(백업)</button>
+        <button id="impBtn">JSON 가져오기</button>
+        <button id="demoBtn">데모 데이터</button>
+        <button id="resetBtn" class="reset">전체 초기화</button>
+        <input type="file" id="impFile" accept=".json,application/json" style="display:none" />
+      </div>
+      <div class="io-note">CSV는 세션별 행으로 나가서 엑셀 피벗에 바로 맞습니다(한글 인코딩 포함). JSON은 완전 백업본이라, 나중에 Supabase 앱으로 옮길 때 그대로 import하면 됩니다.</div>
+    </div>
+  </section>
+
+  <div class="utils">
+    <div class="sync-note" id="syncNote" style="cursor:pointer" title="오프라인일 때 탭하면 재연결 시도"><span class="sdot" id="syncDot"></span><span id="syncText">저장 상태 확인 중…</span></div>
+    <button class="backup-btn" id="backupNow">지금 JSON 백업</button>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "english-voyage-data-v2";
+  const SUPABASE_URL = "https://pdoelwybbnrdyitoeqrb.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2Vsd3liYm5yZHlpdG9lcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODY1ODgsImV4cCI6MjA5NDY2MjU4OH0.KTAu-umLBVF4ePOn1V1hjdOhmnHlcDlgFrgZh2o1SKI";
+  const SLOTS = ["통근 러닝","크로스핏 웜/쿨","출근 전","저녁 회화","업무 중 실전","기타"];
+  const SLOT_EMOJI = {"통근 러닝":"🏃","크로스핏 웜/쿨":"🏋️","출근 전":"🌅","저녁 회화":"🌙","업무 중 실전":"💼","기타":"✏️"};
+  const SKILLS = ["Listening","Speaking","Reading","Writing","Vocab"];
+  const DEFAULTS = {
+    targetHours: 300, weeklyGoal: 150,
+    milestones: [
+      { h:0, label:"출항" }, { h:75, label:"기초 다지기" }, { h:150, label:"대화 확장" },
+      { h:225, label:"비즈니스·현장" }, { h:300, label:"US 도착" }
+    ]
+  };
+
+  let entries = {};   // { 'YYYY-MM-DD': { sessions:[{slot,skill,minutes,material}], vocab, expressions:[], reflection, feel } }
+  let settings = JSON.parse(JSON.stringify(DEFAULTS));
+  let backend = "memory";
+  let syncCode = "";
+  let calMonth = new Date();
+  const mem = {};
+
+  // day-edit working state
+  let daySessions = [];
+  let dayExprs = [];
+  let dayFeel = null;
+
+  const pad = n => String(n).padStart(2,"0");
+  const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const todayStr = () => ymd(new Date());
+  const parseYmd = s => { const [y,m,dd]=s.split("-").map(Number); return new Date(y,m-1,dd); };
+  const addDays = (d,n)=>{ const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  /* ---- migrate old model → session model ---- */
+  function migrate(e){
+    if(e && e.sessions) return e;
+    e = e||{};
+    const m = { sessions:[], vocab:e.vocab||0, expressions:[], reflection:e.reflection||"", feel:e.feel||null };
+    if(e.minutes>0 || (e.skills&&e.skills.length) || (e.slots&&e.slots.length)){
+      m.sessions.push({ slot:(e.slots&&e.slots[0])||"기타", skill:(e.skills&&e.skills[0])||"Listening", minutes:e.minutes||0, material:"" });
+    }
+    if(e.expr) m.expressions.push(e.expr);
+    if(Array.isArray(e.expressions)) m.expressions = e.expressions.slice();
+    return m;
+  }
+  function migrateAll(){ for(const k of Object.keys(entries)) entries[k]=migrate(entries[k]); }
+
+  /* ---- storage: cloud -> localStorage -> memory ---- */
+  function apply(d){ entries=d.entries||{}; settings=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),d.settings||{}); migrateAll(); }
+  function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return undefined; } }
+  function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+  function lsAvail(){ try{ window.localStorage.setItem("__vlt__","1"); window.localStorage.removeItem("__vlt__"); return true; }catch(e){ return false; } }
+
+  const CODE_KEY = "evl_sync_code";
+  function cacheKey(code){ return STORAGE_KEY+"::"+code; }
+
+  async function sbGet(code){
+    const url = `${SUPABASE_URL}/rest/v1/english_voyage_data?user_code=eq.${encodeURIComponent(code)}&select=data`;
+    const res = await fetch(url, { headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}` } });
+    if(!res.ok) throw new Error("sb get failed");
+    const rows = await res.json();
+    return rows && rows[0] ? rows[0].data : null;
+  }
+  async function sbSet(code, data){
+    const url = `${SUPABASE_URL}/rest/v1/english_voyage_data`;
+    const res = await fetch(url, {
+      method:"POST",
+      headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, "Content-Type":"application/json", Prefer:"resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify([{ user_code:code, data, updated_at:new Date().toISOString() }])
+    });
+    if(!res.ok) throw new Error("sb set failed");
+  }
+  function getSyncCode(){
+    let c = lsGet(CODE_KEY);
+    if(!c){
+      c = (prompt("동기화 코드를 입력하세요 (폰·PC 어디서든 이 코드로 기록이 이어집니다). 예: JAE","")||"").trim().toUpperCase();
+      if(c) lsSet(CODE_KEY, c);
+    }
+    return c || "";
+  }
+  function setSyncCode(newCode){
+    const c=(newCode||"").trim().toUpperCase();
+    if(!c) return;
+    lsSet(CODE_KEY, c); syncCode=c;
+  }
+
+  async function load(){
+    syncCode = getSyncCode();
+    if(syncCode){
+      try{
+        const data = await sbGet(syncCode);
+        backend="cloud";
+        if(data) apply(data);
+        if(lsAvail()) lsSet(cacheKey(syncCode), JSON.stringify(data||{entries,settings}));
+        return;
+      }catch(e){
+        backend="local-offline";
+        if(lsAvail()){ const c=lsGet(cacheKey(syncCode)); if(c){ try{ apply(JSON.parse(c)); }catch(err){} } }
+        return;
+      }
+    }
+    if(lsAvail()){ backend="local"; const lv=lsGet(STORAGE_KEY); if(lv){ try{ apply(JSON.parse(lv)); }catch(e){} } return; }
+    backend="memory"; if(mem[STORAGE_KEY]){ try{ apply(JSON.parse(mem[STORAGE_KEY])); }catch(e){} }
+  }
+  async function save(){
+    const payload={entries,settings}; const text=JSON.stringify(payload);
+    if(syncCode){
+      if(lsAvail()) lsSet(cacheKey(syncCode), text);
+      try{ await sbSet(syncCode, payload); backend="cloud"; syncBadge(); return; }
+      catch(e){ backend="local-offline"; syncBadge(); return; }
+    }
+    if(lsSet(STORAGE_KEY,text)){ backend="local"; syncBadge(); return; }
+    mem[STORAGE_KEY]=text; backend="memory"; syncBadge();
+  }
+
+  /* ---- metrics (session-based) ---- */
+  const dayMin = e => (e.sessions||[]).reduce((a,s)=>a+(s.minutes||0),0);
+  const totalMinutes = ()=>Object.values(entries).reduce((a,e)=>a+dayMin(e),0);
+  const totalVocab = ()=>Object.values(entries).reduce((a,e)=>a+(e.vocab||0),0);
+  const totalSessions = ()=>Object.values(entries).reduce((a,e)=>a+(e.sessions?e.sessions.filter(s=>s.minutes>0).length:0),0);
+  const loggedDays = ()=>Object.keys(entries).filter(k=>dayMin(entries[k])>0);
+
+  function streak(){
+    let cur=0,best=0; let d=new Date();
+    if(!(entries[ymd(d)]&&dayMin(entries[ymd(d)])>0)) d=addDays(d,-1);
+    while(entries[ymd(d)]&&dayMin(entries[ymd(d)])>0){cur++;d=addDays(d,-1);}
+    const days=loggedDays().sort(); let run=0,prev=null;
+    for(const k of days){ const dt=parseYmd(k); if(prev&&(dt-prev)/86400000===1)run++;else run=1; if(run>best)best=run; prev=dt; }
+    return {cur,best};
+  }
+  function weekStats(){
+    const now=new Date(),day=(now.getDay()+6)%7,mon=addDays(now,-day); let days=0,mins=0;
+    for(let i=0;i<7;i++){ const k=ymd(addDays(mon,i)); if(entries[k]){ const m=dayMin(entries[k]); if(m>0){days++;mins+=m;} } }
+    return {days,mins};
+  }
+  function skillMinutes(win){
+    const acc={}; SKILLS.forEach(s=>acc[s]=0);
+    const cut=addDays(new Date(),-(win-1)); const cutD=new Date(cut.getFullYear(),cut.getMonth(),cut.getDate());
+    for(const [k,e] of Object.entries(entries)){ if(parseYmd(k)<cutD)continue;
+      (e.sessions||[]).forEach(s=>{ if(acc[s.skill]!==undefined) acc[s.skill]+=(s.minutes||0); });
+    }
+    return acc;
+  }
+  function phaseName(){ const h=totalMinutes()/60; const ms=[...settings.milestones].sort((a,b)=>a.h-b.h); let n=ms[0]?ms[0].label:"출항"; for(const m of ms){ if(h>=m.h)n=m.label; } return n; }
+  function last30(){ const arr=[]; for(let i=29;i>=0;i--){ const k=ymd(addDays(new Date(),-i)); arr.push({k,m:entries[k]?dayMin(entries[k]):0}); } return arr; }
+  function monthMinutes(off){ const base=new Date(); const ref=new Date(base.getFullYear(),base.getMonth()+off,1); let mins=0,days=0;
+    for(const [k,e] of Object.entries(entries)){ const d=parseYmd(k); if(d.getFullYear()===ref.getFullYear()&&d.getMonth()===ref.getMonth()){ const m=dayMin(e); mins+=m; if(m>0)days++; } } return {mins,days}; }
+  function records(){ let bestDay={m:0,k:null},bestVocab={v:0,k:null};
+    for(const k of Object.keys(entries)){ const e=entries[k]; const m=dayMin(e); if(m>bestDay.m)bestDay={m,k}; if((e.vocab||0)>bestVocab.v)bestVocab={v:e.vocab,k}; }
+    return { totalDays:loggedDays().length, best:streak().best, bestDay, bestVocab, hours:totalMinutes()/60 }; }
+
+  /* ---- render voyage ---- */
+  function renderVoyage(){
+    const target=settings.targetHours||300, hours=totalMinutes()/60, pct=Math.max(0,Math.min(1,hours/target));
+    $("wake").style.width=(pct*100)+"%"; $("ship").style.left=(pct*100)+"%";
+    $("cumHoursV").textContent=hours.toFixed(1); $("targetV").textContent=target; $("voyPct").textContent=Math.round(pct*100); $("phaseText").textContent=phaseName();
+    const track=$("track"); track.querySelectorAll(".tick,.tlabel").forEach(el=>el.remove());
+    const ms=[...settings.milestones].sort((a,b)=>a.h-b.h);
+    ms.forEach(m=>{ const x=Math.max(0,Math.min(100,(m.h/target)*100)), hit=hours>=m.h-0.001;
+      const t=document.createElement("div"); t.className="tick"+(hit?" hit":""); t.style.left=x+"%"; track.appendChild(t);
+      const l=document.createElement("div"); l.className="tlabel"+(hit?" hit":""); l.style.left=x+"%"; l.textContent=m.label;
+      if(x<7){l.style.left="0";l.style.transform="translateX(0)";} if(x>93){l.style.left="100%";l.style.transform="translateX(-100%)";} track.appendChild(l);
+    });
+    const next=ms.find(m=>hours<m.h);
+    $("nextPort").innerHTML = next?`다음 기항지 · <b>${next.label}</b> (${(next.h-hours).toFixed(1)}h 남음)`:`<b>US 도착</b> — 항해 완주! ⚓`;
+  }
+
+  function animNum(el,to,dec=0,dur=650){ const r=window.matchMedia("(prefers-reduced-motion: reduce)").matches; if(r){el.textContent=dec?to.toFixed(dec):Math.round(to);return;} const st=performance.now(); (function s(t){ const p=Math.min(1,(t-st)/dur); el.textContent=(to*(1-Math.pow(1-p,3))).toFixed(dec); if(dec===0)el.textContent=Math.round(to*(1-Math.pow(1-p,3))); if(p<1)requestAnimationFrame(s); })(st); }
+  function renderKPIs(anim){
+    const {cur,best}=streak(),w=weekStats(),hours=totalMinutes()/60;
+    if(anim){ animNum($("kStreak"),cur); animNum($("kHours"),hours,1); animNum($("kWeekDays"),w.days); animNum($("kVocab"),totalVocab()); }
+    else { $("kStreak").textContent=cur; $("kHours").textContent=hours.toFixed(1); $("kWeekDays").textContent=w.days; $("kVocab").textContent=totalVocab(); }
+    $("kBest").textContent=best; $("kSessions").textContent=totalSessions(); $("kWeekMin").textContent=w.mins;
+  }
+  function renderRing(){
+    const w=weekStats(),goal=settings.weeklyGoal||150,p=Math.max(0,Math.min(1,w.mins/goal)),C=2*Math.PI*42;
+    $("ringFg").style.strokeDashoffset=C*(1-p); $("ringPct").textContent=Math.round(p*100)+"%";
+    $("ringMin").textContent=w.mins; $("ringGoal").textContent=goal;
+    $("ringRemain").textContent=w.mins>=goal?"이번 주 목표 달성! 🎉":`목표까지 ${goal-w.mins}분`;
+    $("ringDays").textContent=`이번 주 ${w.days}일 기록`;
+  }
+  const intensity = m => !m?"":(m<20?"l1":(m<45?"l2":"l3"));
+  function renderCal(){
+    const grid=$("calGrid"); grid.innerHTML="";
+    const y=calMonth.getFullYear(),m=calMonth.getMonth(); $("calTitle").textContent=`${y} · ${pad(m+1)}월`;
+    ["M","T","W","T","F","S","S"].forEach(d=>{const e=document.createElement("div");e.className="dow";e.textContent=d;grid.appendChild(e);});
+    const lead=(new Date(y,m,1).getDay()+6)%7; for(let i=0;i<lead;i++){const e=document.createElement("div");e.className="cal-cell empty";grid.appendChild(e);}
+    const days=new Date(y,m+1,0).getDate();
+    for(let d=1;d<=days;d++){ const key=`${y}-${pad(m+1)}-${pad(d)}`; const e=entries[key]; const mn=e?dayMin(e):0;
+      const cell=document.createElement("div"); cell.className="cal-cell "+intensity(mn); if(key===todayStr())cell.classList.add("today"); cell.textContent=d;
+      if(mn)cell.title=`${key} · ${mn}분`;
+      cell.addEventListener("click",()=>{ $("entryDate").value=key; loadDay(key); switchTab("log"); });
+      grid.appendChild(cell);
+    }
+  }
+  function renderSkills(){
+    const acc=skillMinutes(14),max=Math.max(1,...Object.values(acc)),box=$("skillBars"); box.innerHTML="";
+    SKILLS.forEach(s=>{ const mins=Math.round(acc[s]); const row=document.createElement("div"); row.className="skill-row";
+      row.innerHTML=`<div class="stop"><span class="sn">${s}</span><span class="sm">${mins}m</span></div><div class="bar"><i style="width:${(acc[s]/max)*100}%"></i></div>`; box.appendChild(row); });
+    const note=$("focusNote"),total=Object.values(acc).reduce((a,b)=>a+b,0);
+    if(total<1){ note.innerHTML="첫 기록을 남기면 다음 초점을 제안해 드릴게요."; return; }
+    let least=SKILLS[0]; SKILLS.forEach(s=>{if(acc[s]<acc[least])least=s;});
+    const tips={Listening:"통근 러닝에 팟캐스트/쉐도잉을 얹어보세요.",Speaking:"저녁 5분 롤플레이(선적 시나리오)로.",Reading:"실무 이메일·B/L 한 편 정독.",Writing:"오늘의 표현으로 문장 3개.",Vocab:"크로스핏 쿨다운에 Anki 10장."};
+    note.innerHTML=`이번 2주 최소 스킬은 <b>${least}</b> 입니다. ${tips[least]}`;
+  }
+  function renderRadar(){
+    const acc=skillMinutes(30),max=Math.max(1,...Object.values(acc)),cx=110,cy=110,R=80,n=SKILLS.length,svg=$("radar"); let out="";
+    [0.25,0.5,0.75,1].forEach(r=>{ let p=""; for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;p+=`${cx+Math.cos(a)*R*r},${cy+Math.sin(a)*R*r} `;} out+=`<polygon points="${p.trim()}" fill="none" stroke="#E2E9EF" stroke-width="1"/>`; });
+    for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;
+      out+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#E2E9EF" stroke-width="1"/>`;
+      const lx=cx+Math.cos(a)*(R+16),ly=cy+Math.sin(a)*(R+16); out+=`<text x="${lx}" y="${ly+3}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#5E7688">${SKILLS[i][0]}</text>`; }
+    let dp=""; for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n,r=acc[SKILLS[i]]/max; dp+=`${cx+Math.cos(a)*R*r},${cy+Math.sin(a)*R*r} `; }
+    out+=`<polygon points="${dp.trim()}" fill="rgba(18,168,103,.2)" stroke="#12A867" stroke-width="2"/>`;
+    for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n,r=acc[SKILLS[i]]/max; out+=`<circle cx="${cx+Math.cos(a)*R*r}" cy="${cy+Math.sin(a)*R*r}" r="2.5" fill="#12A867"/>`; }
+    svg.innerHTML=out;
+  }
+  function renderTrend(){
+    const data=last30(),max=Math.max(30,...data.map(d=>d.m)),svg=$("trendChart"),W=320,H=120,pd=6,bw=(W-pd*2)/30; let out="";
+    const dg=(settings.weeklyGoal||150)/7,gy=H-pd-((dg/max)*(H-pd*2-10))-10;
+    out+=`<line x1="${pd}" y1="${gy}" x2="${W-pd}" y2="${gy}" stroke="#CBD8E1" stroke-width="1" stroke-dasharray="3 3"/>`;
+    data.forEach((d,i)=>{ const h=d.m>0?Math.max(3,(d.m/max)*(H-pd*2-10)):0,x=pd+i*bw+1,y=H-pd-h;
+      const col=d.m>=45?"#12A867":d.m>=20?"#3FB6A0":d.m>0?"#8CCBB8":"#EEF3F7";
+      out+=`<rect x="${x}" y="${y}" width="${bw-2}" height="${h||2}" rx="1.5" fill="${col}"><title>${d.k} · ${d.m}분</title></rect>`; });
+    svg.innerHTML=out;
+  }
+  function renderStats(){
+    const cur=monthMinutes(0),prev=monthMinutes(-1); $("mThis").textContent=cur.mins; $("mLast").textContent=prev.mins; $("mThisDays").textContent=cur.days;
+    const delta=cur.mins-prev.mins,el=$("mDelta");
+    if(prev.mins===0&&cur.mins===0){el.textContent="—";el.className="mcd";} else if(delta>=0){el.textContent=`▲ ${delta}분`;el.className="mcd up";} else {el.textContent=`▼ ${Math.abs(delta)}분`;el.className="mcd down";}
+    const r=records();
+    $("records").innerHTML=`
+      <div class="rec"><div class="rl">Total days</div><div class="rv">${r.totalDays}<span class="u">일</span></div><div class="rs">기록한 날</div></div>
+      <div class="rec"><div class="rl">Longest streak</div><div class="rv">${r.best}<span class="u">일</span></div><div class="rs">최장 연속</div></div>
+      <div class="rec"><div class="rl">Best day</div><div class="rv">${r.bestDay.m}<span class="u">분</span></div><div class="rs">${r.bestDay.k||"—"}</div></div>
+      <div class="rec"><div class="rl">Most vocab</div><div class="rv">${r.bestVocab.v}<span class="u">개</span></div><div class="rs">${r.bestVocab.k||"—"}</div></div>
+      <div class="rec"><div class="rl">Total hours</div><div class="rv">${r.hours.toFixed(1)}<span class="u">h</span></div><div class="rs">누적 학습</div></div>`;
+  }
+
+  function renderList(){
+    const list=$("logList");
+    const keys=Object.keys(entries).filter(k=>{const e=entries[k];return dayMin(e)>0||(e.expressions&&e.expressions.length)||e.reflection;}).sort().reverse().slice(0,15);
+    if(!keys.length){ list.innerHTML=`<div class="empty-state"><div class="anchor">⚓</div><div class="es-t">아직 기록이 없습니다.<br>첫 항해를 시작해 보세요.</div></div>`; return; }
+    list.innerHTML="";
+    keys.forEach(k=>{ const e=entries[k],item=document.createElement("div"); item.className="log-item";
+      const sess=(e.sessions||[]).map(s=>`<div class="lss"><span class="em">${SLOT_EMOJI[s.slot]||"✏️"}</span><b>${s.skill}</b> <span class="mn">${s.minutes}m</span>${s.material?` · ${esc(s.material)}`:""}</div>`).join("");
+      const exprs=(e.expressions||[]).map(x=>`<div class="li-expr">${esc(x)}</div>`).join("");
+      const feel=e.feel?` · 컨디션 ${e.feel}/5`:"";
+      item.innerHTML=`<button class="li-del" data-k="${k}" title="삭제">✕</button>
+        <div class="li-top"><span class="li-date" data-edit="${k}">${k}</span><span class="li-mins">${dayMin(e)}분 · ${(e.sessions||[]).length}세션 · ${e.vocab||0} words${feel}</span></div>
+        <div class="li-sess">${sess||'<div class="lss" style="color:var(--fog-dim)">세션 없음</div>'}</div>
+        ${exprs}
+        ${e.reflection?`<div class="li-refl">${esc(e.reflection)}</div>`:""}`;
+      list.appendChild(item);
+    });
+    list.querySelectorAll(".li-del").forEach(b=>b.addEventListener("click",async()=>{const k=b.dataset.k;if(!confirm(`${k} 기록을 삭제할까요?`))return;delete entries[k];await save();renderAll(false);if(k===$("entryDate").value)loadDay(k);}));
+    list.querySelectorAll(".li-date").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.edit;$("entryDate").value=k;loadDay(k);window.scrollTo({top:0,behavior:"smooth"});}));
+  }
+
+  function renderPhrasebook(){
+    const q=($("pbSearch").value||"").toLowerCase().trim(); const all=[];
+    Object.keys(entries).sort().reverse().forEach(k=>{ (entries[k].expressions||[]).forEach(t=>all.push({k,t})); });
+    const filtered=q?all.filter(x=>x.t.toLowerCase().includes(q)):all;
+    $("pbCount").textContent=`${filtered.length}개`; const list=$("pbList");
+    if(!filtered.length){ list.innerHTML=`<div class="empty-state"><div class="anchor">✒️</div><div class="es-t">${q?"검색 결과가 없어요.":"저장된 표현이 아직 없어요.<br>기록 탭에서 오늘의 표현을 추가해 보세요."}</div></div>`; return; }
+    list.innerHTML="";
+    filtered.forEach(x=>{ const el=document.createElement("div"); el.className="pb-item";
+      el.innerHTML=`<div><div class="pb-text">${esc(x.t)}</div><div class="pb-date">${x.k}</div></div><button class="pb-copy" data-t="${esc(x.t)}">복사</button>`; list.appendChild(el); });
+    list.querySelectorAll(".pb-copy").forEach(b=>b.addEventListener("click",()=>{ const txt=b.dataset.t,done=()=>{b.textContent="✓";setTimeout(()=>b.textContent="복사",1200);};
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(done);} else {const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();done();} }));
+  }
+
+  /* ---- session builder + day form ---- */
+  function fillSelect(sel,opts){ sel.innerHTML=opts.map(o=>`<option value="${o}">${o}</option>`).join(""); }
+  function renderSessList(){
+    const box=$("sessList");
+    if(!daySessions.length){ box.innerHTML=`<div class="sess-empty">추가된 세션이 없습니다. 위에서 세션을 하나씩 쌓아보세요.</div>`; }
+    else {
+      box.innerHTML="";
+      daySessions.forEach((s,i)=>{ const el=document.createElement("div"); el.className="sess-item";
+        el.innerHTML=`<span class="si-emoji">${SLOT_EMOJI[s.slot]||"✏️"}</span>
+          <div class="si-body"><div class="si-line1"><b>${s.slot}</b><span class="si-skill">${s.skill}</span></div>${s.material?`<div class="si-mat">${esc(s.material)}</div>`:""}</div>
+          <span class="si-min">${s.minutes}m</span><button class="si-del" data-i="${i}">✕</button>`; box.appendChild(el); });
+      box.querySelectorAll(".si-del").forEach(b=>b.addEventListener("click",()=>{ daySessions.splice(+b.dataset.i,1); renderSessList(); renderDaySummary(); }));
+    }
+    renderDaySummary();
+  }
+  function renderExprList(){
+    const box=$("exprList");
+    box.innerHTML=""; dayExprs.forEach((t,i)=>{ const el=document.createElement("div"); el.className="expr-chip";
+      el.innerHTML=`<div class="ec-t">${esc(t)}</div><button class="ec-x" data-i="${i}">✕</button>`; box.appendChild(el); });
+    box.querySelectorAll(".ec-x").forEach(b=>b.addEventListener("click",()=>{ dayExprs.splice(+b.dataset.i,1); renderExprList(); renderDaySummary(); }));
+  }
+  function renderFeel(){ document.querySelectorAll("#feelDots .fd").forEach(d=>d.classList.toggle("on", dayFeel!==null && +d.dataset.f<=dayFeel)); }
+  function renderDaySummary(){
+    const mins=daySessions.reduce((a,s)=>a+(s.minutes||0),0);
+    $("dsMin").textContent=mins; $("dsSess").textContent=daySessions.length;
+    $("dsVocab").textContent=parseInt($("vocab").value,10)||0; $("dsExpr").textContent=dayExprs.length;
+  }
+  function loadDay(key){
+    const e=migrate(entries[key]||{});
+    daySessions=(e.sessions||[]).map(s=>({...s}));
+    dayExprs=(e.expressions||[]).slice();
+    dayFeel=e.feel||null;
+    $("vocab").value=e.vocab||0; $("reflection").value=e.reflection||"";
+    $("todayFlag").style.display=(key===todayStr())?"inline":"none";
+    renderSessList(); renderExprList(); renderFeel();
+  }
+  async function saveDay(){
+    const key=$("entryDate").value||todayStr();
+    const entry={ sessions:daySessions.map(s=>({...s})), vocab:parseInt($("vocab").value,10)||0, expressions:dayExprs.slice(), reflection:$("reflection").value.trim(), feel:dayFeel };
+    const empty=!entry.sessions.length && !entry.vocab && !entry.expressions.length && !entry.reflection;
+    if(empty) delete entries[key]; else entries[key]=entry;
+    await save(); calMonth=parseYmd(key); renderAll(true);
+    const t=$("savedToast"); t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600);
+  }
+
+  function renderSettings(){
+    $("setTarget").value=settings.targetHours; $("setWeekly").value=settings.weeklyGoal;
+    const box=$("msList"); box.innerHTML="";
+    settings.milestones.forEach((m,i)=>{ const row=document.createElement("div"); row.className="ms-row";
+      row.innerHTML=`<input class="msh" type="number" data-i="${i}" data-f="h" value="${m.h}" min="0" step="5"/><input class="msl" data-i="${i}" data-f="label" value="${esc(m.label)}"/>`; box.appendChild(row); });
+  }
+  async function saveSettings(){
+    settings.targetHours=Math.max(10,parseInt($("setTarget").value,10)||300);
+    settings.weeklyGoal=Math.max(10,parseInt($("setWeekly").value,10)||150);
+    document.querySelectorAll("#msList .ms-row").forEach(row=>{ const h=row.querySelector('[data-f="h"]'),l=row.querySelector('[data-f="label"]'),i=+h.dataset.i;
+      settings.milestones[i]={ h:parseInt(h.value,10)||0, label:l.value.trim()||`${h.value}h` }; });
+    await save(); renderAll(false); alert("설정을 저장했어요. 항해 라벨·목표에 반영됩니다.");
+  }
+
+  function download(name,text,type){ const b=new Blob([text],{type}),u=URL.createObjectURL(b),a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1500); }
+  function exportCsv(){
+    const rows=[["date","slot","skill","minutes","material","day_vocab","day_expressions","day_reflection","feel"]];
+    Object.keys(entries).sort().forEach(k=>{ const e=entries[k]; const exprJoined=(e.expressions||[]).join(" || ");
+      const sess=e.sessions&&e.sessions.length?e.sessions:[{slot:"",skill:"",minutes:0,material:""}];
+      sess.forEach((s,idx)=>{ rows.push([k,s.slot,s.skill,s.minutes||0,s.material||"", idx===0?(e.vocab||0):"", idx===0?exprJoined:"", idx===0?(e.reflection||""):"", idx===0?(e.feel||""):""]); });
+    });
+    const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    download(`english-voyage-log_${todayStr()}.csv`,csv,"text/csv;charset=utf-8;");
+  }
+  function exportJson(){ download(`english-voyage-log_${todayStr()}.json`,JSON.stringify({entries,settings},null,2),"application/json"); }
+  function importJson(file){ const r=new FileReader(); r.onload=async()=>{ try{ const d=JSON.parse(r.result),inc=d.entries||d; if(typeof inc!=="object")throw 0;
+    if(!confirm("가져온 기록을 기존과 병합합니다. 같은 날짜는 덮어써요. 진행할까요?"))return; Object.assign(entries,inc); migrateAll();
+    if(d.settings)settings=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),d.settings);
+    await save(); renderSettings(); calMonth=new Date(); loadDay(todayStr()); renderAll(true); alert("가져오기 완료!"); }
+    catch(e){ alert("JSON을 읽을 수 없어요. 이 앱에서 내보낸 파일인지 확인해 주세요."); } }; r.readAsText(file); }
+
+  function switchTab(name){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name));
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+name));
+    if(name==="phrase")renderPhrasebook();
+    if(name==="stats"){renderTrend();renderRadar();renderStats();}
+    if(name==="settings")renderSettings();
+  }
+  function syncBadge(){
+    const dot=$("syncDot"),txt=$("syncText"),cb=$("codeText"),cd=$("codeDot");
+    if(backend==="cloud"){ dot.classList.remove("off"); txt.textContent=`클라우드 저장됨 · 코드 ${syncCode}로 동기화`; }
+    else if(backend==="local-offline"){ dot.classList.add("off"); txt.textContent=`오프라인 — 이 기기 캐시만 사용 (코드 ${syncCode})`; }
+    else if(backend==="local"){ dot.classList.remove("off"); txt.textContent="이 브라우저에만 저장됨 (동기화 코드 없음)"; }
+    else { dot.classList.add("off"); txt.textContent="⚠ 임시 저장 — 닫으면 사라짐"; }
+    if(syncCode){ cb.textContent=`코드 · ${syncCode}`; cd.style.background = backend==="cloud" ? "#12A867" : "#B9820C"; }
+    else { cb.textContent="코드 미설정"; cd.style.background="#B9820C"; }
+  }
+
+  function renderAll(anim){
+    renderVoyage(); renderKPIs(anim); renderRing(); renderCal(); renderSkills(); renderList();
+    if($("view-phrase").classList.contains("active"))renderPhrasebook();
+    if($("view-stats").classList.contains("active")){renderTrend();renderRadar();renderStats();}
+    syncBadge();
+  }
+
+  function wire(){
+    fillSelect($("sbSlot"),SLOTS); fillSelect($("sbSkill"),SKILLS);
+    document.querySelectorAll("[data-mstep]").forEach(b=>b.addEventListener("click",()=>{ const i=$("sbMin"); i.value=Math.max(0,(parseInt(i.value,10)||0)+parseInt(b.dataset.mstep,10)); }));
+    document.querySelectorAll("[data-mset]").forEach(b=>b.addEventListener("click",()=>{ $("sbMin").value=b.dataset.mset; }));
+    document.querySelectorAll("[data-vstep]").forEach(b=>b.addEventListener("click",()=>{ const i=$("vocab"); i.value=Math.max(0,(parseInt(i.value,10)||0)+parseInt(b.dataset.vstep,10)); renderDaySummary(); }));
+    $("vocab").addEventListener("input",renderDaySummary);
+    $("sbAdd").addEventListener("click",()=>{
+      const min=parseInt($("sbMin").value,10)||0;
+      if(min<=0){ alert("시간(분)을 입력해 주세요."); return; }
+      daySessions.push({ slot:$("sbSlot").value, skill:$("sbSkill").value, minutes:min, material:$("sbMat").value.trim() });
+      $("sbMat").value=""; renderSessList();
+    });
+    $("exprAdd").addEventListener("click",()=>{ const v=$("exprInput").value.trim(); if(!v)return; dayExprs.push(v); $("exprInput").value=""; renderExprList(); renderDaySummary(); });
+    $("exprInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("exprAdd").click(); } });
+    document.querySelectorAll("#feelDots .fd").forEach(d=>d.addEventListener("click",()=>{ const v=+d.dataset.f; dayFeel=(dayFeel===v)?null:v; renderFeel(); }));
+    $("feelClear").addEventListener("click",()=>{ dayFeel=null; renderFeel(); });
+    $("saveBtn").addEventListener("click",saveDay);
+    $("clearBtn").addEventListener("click",()=>{ daySessions=[]; dayExprs=[]; dayFeel=null; $("vocab").value=0; $("reflection").value=""; $("sbMat").value=""; renderSessList(); renderExprList(); renderFeel(); });
+    $("entryDate").addEventListener("change",e=>loadDay(e.target.value||todayStr()));
+    $("prevMonth").addEventListener("click",()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal();});
+    $("nextMonth").addEventListener("click",()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal();});
+    $("pbSearch").addEventListener("input",renderPhrasebook);
+    $("setSave").addEventListener("click",saveSettings);
+    $("expCsv").addEventListener("click",exportCsv);
+    $("expJson").addEventListener("click",exportJson);
+    $("backupNow").addEventListener("click",exportJson);
+    $("impBtn").addEventListener("click",()=>$("impFile").click());
+    $("impFile").addEventListener("change",e=>{ if(e.target.files[0])importJson(e.target.files[0]); e.target.value=""; });
+    $("demoBtn").addEventListener("click",async()=>{ if(!confirm("데모 데이터로 최근 2주를 채웁니다. 기존과 병합돼요. 진행할까요?"))return; Object.assign(entries,demo()); await save(); calMonth=new Date(); loadDay(todayStr()); renderAll(true); });
+    $("resetBtn").addEventListener("click",async()=>{ if(!confirm("모든 기록을 삭제합니다. 되돌릴 수 없어요. 초기화할까요?"))return; entries={}; await save(); loadDay(todayStr()); calMonth=new Date(); renderAll(false); });
+    document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchTab(t.dataset.tab)));
+    $("syncNote").addEventListener("click", async ()=>{
+      if(backend!=="local-offline" || !syncCode) return;
+      $("syncText").textContent="재연결 시도 중…";
+      await save();
+      if(backend==="cloud"){ await load(); calMonth=new Date(); loadDay($("entryDate").value||todayStr()); renderAll(false); }
+    });
+    $("codeBadge").addEventListener("click", async ()=>{
+      const cur = syncCode || "";
+      const next = (prompt("동기화 코드 (폰·PC 등 같은 코드를 쓰면 기록이 이어집니다):", cur)||"").trim().toUpperCase();
+      if(!next || next===cur) return;
+      setSyncCode(next);
+      await load();
+      calMonth=new Date(); loadDay(todayStr()); renderAll(true);
+    });
+  }
+
+  function demo(){
+    const out={}; const mats={Listening:["6 Minute English","BBC podcast 쉐도잉","물류 유튜브 청취"],Speaking:["부킹 컨펌 롤플레이","ETA 안내 통화 연습","스탠드업 셀프토크"],Reading:["실무 이메일 정독","B/L 문서 읽기","기사 1편"],Writing:["오늘 표현 문장쓰기","견적 커버레터 초안"],Vocab:["Anki 신규 10","물류 용어 20"]};
+    const exprs=["Let's circle back on the ETA once the vessel berths.","Please advise the cut-off time for this booking.","We're seeing a rollover risk on the Busan sailing.","Can you confirm the incoterm before we quote?","I'll loop in the ops team and get back to you.","The consignee requested a partial release."];
+    for(let i=13;i>=0;i--){ if(Math.random()<0.16)continue; const d=ymd(addDays(new Date(),-i));
+      const nS=1+Math.floor(Math.random()*2); const sessions=[];
+      for(let j=0;j<nS;j++){ const sk=SKILLS[Math.floor(Math.random()*SKILLS.length)]; const sl=SLOTS[Math.floor(Math.random()*SLOTS.length)];
+        sessions.push({slot:sl,skill:sk,minutes:[10,15,20,25,30][Math.floor(Math.random()*5)],material:mats[sk][Math.floor(Math.random()*mats[sk].length)]}); }
+      out[d]={ sessions, vocab:Math.floor(Math.random()*12), expressions:Math.random()<0.65?[exprs[Math.floor(Math.random()*exprs.length)]]:[], reflection:Math.random()<0.35?"쉐도잉 반 박자 밀림. 내일 속도 낮춰 재시도.":"", feel:Math.random()<0.6?2+Math.floor(Math.random()*4):null };
+    }
+    return out;
+  }
+
+  (async function(){ wire(); await load(); $("entryDate").value=todayStr(); calMonth=new Date(); loadDay(todayStr()); renderAll(true); })();
+
+})();
+</script>
+</body>
+</html>
