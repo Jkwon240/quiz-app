@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>새교안 플래시카드 · 스마트해상물류관리사</title>
+<style>
+:root{
+  --navy:#0f2545; --navy2:#16345f; --blue:#2563eb; --blue-light:#eff6ff;
+  --amber:#f59e0b; --green:#16a34a; --red:#dc2626;
+  --bg:#f3f5f9; --card:#ffffff; --ink:#1e293b; --sub:#64748b; --line:#e2e8f0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.topbar{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.topbar h1{font-size:15px;font-weight:800;letter-spacing:-.2px;white-space:nowrap}
+.topbar h1 small{display:block;font-size:10px;font-weight:500;opacity:.65;letter-spacing:.3px;margin-top:1px}
+.topbar .spacer{flex:1}
+.deck-count{font-size:12px;background:rgba(255,255,255,.12);padding:5px 12px;border-radius:20px;font-weight:700}
+
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 14px;border-radius:20px;border:1.5px solid var(--line);background:#fff;color:var(--sub);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;font-family:inherit}
+.chip:hover{border-color:#93c5fd}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip .n{opacity:.7;font-weight:500;margin-left:3px}
+
+.progwrap{padding:10px 18px 0}
+.progtrack{height:6px;background:#e2e8f0;border-radius:4px;overflow:hidden;max-width:640px;margin:0 auto}
+.progfill{height:100%;background:linear-gradient(90deg,var(--blue),#60a5fa);border-radius:4px;transition:width .35s ease;width:0%}
+.proglabel{max-width:640px;margin:5px auto 0;display:flex;justify-content:space-between;font-size:11px;color:var(--sub);font-weight:600}
+
+.stage{max-width:640px;margin:0 auto;padding:22px 18px 10px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.cardpos{font-size:12px;color:var(--sub);font-weight:700;letter-spacing:.3px}
+
+.flip-scene{width:100%;max-width:560px;height:300px;perspective:1600px;cursor:pointer;touch-action:pan-y}
+.flip-card{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+.flip-card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 30px;text-align:center;box-shadow:0 8px 28px rgba(15,37,69,.14)}
+.face-front{background:var(--card);border:1px solid var(--line)}
+.face-back{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff;transform:rotateY(180deg)}
+.face-eyebrow{position:absolute;top:16px;left:20px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--blue)}
+.face-back .face-eyebrow{color:#93c5fd}
+.face-hint{position:absolute;bottom:14px;font-size:10.5px;color:var(--sub);font-weight:600}
+.face-back .face-hint{color:rgba(255,255,255,.55)}
+.face-term{font-size:23px;font-weight:800;line-height:1.35;color:var(--ink)}
+.face-def{font-size:15.5px;line-height:1.65;font-weight:500}
+.bm-dot{position:absolute;top:14px;right:16px;font-size:16px}
+
+.knowrow{display:flex;gap:10px;width:100%;max-width:560px}
+.know-btn{flex:1;padding:13px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.know-btn.dont{color:var(--red)}
+.know-btn.dont:hover,.know-btn.dont.active{background:#fef2f2;border-color:#fecaca}
+.know-btn.know{color:var(--green)}
+.know-btn.know:hover,.know-btn.know.active{background:#f0fdf4;border-color:#bbf7d0}
+
+.navrow{display:flex;align-items:center;gap:10px;width:100%;max-width:560px}
+.nav-btn{padding:12px 16px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.nav-btn:hover{border-color:#93c5fd;color:var(--blue)}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+.nav-btn.wide{flex:1}
+.nav-btn.shuffle{color:var(--blue);border-color:#bfdbfe;background:var(--blue-light)}
+
+.toolrow{display:flex;gap:8px;width:100%;max-width:560px;flex-wrap:wrap}
+.tool-btn{flex:1;min-width:140px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--sub);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.tool-btn:hover{border-color:#93c5fd;color:var(--blue)}
+.tool-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.statbar{display:flex;gap:10px;width:100%;max-width:560px;margin-top:2px}
+.statbox{flex:1;text-align:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 4px}
+.statbox .n{font-size:18px;font-weight:800}
+.statbox .l{font-size:10px;color:var(--sub);font-weight:700;margin-top:1px}
+.statbox.know .n{color:var(--green)}
+.statbox.dont .n{color:var(--red)}
+.statbox.rest .n{color:var(--sub)}
+
+.kbd-hint{max-width:560px;width:100%;text-align:center;font-size:11px;color:#94a3b8;padding:6px 0 26px;line-height:1.7}
+.kbd-hint b{background:#e2e8f0;color:#475569;padding:1px 6px;border-radius:4px;font-family:monospace;font-weight:700}
+
+.empty-state{max-width:560px;width:100%;text-align:center;padding:60px 20px;color:var(--sub)}
+.empty-state .ic{font-size:40px;margin-bottom:10px}
+
+.done-banner{max-width:560px;width:100%;background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:1px solid #bbf7d0;border-radius:14px;padding:22px;text-align:center;margin-bottom:4px}
+.done-banner .t{font-size:16px;font-weight:800;color:#166534}
+.done-banner .s{font-size:12.5px;color:#15803d;margin-top:4px}
+
+@media(max-width:480px){
+  .flip-scene{height:260px}
+  .face-term{font-size:19px}
+  .face-def{font-size:14px}
+  .topbar h1{font-size:13.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🗂 새교안 플래시카드<small>스마트해상물류관리사 · 표준교재 5개 과목</small></h1>
+  <div class="spacer"></div>
+  <div class="deck-count" id="deckCount">0/0</div>
+</div>
+
+<div class="chips" id="chips"></div>
+
+<div class="progwrap">
+  <div class="progtrack"><div class="progfill" id="progFill"></div></div>
+  <div class="proglabel"><span id="progText">0% 학습</span><span id="progKnowText">아는 카드 0장</span></div>
+</div>
+
+<div class="stage" id="stage">
+  <!-- rendered by JS -->
+</div>
+
+<script>
+const FLASHCARDS=[
+{s:"국제물류거래",f:"협의의 무역 (유형무역)",b:"물품(goods)의 국가간 이동만을 대상으로 하는 무역. 물품의 수출입만을 의미한다."},
+{s:"국제물류거래",f:"광의의 무역",b:"물품·용역(service)·기술(technology)·전자적 형태의 무체물·자본(capital)·노동(labor) 등의 국제적 이동을 모두 포함하는 개념."},
+{s:"국제물류거래",f:"비교우위 / 비교열위",b:"생산비용 측면에서 유리한 위치에 있으면 비교우위, 불리하면 비교열위. 리카도의 비교우위 이론이 무역발생의 기본원리를 설명함."},
+{s:"국제물류거래",f:"헥셔-올린 이론",b:"각국의 생산요소 부존량(자본·노동 등)의 차이에 의해 무역이 발생한다고 설명하는 현대 무역이론."},
+{s:"국제물류거래",f:"S/R (Shipping Request)",b:"선적요청서. 송화인이 선박회사에 선복을 신청할 때 제출하는 서류."},
+{s:"국제물류거래",f:"S/I (Shipping Instruction)",b:"선적의뢰서. 송화인이 운송주선인에게 계약물품의 선적을 의뢰할 때 제출하는 서류."},
+{s:"국제물류거래",f:"S/A (Shipping Application)",b:"선적신청서. 운송주선인이 S/I를 기초로 운송인에게 제출하는 서류. 운송인이 승낙하면 운송계약 성립."},
+{s:"국제물류거래",f:"S/O (Shipping Order)",b:"선적지시서. 선박회사가 화주 또는 대리인에게 발행하는, 본선에 화물 선적을 지시하는 서류."},
+{s:"국제물류거래",f:"M/R (Mate's Receipt)",b:"본선수취증. 본선의 일등항해사가 화물 수량을 증명하기 위해 송화인에게 발행하는 서류."},
+{s:"국제물류거래",f:"EIR (Equipment Interchange Receipt)",b:"기기수도증. 컨테이너의 외관상 상태(파손·변형 여부)를 기록한 문서로 반출·반입 시 양 당사자가 서명."},
+{s:"국제물류거래",f:"D/R (Dock Receipt)",b:"부두수취증. 컨테이너 화물이 CY에 반입·인도될 때 CY 운영인이 발행하는, 운송인의 화물 인수를 증명하는 문서."},
+{s:"국제물류거래",f:"CLP (Container Load Plan)",b:"컨테이너 내부 적부도. 컨테이너 내부의 적재상태를 상세히 기록한 문서로 화물분쟁 시 증거자료가 됨."},
+{s:"국제물류거래",f:"CY (Container Yard)",b:"컨테이너 장치장. 선사가 컨테이너를 집적·보관·장치하는 항만근처 지역. FCL 화물은 CY에서 인수한다."},
+{s:"국제물류거래",f:"CFS (Container Freight Station)",b:"컨테이너 화물 조작장. 소량화물(LCL)을 여러 화주로부터 인수해 목적항별로 분류·혼재하는 시설."},
+{s:"국제물류거래",f:"Freight Forwarder",b:"운송주선인. 운송수단을 직접 보유하지 않으면서도 하주에게는 운송인, 실제운송인에게는 하주의 입장에서 책임을 지는 계약운송인."},
+{s:"국제물류거래",f:"\"Shipper's Load and Count\"",b:"컨테이너 선하증권의 문언. 운송인이 컨테이너 내부 화물의 수량·상태를 직접 확인하지 않았음을 의미. 적입책임은 화주에게 귀속."},
+{s:"국제물류거래",f:"낙성계약",b:"무역계약의 법적 성격 중 하나. 당사자의 합의만 있으면 성립하며 계약문서 작성·교부를 성립조건으로 하지 않음."},
+{s:"국제물류거래",f:"쌍무계약",b:"매도인의 물품인도의무와 매수인의 대금지급의무처럼, 당사자 쌍방이 서로 대가적 채무를 부담하는 계약."},
+{s:"국제물류거래",f:"견본매매 (Sales by Sample)",b:"품질결정방법의 하나. 매매당사자 일방이 제시한 견본과 동일한 품질의 물품을 인도할 것을 약정하는 방식."},
+{s:"국제물류거래",f:"표준품매매 (Sales by Standard)",b:"농림수산물·광산물처럼 품질변동이 큰 상품에서 견본 대신 표준품을 기준으로 계약을 체결하는 방식."},
+{s:"국제물류거래",f:"과부족용인조항 (M/L Clause)",b:"More or Less Clause. 일정 범위 내 수량과부족을 계약위반으로 보지 않기로 약정하는 조항. 대량 산화물(Bulk Cargo)에 주로 적용."},
+{s:"국제물류거래",f:"개산수량조건",b:"about, approximately 등의 용어로 수량을 표시하는 조건. UCP600상 신용장 거래에서는 10%의 과부족이 허용됨."},
+{s:"국제물류거래",f:"환적 (Transhipment)",b:"선적항에서 양륙항까지의 운송 도중 한 운송수단에서 다른 운송수단으로 화물을 옮겨 싣는 것. 금지 특약이 없으면 허용."},
+{s:"국제물류거래",f:"ICC(A)",b:"신협회적하약관 중 최대담보(포괄책임주의, All Risks)에 해당하는 약관."},
+{s:"국제물류거래",f:"ICC(C)",b:"신협회적하약관 중 최소담보(열거책임주의)에 해당. CIF 조건에서 매도인의 기본 보험 부보 수준."},
+{s:"국제물류거래",f:"D/P (Documents against Payment)",b:"지급인도조건. 수입업자가 대금을 지급함과 동시에 선적서류를 인도받는 추심방식."},
+{s:"국제물류거래",f:"D/A (Documents against Acceptance)",b:"인수인도조건. 수입업자가 환어음을 인수하면 선적서류를 인도받고, 만기일에 대금을 지급하는 기간추심 방식."},
+{s:"국제물류거래",f:"T/T (Telegraphic Transfer)",b:"전신환. SWIFT 등을 이용해 지급은행에 지급지시를 하는 송금방식으로 현재 가장 널리 사용됨."},
+{s:"국제물류거래",f:"COD (Cash on Delivery)",b:"현물상환방식. 수입국에서 물품 인도 시 대금을 수령하는 방식. 귀금속 등 고가품 거래에 활용."},
+{s:"국제물류거래",f:"CAD (Cash against Documents)",b:"서류상환방식. 수출국에서 선적서류 인도 시 대금을 수령하는 방식."},
+{s:"국제물류거래",f:"발행은행 (Issuing Bank)",b:"신용장의 기본당사자. 발행의뢰인의 요청에 따라 수익자 앞으로 신용장을 발행하고 지급을 확약하는 은행."},
+{s:"국제물류거래",f:"수익자 (Beneficiary)",b:"신용장에 의하여 권리와 이익을 획득하는 자. 통상 수출업자를 지칭."},
+{s:"국제물류거래",f:"지정은행 (Nominated Bank)",b:"발행은행에 의해 지정되어 지급·연지급확약·인수·매입 권한을 수권받은 은행."},
+{s:"국제물류거래",f:"상환은행 (Reimbursement Bank)",b:"매입은행이 발행은행과 예치환거래은행이 아니거나 결제통화가 제3국 통화인 경우, 결제를 대행하는 제3의 은행."},
+{s:"국제물류거래",f:"양도가능신용장 (Transferable L/C)",b:"수익자가 받은 신용장을 제3자(제2수익자)에게 1회에 한하여 전부 또는 일부 양도할 수 있는 신용장."},
+{s:"국제물류거래",f:"지시식 선하증권 (Order B/L)",b:"수화인란에 order of XXX 등으로 기재되어 배서를 통해 자유롭게 양도 가능한 선하증권."},
+{s:"국제물류거래",f:"수취선하증권 (Received B/L)",b:"선적 전 화물이 지정 장소에서 운송인에게 인도되었을 때 발행되는 선하증권. \"received for shipment\" 기재."},
+{s:"국제물류거래",f:"Sea Waybill",b:"해상운송장. 비유통성 운송서류로 원본 제시 없이 신원확인만으로 화물 인도가 가능. 본사-지사 간 거래에 주로 활용."},
+{s:"국제물류거래",f:"과세가격 결정 제1방법",b:"수입물품이 우리나라로 수출하기 위해 실제로 지급하였거나 지급하여야 할 실제거래가격을 기초로 하는 과세가격 결정 원칙."},
+{s:"국제물류거래",f:"DPU (Delivered at Place Unloaded)",b:"인코텀즈 2020 신설 조건. 매도인이 지정 목적지에서 물품을 직접 양하하여 인도하며 하역비·위험까지 부담."},
+{s:"해운물류론",f:"조달물류",b:"생산에 필요한 원자재·부품·자재를 공급처로부터 공장 또는 물류거점까지 적시에 확보·이동·보관하는 물류활동."},
+{s:"해운물류론",f:"회수물류",b:"고객에게 판매·인도된 제품이나 포장재를 회수해 반품·교환·수리·재사용·재활용을 수행하는 역방향 물류."},
+{s:"해운물류론",f:"3S 1L 원칙",b:"신속(Speedy)·안전(Safely)·확실(Surely)·저비용(Low)으로 구성된 물류의 기본 목표 원칙."},
+{s:"해운물류론",f:"7R 원칙",b:"미시건대 스마이키 교수가 제창. Right Commodity·Quality·Quantity·Time·Place·Impression·Price로 구성."},
+{s:"해운물류론",f:"블록트레인 (Block Train)",b:"조차장 재편성 과정 없이 철도화물역이나 물류터미널 사이를 직통으로 운행하는 화물열차."},
+{s:"해운물류론",f:"Y-셔틀트레인",b:"셔틀트레인 운영원리를 따르되 중간 터미널 1개를 경유하여 운행하는 열차 서비스."},
+{s:"해운물류론",f:"정기선 운송 (Liner)",b:"정해진 항로를 정해진 시간·공표운임에 따라 규칙적으로 운항. 불특정 다수 화주와 개품운송계약 체결."},
+{s:"해운물류론",f:"부정기선 운송 (Tramper)",b:"화주가 선주로부터 선박을 용선하여 운송. 용선계약서(C/P) 작성. 벌크화물이 주종."},
+{s:"해운물류론",f:"과금중량 (Chargeable Weight)",b:"항공화물 운임 산정 시 실중량과 용적중량 중 더 큰 값. 1kg=6,000㎤ 기준으로 용적중량 환산."},
+{s:"해운물류론",f:"BUC (Bulk Unitization Charge)",b:"단위탑재용기운임. 화물 종류와 관계없이 ULD 단위로 산정하는 항공운임."},
+{s:"해운물류론",f:"IATA",b:"국제항공운송협회. 1945년 하바나 설립. 민간 항공사 간 협력체로 운송약관·서류 표준화 수행."},
+{s:"해운물류론",f:"ICAO",b:"국제민간항공기구. 유엔 산하 전문기구로 정부적 성격. 총회가 최고의결기관(3년 주기 개최)."},
+{s:"해운물류론",f:"FIATA",b:"국제운송주선인협회연합회. FBL(FIATA CT B/L)이라는 유통성 복합운송증권을 발행."},
+{s:"해운물류론",f:"TEU / FEU",b:"20피트 컨테이너=TEU(Twenty-foot Equivalent Unit), 40피트 컨테이너=FEU(Forty-foot Equivalent Unit)."},
+{s:"해운물류론",f:"하이큐빅 컨테이너",b:"길이·폭은 일반 40ft와 동일하나 높이만 8ft6in에서 9ft6in로 높인 컨테이너."},
+{s:"해운물류론",f:"오픈탑 컨테이너",b:"천정을 캔버스 덮개로 구성해 상부에서 크레인으로 직접 하역 가능. 중량물·장대물 운송에 활용."},
+{s:"해운물류론",f:"탱크 컨테이너",b:"액체화물(주류·유류·화학품 등) 대량운송을 위해 프레임 내부에 원통형 탱크를 장착한 특수 컨테이너."},
+{s:"해운물류론",f:"BIC Code",b:"컨테이너 코드. 4자리 영문(소유자코드3+장비식별기호1)+7자리 숫자(일련번호6+체크디지트1)로 11자리 구성."},
+{s:"해운물류론",f:"CSC (컨테이너안전협약)",b:"컨테이너의 구조적 안전요건과 시험절차를 국제적으로 공통화한 협약. 인명안전 확보 목적."},
+{s:"해운물류론",f:"CCC (컨테이너통관협약)",b:"컨테이너 국경통과 시 관세·통관 문제를 완화하기 위한 협약. 세관봉인 하 승인체계로 통관 간소화."},
+{s:"해운물류론",f:"잔교 (Pier)",b:"파일을 이용해 건설되어 바닷물 유동이 자유로운 접안 구조물. 안벽과 구분됨."},
+{s:"해운물류론",f:"허브항 (Hub-Port)",b:"기간항로에 위치해 자체 배후지 물동량과 환적물동량이 모두 큰 중심 항만."},
+{s:"해운물류론",f:"자유항 (Free Port)",b:"외국 물품·선박에 대해 관세법 적용을 배제·완화해 반입·반출·저장·가공·분류가 자유로운 항만."},
+{s:"해운물류론",f:"THC (Terminal Handling Charge)",b:"FCL 화물이 CY 반입부터 본선 선측까지 발생하는 비용. 일본은 CHC, 미국은 DDC라 부름."},
+{s:"해운물류론",f:"유치료 (Demurrage)",b:"화주가 Free Time을 초과해 CY에서 컨테이너를 반출하지 않을 때 지불하는 비용."},
+{s:"해운물류론",f:"지체료 (Detention)",b:"반출된 컨테이너를 지정 CY로 제때 반환하지 않을 때 발생하는 비용."},
+{s:"해운물류론",f:"체선료 (Demurrage, 용선)",b:"용선자가 약정된 정박기간(Laytime)을 초과해 하역을 마치지 못한 경우 선주에게 지급하는 비용."},
+{s:"해운물류론",f:"조출료 (Despatch Money)",b:"용선자가 약정 정박기간보다 빨리 하역을 마쳤을 때 선주가 용선자에게 지급하는 비용."},
+{s:"해운물류론",f:"나용선계약 (Bareboat Charter)",b:"용선자가 선박만 임차하며 선장·선원·항비·연료·수선비·보험료까지 모두 부담하는 용선계약."},
+{s:"해운물류론",f:"FIO (Free In & Out)",b:"선적·하역 비용을 모두 화주가 부담하는 하역비 부담조건."},
+{s:"해운물류론",f:"NOR (Notice of Readiness)",b:"하역준비완료통지서. 선장이 하역준비 완료 후 용선자에게 제출하는 통지서로 정박기간 개시."},
+{s:"해운물류론",f:"GENCON",b:"BIMCO가 제정한 항해용선계약 표준서식. 선박소유자에게 유리하게 구성."},
+{s:"해운물류론",f:"DWT (재화중량톤수)",b:"만재배수톤수에서 경화배수톤수를 공제한 값. 선박이 적재 가능한 화물의 최대중량. 용선료 산정 기준."},
+{s:"해운물류론",f:"순톤수 (Net Tonnage)",b:"직접 상행위에 사용되는 장소의 용적. 항세·톤세·운하통과료·등대사용료 산정 기준."},
+{s:"해운물류론",f:"공적운임 (Dead Freight)",b:"용선자가 약정 화물량에 미달하는 물량만 선적한 경우, 미선적 잔여물량에 대해 선주에게 지급하는 금액."},
+{s:"해운물류론",f:"비율운임 (Pro-rata Freight)",b:"불가항력 등으로 항해를 계속할 수 없게 된 경우, 실제 운송된 거리 비율에 따라 인정되는 운임."},
+{s:"해운물류론",f:"운임톤 (Revenue Ton)",b:"중량톤과 용적톤 중 운임수입이 더 큰 기준을 선택해 부과하는 정기선 운임 산정 톤수."},
+{s:"해운물류론",f:"BAF (유가할증료)",b:"벙커유 가격 변동으로 인한 연료비 부담을 반영해 기본운임에 추가하는 할증운임."},
+{s:"해운물류론",f:"스트래들 캐리어",b:"CY에서 컨테이너를 15~20km 속도로 이동시키는 야드 장비. 자중 40톤 전후로 기동적이나 중포장 필요."},
+{s:"ICT요소기술",f:"다트머스 회의 (1956)",b:"\"인공지능(Artificial Intelligence)\"이라는 용어가 공식적으로 처음 사용된 회의."},
+{s:"ICT요소기술",f:"딥 블루 (Deep Blue)",b:"1997년 IBM이 개발, 세계 체스 챔피언 가리 카스파로프를 이긴 인공지능 시스템."},
+{s:"ICT요소기술",f:"AlexNet",b:"2012년 이미지 인식 대회에서 압도적 우승, 딥러닝 시대 개막을 알린 딥러닝 알고리즘."},
+{s:"ICT요소기술",f:"딥러닝 (Deep Learning)",b:"인공신경망을 다층으로 쌓아 복잡한 비정형 데이터를 처리하는 고도화된 머신러닝 기술."},
+{s:"ICT요소기술",f:"강화학습 (Reinforcement Learning)",b:"에이전트가 환경에서 얻는 보상을 최대화하는 방향으로 행동전략을 학습하는 AI 기술. 알파고에 활용."},
+{s:"ICT요소기술",f:"CNN (합성곱 신경망)",b:"이미지 처리에 주로 사용되는 딥러닝 신경망 기법."},
+{s:"ICT요소기술",f:"트랜스포머 (Transformer)",b:"언어모델(LLM) 구현에 핵심적으로 사용되는 딥러닝 신경망 구조. GPT 시리즈의 기반 기술."},
+{s:"ICT요소기술",f:"자연어처리 (NLP)",b:"인간의 언어를 기계가 이해·해석·생성할 수 있도록 하는 기술. 챗봇·기계번역·감성분석에 활용."},
+{s:"ICT요소기술",f:"컴퓨터비전 (Computer Vision)",b:"카메라·센서의 시각적 데이터를 분석하는 기술. 안면인식·자율주행·의료영상 판독에 활용."},
+{s:"ICT요소기술",f:"생성형 AI (Generative AI)",b:"대규모 언어모델(LLM)을 활용해 텍스트·이미지·코드 등 새로운 콘텐츠를 스스로 생성하는 AI 기술."},
+{s:"ICT요소기술",f:"스마트 라우팅",b:"선박 운항 중 풍향·조류·연료소비량 데이터를 AI가 학습해 최적 항로·속도를 제시하는 기술."},
+{s:"ICT요소기술",f:"트레이드렌즈 (TradeLens)",b:"머스크가 IBM과 협력해 운영한 블록체인 기반 물류 플랫폼. 공급망 투명성 제고 목적."},
+{s:"ICT요소기술",f:"AIS (자동식별시스템)",b:"선박 위치 실시간 파악을 통해 선복량 예측 및 항만 혼잡도 예측에 활용되는 데이터."},
+{s:"ICT요소기술",f:"OSI 3계층 (네트워크 계층)",b:"IP주소 기반 경로설정(Routing)을 담당. 데이터 단위는 패킷(Packet). 대표 장비는 라우터."},
+{s:"ICT요소기술",f:"OSI 4계층 (전송 계층)",b:"포트번호를 통해 프로세스 간 연결 설정. TCP는 세그먼트, UDP는 데이터그램 단위로 전송."},
+{s:"ICT요소기술",f:"OSI 6계층 (표현 계층)",b:"데이터 압축·인코딩, SSL/TLS 암호화를 담당하는 계층."},
+{s:"ICT요소기술",f:"OSI 2계층 (데이터링크 계층)",b:"물리적 주소(MAC) 기반 인접노드 간 전송. 스위치·브리지·이더넷(IEEE 802.3)이 대표 기술."},
+{s:"ICT요소기술",f:"OSI 5계층 (세션 계층)",b:"응용 프로그램 간 대화체제(Session) 구축·유지·동기화를 담당."},
+{s:"ICT요소기술",f:"TCP/IP 4계층 모델",b:"Network Access-Internet-Transport-Application 계층. Application이 OSI 5~7계층 통합."},
+{s:"ICT요소기술",f:"3-way handshake",b:"TCP가 연결을 설정할 때 사용하는 방식. 연결 종료 시에는 4-way handshake 사용."},
+{s:"ICT요소기술",f:"IPv4 클래스 B",b:"128.0~191.255 범위의 네트워크 주소. A는 0~127, C는 192.0.0~223.255.255, D는 멀티캐스트용."},
+{s:"ICT요소기술",f:"IPv4 vs IPv6 주소길이",b:"IPv4는 32비트(약 43억개), IPv6는 128비트(거의 무한대)."},
+{s:"ICT요소기술",f:"IPv6 특징",b:"헤더 크기 고정(40바이트), IPSec 기본 내장, 헤더 체크섬 삭제로 처리속도 향상, 자동설정 지원."},
+{s:"ICT요소기술",f:"IEEE 802.11",b:"무선 네트워크(Wi-Fi) 표준. CSMA/CA 방식 사용."},
+{s:"ICT요소기술",f:"IEEE 802.3",b:"이더넷 표준. CSMA/CD 방식. UTP·광섬유 매체로 선내 백본망·유선 제어기 등에 활용."},
+{s:"ICT요소기술",f:"TCP vs UDP",b:"TCP는 신뢰성 중심의 연결지향형(재전송·순서제어), UDP는 속도 중심의 비연결형."},
+{s:"ICT요소기술",f:"TTL (Time To Live)",b:"IP 헤더 필드. 라우터를 거칠 때마다 감소, 0이 되면 패킷 폐기하여 무한순환 방지."},
+{s:"ICT요소기술",f:"ICMP",b:"네트워크 계층 프로토콜. 오류 메시지·상태정보 전송에 사용(예: ping)."},
+{s:"ICT요소기술",f:"예지 보전 (Predictive Maintenance)",b:"선박 주요 장비 상태를 모니터링해 고장을 사전에 감지하는 기술. 인적과실 사고 방지에 기여."},
+{s:"ICT요소기술",f:"텍스트 마이닝 (감성분석)",b:"뉴스·SNS 등 비정형 데이터를 분석해 시장 참여자 심리를 해운시황 예측에 반영하는 기법."},
+{s:"ICT요소기술",f:"GICOMS와의 구분: TCP 헤더 크기",b:"TCP 헤더는 옵션 제외 총 20바이트로 구성."},
+{s:"ICT요소기술",f:"전문가 시스템 (Expert System)",b:"1980~90년대 초 특정분야 지식을 If-Then 규칙으로 입력한 산업용 AI. 이후 유지보수 문제로 AI 빙하기 초래."},
+{s:"ICT요소기술",f:"AI Winter (AI 빙하기)",b:"데이터·컴퓨팅 파워 부족과 복잡한 현실문제 해결 실패로 연구자금이 중단된 두 차례의 인공지능 침체기."},
+{s:"ICT요소기술",f:"네트워크 토폴로지",b:"네트워크에서 컴퓨터·장치들이 연결된 물리적 형태. 속도·안정성·보안에 영향."},
+{s:"ICT요소기술",f:"멀티모달리티 (Multi-Modality)",b:"텍스트·이미지·오디오·센서값 등 서로 다른 형태의 데이터를 통합적으로 이해·분석하는 AI 특징."},
+{s:"ICT요소기술",f:"24/7 중단 없는 작동",b:"클라우드 기반 인프라를 통해 AI가 시간·장소에 구애받지 않고 지속적으로 데이터를 처리하는 특징."},
+{s:"ICT요소기술",f:"불확실성 관리 (AI 특징)",b:"모호하거나 불완전한 정보 상황에서도 통계적 확률에 기반해 신뢰도 높은 판단을 내리는 AI의 특징."},
+{s:"ICT요소기술",f:"빅데이터의 특징",b:"일반적으로 Volume(규모)·Velocity(속도)·Variety(다양성) 등으로 표현되는 데이터 특성."},
+{s:"ICT요소기술",f:"알파고 (2016)",b:"구글 딥마인드가 개발, 바둑 대결에서 승리하며 강화학습 기반 AI의 가능성을 널리 알린 사례."},
+{s:"ICT요소기술",f:"스마트 포트의 AI 접목 사례",b:"로테르담항·싱가포르항 등 선진 항만이 무인 자동화 터미널에 AI를 접목해 하역·이송 동선을 실시간 계산."},
+{s:"스마트해상물류",f:"Cargo Port (1세대 항만)",b:"인력·기계력으로 화물을 단순히 싣고 내리는 양적 처리 중심의 1세대 항만."},
+{s:"스마트해상물류",f:"Smart Port (4세대 항만)",b:"4차 산업혁명 기술로 항만 내부 장비뿐 아니라 외부 선박·항만도시와 실시간 데이터를 연동하는 4세대 항만."},
+{s:"스마트해상물류",f:"OSS (Overhead Shuttle System)",b:"플랫카와 오버헤드 셔틀이 결합된 초고속 대용량 컨테이너 자동 하역시스템."},
+{s:"스마트해상물류",f:"스마트 계류 시스템",b:"선박이 부두에 접근할 때 자동으로 고정해 접안시간을 단축하는 시스템."},
+{s:"스마트해상물류",f:"닐넷 (NEAL-Net)",b:"한·중·일 3국 주요 항만 간 협의체. 선박 입출항 스케줄과 컨테이너 상태 정보를 공유."},
+{s:"스마트해상물류",f:"VBS (Vehicle Booking System)",b:"반출입 사전예약 시스템. 트럭 반출입을 사전예약해 터미널 혼잡을 선제적으로 관리."},
+{s:"스마트해상물류",f:"AGV / ASC",b:"AGV는 크레인 도움 없이는 컨테이너를 못 받는 기본형 자동이송장비, ASC는 자체 동력으로 컨테이너를 들 수 있는 진보형."},
+{s:"스마트해상물류",f:"UAM (도심항공교통)",b:"eVTOL 등 친환경·저소음 기체로 도심 상공에서 사람·화물을 운송하는 차세대 지능형 교통체계."},
+{s:"스마트해상물류",f:"MASS",b:"국제해사기구(IMO)가 정의하는 자율운항선박(Maritime Autonomous Surface Ship) 명칭. 2018년부터 법적 규정 논의."},
+{s:"스마트해상물류",f:"부분 자율운항선박",b:"기존 선박에 IoT·제어기술을 융합해 선원 역할을 시스템이 대체, 최소 선원만으로 운항 가능한 선박."},
+{s:"스마트해상물류",f:"LTE-M",b:"연안 최대 100km 범위까지 실시간 전자해도·해양안전정보를 제공하는 해상무선통신망. e-Navigation 지원."},
+{s:"스마트해상물류",f:"GICOMS",b:"해양안전종합정보시스템. 선박 제원, 해양사고 속보, 해적 동향, 해상기상 등 안전운항 정보를 통합 관리."},
+{s:"스마트해상물류",f:"TOS (Terminal Operating System)",b:"개별 항만 터미널의 화물·재고관리를 지원하는 핵심 정보시스템. 우리 기업이 세계시장 약 9% 점유."},
+{s:"스마트해상물류",f:"Port-MIS",b:"항만법 제89조를 법적 근거로 하는 항만물류통합정보체계. 항만 운영업무 전반을 처리."},
+{s:"스마트해상물류",f:"PLISM",b:"해운항만물류통합시스템. 해상적하목록 취합, 실시간 물류 visibility, 화물진행관리 등을 제공."},
+{s:"스마트해상물류",f:"해상적하목록 취합 서비스",b:"PLISM의 B2G 서비스. 운항선사가 적하목록을 취합해 관세청에 전자적으로 제출."},
+{s:"스마트해상물류",f:"국고수납 자동화",b:"PLISM 서비스. 항만이용자가 은행 방문 없이 전자적 방법으로 항만시설사용료를 자동 납부."},
+{s:"스마트해상물류",f:"선적자동화 서비스",b:"PLISM의 B2B 서비스. 선사 B/K·B/C·S/R 전송 등 선적서류 EDI 서비스로 다중 선사 웹페이지 이동 불편 해소."},
+{s:"스마트해상물류",f:"로지스틱스 1.0",b:"운송·보관 등 개별 기능 중심의 초기 물류관리 단계. 이후 SCM, 스마트물류(4.0)로 진화."},
+{s:"스마트해상물류",f:"스마트컨테이너 (Smart Container)",b:"내장 센서로 화물 위치를 실시간 확인하고 온도·습도를 원격 제어해 냉동·냉장 화물 손상을 방지하는 컨테이너."},
+{s:"스마트해상물류",f:"SafePort System",b:"스마트헬멧·스마트워치·지능형 CCTV로 작업자 위치·신체상태를 확인하는 스마트항만안전플랫폼."},
+{s:"스마트해상물류",f:"Pronto (이벤트 데이터)",b:"로테르담항 항만이용최적화 프로젝트의 비즈니스 플랫폼. 도선·터미널·급유 등 서비스 정보를 공유해 포트콜 최적화."},
+{s:"스마트해상물류",f:"MASSPorts Network",b:"자율운항선박의 항만 간 시범운항 등 실증 관련 논의를 위한 국제 표준 협의체."},
+{s:"스마트해상물류",f:"디지털 트윈 (Digital Twin)",b:"가상의 디지털 쌍둥이 모델을 만들어 실시간 상호 동기화, 물리적 자산을 최적화하는 기술."},
+{s:"스마트해상물류",f:"VTS (해상교통관제)",b:"해상교통 안전·효율성 증진, 해양환경·시설 보호를 위해 선박 위치를 탐지·통신하는 관제 시스템."},
+{s:"스마트해상물류",f:"항만 지능화 4단계",b:"디지털화(센서 부착)→데이터 수집·연결(IoT)→데이터 분석(빅데이터)→의사결정의 최적화."},
+{s:"스마트해상물류",f:"공동배차시스템",b:"화물 이송 후 빈 차로 돌아오는 공차 주행을 방지하기 위해 실시간 데이터로 차량 동선을 매칭하는 시스템."},
+{s:"스마트해상물류",f:"컨테이너 셔틀레일",b:"항만 배후부지·인근 공항 등을 효율적으로 연결하는 대량화물의 신속·친환경 첨단 복합운송 체계."},
+{s:"스마트해상물류",f:"물류 블록체인 플랫폼",b:"기존 EDI 기반 서류작업을 대체해 터미널 간 화물정보의 보안성·투명성을 확보하는 기술."},
+{s:"스마트해상물류",f:"2030 항만정책 방향",b:"글로벌 경쟁력을 갖춘 고부가가치 스마트 항만 실현을 비전으로 항만 자동화·디지털화를 추진하는 정책."},
+{s:"스마트해상물류",f:"무인 자동화 선박 계류·도선지원 시스템",b:"도선사 경험에 의존하는 항만 이접안 방식을 3차원 어라운드뷰 등으로 개선하는 기술."},
+{s:"스마트해상물류",f:"육상제어 시뮬레이터 (VR)",b:"IMO 지침에 따라 비상시 선박을 육상에서 원격제어하는 육상제어사를 양성하기 위한 VR 기반 시뮬레이터."},
+{s:"스마트해상물류",f:"Seamless 물류",b:"스마트항만이 궁극적으로 지향하는, 선박 입출항과 화물처리가 중단 없이 이어지는 물류 형태."},
+{s:"스마트해상물류",f:"RTG / RMG",b:"야드에서 컨테이너를 적치·재정렬하는 대표 장비(타이어형/레일형 갠트리크레인). 안벽크레인(QC)과 구분."},
+{s:"스마트해상물류",f:"메인 트롤리 vs 보조 트롤리",b:"안벽크레인 더블 트롤리 방식에서, 콘 제거 등 기술적 한계로 현재는 보조 트롤리 위주로 무인화 추진."},
+{s:"스마트해상물류",f:"통합 Port-MIS의 4개 서브시스템",b:"Port-MIS시스템, 해운종합정보시스템, 물류이동시스템, 물류통계시스템으로 구성."},
+{s:"스마트해상물류",f:"PLISM 반출입 로그 제공시간",b:"적하목록 신고 시 ETA 기준 반출입 로그는 30분 이내, 반입 컨테이너 선적완료 정보는 1시간 이내 제공."},
+{s:"스마트해상물류",f:"수입물류 프로세스 첫 단계",b:"해상운송(입항준비→입항)에서 시작해 항만운송(양하/검수, 장치/운송), 배후단지 순으로 진행."},
+{s:"스마트해상물류",f:"PLISM 부가서비스",b:"HOUSE D/O, AFR, VGM을 WEB-LINK 및 모바일을 통해 즉시 제공하는 서비스."},
+{s:"정보통신법규",f:"물류정책기본법의 목적",b:"물류체계의 효율화, 물류산업의 경쟁력 강화 및 물류의 선진화·국제화를 위한 기본사항을 규정."},
+{s:"정보통신법규",f:"국가물류정책위원회",b:"국가물류체계 효율화, 물류시설 개발계획, 물류산업 육성, 물류보안, 국제물류 촉진 등을 심의하는 기구."},
+{s:"정보통신법규",f:"국제물류주선업 등록요건",b:"자본금(자산평가액) 10억원 이상, 컨테이너장치장 소유, 또는 은행의 1억원 이상 지급보증 중 하나 충족."},
+{s:"정보통신법규",f:"물류관리사",b:"국토교통부 장관이 실시하는 시험에 합격해야 취득 가능한 자격."},
+{s:"정보통신법규",f:"물류관리사 자격취소 사유",b:"부정한 방법으로 자격 취득, 명의 대여, 대여 알선 등. 정당하게 취득해 본인이 사용하는 것은 해당 없음."},
+{s:"정보통신법규",f:"해운법 해상여객운송사업 결격사유",b:"미성년자·피성년후견인, 파산선고 미복권자, 면허취소 후 2년 미경과자 등 (단순 연령기준은 아님)."},
+{s:"정보통신법규",f:"해운법상 운항관리규정",b:"내항여객운송사업자가 반드시 준수해야 하는 규정(해운법 제21조 제3항)."},
+{s:"정보통신법규",f:"해운법 금지행위 - 운임",b:"공표하거나 신고한 운임 및 요금보다 더 많이 받거나 덜 받는 행위는 금지행위로 규정."},
+{s:"정보통신법규",f:"항만법상 항만 구분",b:"지방항만과 지정항만으로 구분. 지정항만은 다시 무역항(원양구역)과 연안항(연해구역)으로 세분."},
+{s:"정보통신법규",f:"항만시설 사용 절차",b:"관리청(또는 항만시설운영자)의 사용허가를 받거나 임대계약을 체결해야 함. 임의사용 후 사후신고는 불가."},
+{s:"정보통신법규",f:"항만배후단지 입주자격",b:"관할 항만을 이용한 수출입을 목적으로 하는 국내복귀기업 등이 해당."},
+{s:"정보통신법규",f:"항만법 비용부담 주체",b:"관리청이 해양수산부장관인 경우 국가가, 시·도지사인 경우 시·도가 항만 관리·시설 비용을 부담."},
+{s:"정보통신법규",f:"항만개발사업계획 승인 요건",b:"항만기본계획 부합성, 관리·운영상 필요성, 재원조달계획, 타 법률상 개발계획 부재 등 (정치적 성향은 무관)."},
+{s:"정보통신법규",f:"항만배후단지 사업 착수기한",b:"실시계획 승인 후 1년 이내에 착수하지 않으면 사업시행자 지정이 취소될 수 있음."},
+{s:"정보통신법규",f:"지능정보화 기본법의 목적",b:"정보격차 해소, 사생활 보호, 지능정보사회윤리 확립, 지능정보서비스 과의존 예방 등을 목적으로 함."},
+{s:"정보통신법규",f:"지능정보화책임관",b:"지능정보화 사업 조정·지원·평가, 행정업무 지원, 건전한 정보문화 창달 등을 수행하는 책임자."},
+{s:"정보통신법규",f:"전문인력양성기관 지정취소",b:"부정한 방법으로 지정받은 경우, 지정요건 미달, 정당한 사유 없이 1년 이상 교육실적 없는 경우 등."},
+{s:"정보통신법규",f:"지능정보기술 연구개발 시 특별 고려사항",b:"군사적 목적 개발 기술이나, 오작동 시 사람에게 중대한 위해를 끼칠 우려가 있는 기술."},
+{s:"정보통신법규",f:"소프트웨어 진흥시책",b:"창업지원, 국제협력·해외진출, 자산관리 활성화, 소프트웨어융합, 소프트웨어안전 관리 등 포함(세율 일괄인하는 아님)."},
+{s:"정보통신법규",f:"소프트웨어공제조합 자금운용",b:"이월손실금 보전, 손실보전준비금·이익준비금·사업준비금 적립, 이익금 배당 등을 수행."},
+{s:"정보통신법규",f:"과업심의위원회",b:"소프트웨어 진흥법 제50조제1항에 근거해 설치. 소프트웨어사업 과업내용 변경 등을 심의."},
+{s:"정보통신법규",f:"정보통신망법의 목적",b:"정보통신망 기술개발·표준화, 이용활성화, 청소년 보호, 안전성·신뢰성 제고 등을 목적으로 함."},
+{s:"정보통신법규",f:"정보통신망법 유통금지 정보",b:"음란정보, 명예훼손정보, 국가기밀누설정보, 마약류 관련 정보 등의 유통을 금지(제44조의7)."},
+{s:"정보통신법규",f:"명예훼손 분쟁조정부",b:"정보통신망법 제44조의10에 근거해 명예훼손 관련 분쟁조정 업무를 수행."},
+{s:"정보통신법규",f:"청소년 보호 책임자",b:"정보통신망법 제42조의3에 따라 정보통신서비스 제공자가 지정해야 하는 자."},
+{s:"정보통신법규",f:"통신과금서비스 제공자 등록요건",b:"재무건전성, 이용자 보호계획, 인력·물적 설비, 사업계획서 (개인 신용점수는 요건 아님)."},
+{s:"정보통신법규",f:"본인확인기관 지정 필요적 취소사유",b:"거짓·부정한 방법으로 지정받은 경우, 업무정지명령 위반 등."},
+{s:"정보통신법규",f:"영리목적 광고성 정보 금지행위",b:"수신거부·동의철회 회피·방해, 전화번호 자동생성, 발신자 신원 은닉 등 (사전동의 받은 전송은 금지 아님)."},
+{s:"정보통신법규",f:"국가물류기본계획 포함사항",b:"국내외 물류환경 변화 전망, 물류보안, 물류산업 경쟁력 강화, 물류정보화사업, 물류시설 수급 등."},
+{s:"정보통신법규",f:"물류현황조사 항목",b:"조사의 종류·항목, 대상·방법·절차, 조사체계, 시기·지역, 결과 집계·분석·관리 등."},
+{s:"정보통신법규",f:"우수물류기업 인증취소",b:"인증기준에 맞지 아니하게 된 경우 등의 사유로 취소될 수 있음(물류정책기본법 제39조)."},
+{s:"정보통신법규",f:"환경친화적 물류활동",b:"환경친화적 운송수단·포장재료 사용, 기존 물류시설·장비·운송수단의 환경친화적 변경 등."},
+{s:"정보통신법규",f:"위험물질운송차량 단말장치",b:"운전자가 작동여부를 확인할 수 있는 위치에 설치, 위험물질운송안전관리센터에 위치정보 실시간 전송."},
+{s:"정보통신법규",f:"외항정기화물운송사업 금지행위",b:"운송계약을 정당한 사유 없이 이행하지 않거나 일방적으로 변경하는 행위 금지(해운법 제31조)."},
+{s:"정보통신법규",f:"내항여객선 현대화계획",b:"해양수산부장관이 5년 단위로 수립·시행하는 계획(해운법 제37조의2)."},
+{s:"정보통신법규",f:"해상여객운송사업 면허요건",b:"해당 사업 개시가 해상교통의 안전에 지장을 줄 우려가 없어야 함(해운법 제5조)."},
+{s:"정보통신법규",f:"해운법상 사업계획 변경사항",b:"선박의 증선·대체·감선, 기항지 변경, 운항횟수·시각 변경, 휴항 등(단순 소유자 개명은 해당 없음)."},
+{s:"정보통신법규",f:"물류인력 양성사업",b:"중소기업·물류기업 종사자 교육·연수, 선진 교육프로그램 개발·보급, 해외 물류대학 공동 프로그램 지원 등."},
+{s:"정보통신법규",f:"해운법상 해원",b:"선장·해원·선박운항관리자·해상안전감독관 등으로 규정(해운법 제2조 제11호)."},
+{s:"정보통신법규",f:"분과위원회 심의대상",b:"국가물류정책위원회 안건의 사전검토, 위임사항, 법률상 심의의무 사항 (개인 간 사적분쟁 조정은 제외)."}
+];
+
+// ===== 상태 =====
+const SUBJECTS = ['국제물류거래','해운물류론','ICT요소기술','스마트해상물류','정보통신법규'];
+const SUBJECT_LABEL = {'국제물류거래':'1과목 국제물류거래','해운물류론':'2과목 해운물류론','ICT요소기술':'3과목 ICT요소기술','스마트해상물류':'4과목 스마트해상물류','정보통신법규':'5과목 정보통신법규'};
+const LS_KEY = 'fc_newcurriculum_progress_v1';
+
+let progress = {}; // { cardKey: 'know' | 'dont' }
+try{ progress = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }catch(e){ progress = {}; }
+
+function cardKey(c){ return c.s + '__' + c.f; }
+function saveProgress(){ localStorage.setItem(LS_KEY, JSON.stringify(progress)); }
+
+let subjFilter = 'all';
+let onlyUnknown = false;
+let deck = [];       // current filtered card index list (indices into FLASHCARDS)
+let pos = 0;         // position within deck
+let flipped = false;
+
+function buildChips(){
+  const wrap = document.getElementById('chips');
+  const counts = {};
+  FLASHCARDS.forEach(c=>counts[c.s]=(counts[c.s]||0)+1);
+  let html = `<button class="chip on" data-v="all" onclick="setSubj('all',this)">전체 <span class="n">${FLASHCARDS.length}</span></button>`;
+  SUBJECTS.forEach(s=>{
+    html += `<button class="chip" data-v="${s}" onclick="setSubj('${s}',this)">${SUBJECT_LABEL[s].replace(/^\d과목 /,'')} <span class="n">${counts[s]||0}</span></button>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function setSubj(v, btn){
+  subjFilter = v;
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  buildDeck();
+}
+
+function toggleOnlyUnknown(){
+  onlyUnknown = !onlyUnknown;
+  document.getElementById('toolUnknown').classList.toggle('on', onlyUnknown);
+  buildDeck();
+}
+
+function shuffleDeck(){
+  for(let i=deck.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [deck[i],deck[j]] = [deck[j],deck[i]];
+  }
+  pos = 0; flipped = false;
+  render();
+}
+
+function buildDeck(){
+  let ids = FLASHCARDS.map((c,i)=>i);
+  if(subjFilter !== 'all') ids = ids.filter(i=>FLASHCARDS[i].s === subjFilter);
+  if(onlyUnknown) ids = ids.filter(i=>progress[cardKey(FLASHCARDS[i])] !== 'know');
+  deck = ids;
+  pos = 0; flipped = false;
+  render();
+}
+
+function flipCard(){
+  if(!deck.length) return;
+  flipped = !flipped;
+  document.getElementById('flipCard').classList.toggle('flipped', flipped);
+}
+
+function markCard(result){
+  if(!deck.length) return;
+  const c = FLASHCARDS[deck[pos]];
+  progress[cardKey(c)] = result;
+  saveProgress();
+  render();
+  setTimeout(()=>{ goNext(true); }, 180);
+}
+
+function goNext(auto){
+  if(!deck.length) return;
+  if(pos < deck.length - 1){ pos++; flipped = false; render(); }
+  else if(!auto){ pos = 0; flipped = false; render(); }
+  else { render(); } // stay to show "done" banner
+}
+function goPrev(){
+  if(!deck.length) return;
+  if(pos > 0){ pos--; flipped = false; render(); }
+}
+
+function statsFor(ids){
+  let know=0, dont=0;
+  ids.forEach(i=>{
+    const r = progress[cardKey(FLASHCARDS[i])];
+    if(r==='know') know++; else if(r==='dont') dont++;
+  });
+  return { know, dont, rest: ids.length-know-dont };
+}
+
+function render(){
+  const stage = document.getElementById('stage');
+  document.getElementById('deckCount').textContent = deck.length ? `${pos+1}/${deck.length}` : '0/0';
+
+  const allStats = statsFor(FLASHCARDS.map((c,i)=>i));
+  const totalKnown = allStats.know;
+  const progPct = Math.round(totalKnown / FLASHCARDS.length * 100);
+  document.getElementById('progFill').style.width = progPct + '%';
+  document.getElementById('progText').textContent = `전체 ${progPct}% 암기 완료`;
+  document.getElementById('progKnowText').textContent = `아는 카드 ${totalKnown}/${FLASHCARDS.length}장`;
+
+  if(!deck.length){
+    stage.innerHTML = `<div class="empty-state"><div class="ic">🎉</div><div style="font-weight:800;font-size:15px;margin-bottom:4px">해당 조건의 카드가 없어요</div><div style="font-size:12.5px">필터를 바꾸거나 '모르는 카드만' 옵션을 꺼보세요</div></div>`;
+    return;
+  }
+
+  if(pos >= deck.length){
+    const s = statsFor(deck);
+    stage.innerHTML = `
+      <div class="done-banner">
+        <div class="t">🏁 이번 세트를 다 봤어요!</div>
+        <div class="s">아는 카드 ${s.know}장 · 모르는 카드 ${s.dont}장 · 안 본 카드 ${s.rest}장</div>
+      </div>
+      <div class="navrow">
+        <button class="nav-btn wide shuffle" onclick="pos=0;flipped=false;shuffleDeck()">🔀 처음부터 섞어서 다시</button>
+      </div>
+      <div class="navrow">
+        <button class="nav-btn wide" onclick="pos=0;flipped=false;render()">↩️ 처음부터 순서대로</button>
+      </div>
+    `;
+    return;
+  }
+
+  const c = FLASHCARDS[deck[pos]];
+  const key = cardKey(c);
+  const mark = progress[key];
+  const knowActive = mark==='know' ? 'active' : '';
+  const dontActive = mark==='dont' ? 'active' : '';
+  const bmIcon = mark==='know' ? '<div class="bm-dot">✅</div>' : mark==='dont' ? '<div class="bm-dot">🔴</div>' : '';
+
+  stage.innerHTML = `
+    <div class="cardpos">${SUBJECT_LABEL[c.s]} · ${pos+1} / ${deck.length}</div>
+    <div class="flip-scene" id="flipScene" onclick="flipCard()">
+      <div class="flip-card ${flipped?'flipped':''}" id="flipCard">
+        <div class="face face-front">
+          <div class="face-eyebrow">TERM</div>
+          ${bmIcon}
+          <div class="face-term">${c.f}</div>
+          <div class="face-hint">탭하거나 Space를 눌러 뒤집기 →</div>
+        </div>
+        <div class="face face-back">
+          <div class="face-eyebrow">DEFINITION</div>
+          <div class="face-def">${c.b}</div>
+          <div class="face-hint">탭해서 다시 앞면 보기</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="knowrow">
+      <button class="know-btn dont ${dontActive}" onclick="markCard('dont')">🔴 모르겠어요</button>
+      <button class="know-btn know ${knowActive}" onclick="markCard('know')">✅ 알아요</button>
+    </div>
+
+    <div class="navrow">
+      <button class="nav-btn" onclick="goPrev()" ${pos===0?'disabled':''}>◀ 이전</button>
+      <button class="nav-btn wide shuffle" onclick="shuffleDeck()">🔀 랜덤 섞기</button>
+      <button class="nav-btn" onclick="goNext(false)">다음 ▶</button>
+    </div>
+
+    <div class="toolrow">
+      <button class="tool-btn ${onlyUnknown?'on':''}" id="toolUnknown" onclick="toggleOnlyUnknown()">❓ 모르는 카드만 모아보기</button>
+      <button class="tool-btn" onclick="resetProgress()">🗑 학습기록 초기화</button>
+    </div>
+
+    <div class="statbar">
+      <div class="statbox know"><div class="n">${allStats.know}</div><div class="l">아는 카드</div></div>
+      <div class="statbox dont"><div class="n">${allStats.dont}</div><div class="l">모르는 카드</div></div>
+      <div class="statbox rest"><div class="n">${allStats.rest}</div><div class="l">안 본 카드</div></div>
+    </div>
+
+    <div class="kbd-hint"><b>Space</b> 뒤집기 · <b>←</b> 이전 · <b>→</b> 다음 · <b>1</b> 모르겠어요 · <b>2</b> 알아요 (기록은 이 브라우저에 자동 저장됩니다)</div>
+  `;
+}
+
+function resetProgress(){
+  if(!confirm('이 브라우저에 저장된 플래시카드 학습기록(아는/모르는 표시)을 모두 초기화할까요?')) return;
+  progress = {};
+  saveProgress();
+  render();
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+  if(e.code==='Space'){ e.preventDefault(); flipCard(); }
+  else if(e.code==='ArrowRight'){ goNext(false); }
+  else if(e.code==='ArrowLeft'){ goPrev(); }
+  else if(e.code==='Digit1'){ markCard('dont'); }
+  else if(e.code==='Digit2'){ markCard('know'); }
+});
+
+// swipe support (mobile)
+let touchStartX = 0;
+document.addEventListener('touchstart', e=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) < 50) return;
+  if(dx < 0) goNext(false); else goPrev();
+}, {passive:true});
+
+buildChips();
+buildDeck();
+</script>
+</body>
+</html>
