@@ -2480,7 +2480,8 @@ init();
 
   // 2. 로그인 감지 및 클라우드 동기화
   onAuthStateChanged(auth, async (user) => {
-    if (user) { ... } else { st.textContent = 'SYNC · 로그인하면 기기 간 동기화'; }
+    if (user) {
+      console.log("로그인됨:", user.displayName);
       const st = document.getElementById('syncStatusText');
       if (st) st.textContent = 'SYNC 연결됨 · ' + (user.email || user.displayName);
       const userDoc = await getDoc(doc(db, "users", user.uid));
