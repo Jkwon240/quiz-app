@@ -78,15 +78,20 @@
     display:flex;
     gap:14px;
     flex-wrap:wrap;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    color:var(--navy);
+.stats-row span b {
+    color: var(--rust);
+    font-size: 14px;
   }
-  .stats-row span b{
-    color:var(--rust);
-    font-size:14px;
-  }
+</style>
+</head>
+<body>
 
+  <!-- 상단 구글 동기화 버튼 -->
+  <div style="text-align: right; padding: 10px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+    <button onclick="loginWithGoogle()" style="padding: 6px 12px; margin-right: 4px; cursor: pointer;">구글 로그인</button>
+    <button onclick="logoutGoogle()" style="padding: 6px 12px; margin-right: 4px; cursor: pointer;">로그아웃</button>
+    <button onclick="syncToCloud()" style="padding: 6px 12px; cursor: pointer;">진행 상황 저장</button>
+  </div>
   /* ---- controls ---- */
   .controls{
     display:flex;
@@ -405,5 +410,63 @@ modePractice.addEventListener('click', ()=>{
 
 render();
 </script>
+ <!-- Firebase & 동기화 스크립트 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // index.html의 firebaseConfig와 동일하게 실제 키 값 채워넣기
+  const firebaseConfig = {
+    apiKey: "AIzaSy...", 
+    authDomain: "my-quiz-app-cba37.firebaseapp.com",
+    projectId: "my-quiz-app-cba37",
+    storageBucket: "my-quiz-app-cba37.appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  let currentUser = null;
+  onAuthStateChanged(auth, (user) => { currentUser = user; });
+
+  window.loginWithGoogle = () => {
+    signInWithPopup(auth, provider).then(() => {
+      alert("구글 로그인 성공!");
+      location.reload();
+    }).catch(err => alert("로그인 실패: " + err.message));
+  };
+
+  window.logoutGoogle = () => {
+    signOut(auth).then(() => {
+      alert("로그아웃 되었습니다.");
+      location.reload();
+    });
+  };
+
+  window.syncToCloud = async () => {
+    if (!currentUser) { alert("먼저 구글 로그인을 해주세요!"); return; }
+    try {
+      await setDoc(doc(db, "users", currentUser.uid), { chunkData: { ...localStorage } }, { merge: true });
+      alert("진행 상황이 클라우드에 저장되었습니다!");
+    } catch (e) {
+      alert("저장 실패아직 조금 더 손봐야 하는 부분이 있습니다! 
+
+현재 화면의 **`chunk_manifest.html`** 코드에서 아래 항목들을 확인해 주세요.
+
+1. **Firebase 설정 값(Placeholder) 교체**
+   * `apiKey`: `"AIzaSyB..."` 부분과 주석
+   * `messagingSenderId`: `"..."`
+   * `appId`: `"..."`
+   * 위 값들이 아직 실제 값으로 채워지지 않은 상태입니다. `index.html`이나 Firebase 콘솔에 있는 실제 설정 값을 복사해서 넣어주셔야 정상 작동합니다.
+
+2. **커밋(저장) 진행**
+   * 설정 값을 입력한 후, 우측 상단(또는 하단)의 **[Commit changes...]** 버튼을 눌러 GitHub 저장소에 변경 사항을 반영해 주세요.
+
+실제 키 값을 채워 넣고 커밋까지 마쳐주시면 완료됩니다!
 </body>
 </html>
