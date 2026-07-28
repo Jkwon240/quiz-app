@@ -247,6 +247,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#f5f6f8;co
       <button onclick="loginWithGoogle()" class="tab-btn">구글 로그인</button>
 <button onclick="logoutGoogle()" class="tab-btn">로그아웃</button>
 <button onclick="syncToCloud()" class="tab-btn">진행 상황 저장</button>
+      <span id="syncStatusText" style="font-size:11px;color:#64748b;align-self:center">SYNC · 로그인하면 기기 간 동기화</span>
     <div class="stat"><div class="n" id="sTotal">-</div><div class="l">표시</div></div>
     <div class="stat"><div class="n" id="sDone">0</div><div class="l">완료</div></div>
     <div class="stat"><div class="n" id="sCorrect">0</div><div class="l">정답</div></div>
@@ -2479,8 +2480,9 @@ init();
 
   // 2. 로그인 감지 및 클라우드 동기화
   onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      console.log("로그인됨:", user.displayName);
+    if (user) { ... } else { st.textContent = 'SYNC · 로그인하면 기기 간 동기화'; }
+      const st = document.getElementById('syncStatusText');
+      if (st) st.textContent = 'SYNC 연결됨 · ' + (user.email || user.displayName);
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const data = userDoc.data();
