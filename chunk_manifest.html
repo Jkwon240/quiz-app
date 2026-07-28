@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARGO CHUNK MANIFEST — 포워딩 실무 영어 청크</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EFE8D6;
+    --paper-dark: #E3DAC4;
+    --ink: #22282E;
+    --navy: #1B2A3A;
+    --steel: #3D6B8A;
+    --rust: #C1512E;
+    --stamp-green: #2F6B4F;
+    --muted: #756E5F;
+    --line: #C9BFA6;
+    --card-bg: #FBF8EF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(0,0,0,0.035) 1px, transparent 0);
+    background-size: 18px 18px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  /* ---- Header: manifest cover strip ---- */
+  header{
+    border:2px solid var(--navy);
+    background:var(--card-bg);
+    padding:22px 24px;
+    position:relative;
+    margin-bottom:22px;
+  }
+  header::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    border:1px solid var(--navy);
+    margin:5px;
+    pointer-events:none;
+  }
+  .manifest-no{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Oswald', sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    font-size:clamp(26px, 5vw, 38px);
+    margin:6px 0 4px;
+    color:var(--navy);
+  }
+  .subtitle{
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .stats-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--navy);
+  }
+  .stats-row span b{
+    color:var(--rust);
+    font-size:14px;
+  }
+
+  /* ---- controls ---- */
+  .controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  #search{
+    flex:1 1 220px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:10px 12px;
+    border:1.5px solid var(--navy);
+    background:var(--card-bg);
+    color:var(--ink);
+    outline:none;
+  }
+  #search:focus{ border-color:var(--rust); }
+  .mode-toggle{
+    display:flex;
+    border:1.5px solid var(--navy);
+    overflow:hidden;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+  .mode-toggle button{
+    background:var(--card-bg);
+    border:none;
+    padding:10px 14px;
+    cursor:pointer;
+    color:var(--navy);
+    letter-spacing:0.04em;
+  }
+  .mode-toggle button.active{
+    background:var(--navy);
+    color:var(--paper);
+  }
+
+  .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:22px;
+  }
+  .tag{
+    font-family:'Oswald', sans-serif;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:7px 13px;
+    border:1.5px solid var(--navy);
+    border-radius:2px;
+    cursor:pointer;
+    background:transparent;
+    color:var(--navy);
+    transform:rotate(-1deg);
+    transition:transform .12s ease;
+  }
+  .tag:nth-child(even){ transform:rotate(1deg); }
+  .tag:hover{ transform:rotate(0deg) scale(1.03); }
+  .tag.active{
+    background:var(--rust);
+    border-color:var(--rust);
+    color:var(--paper);
+  }
+
+  /* ---- card list ---- */
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-left:4px solid var(--steel);
+    padding:16px 18px 16px 20px;
+    cursor:pointer;
+  }
+  .card[data-cat="delay"]{ border-left-color:var(--rust); }
+  .card[data-cat="confirm"]{ border-left-color:var(--steel); }
+  .card[data-cat="alt"]{ border-left-color:#8A6D3B; }
+  .card[data-cat="claim"]{ border-left-color:#8B3A3A; }
+  .card[data-cat="quote"]{ border-left-color:var(--stamp-green); }
+
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:6px;
+  }
+  .code{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.05em;
+  }
+  .cat-label{
+    font-family:'Oswald', sans-serif;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    padding:2px 8px;
+    border:1px solid currentColor;
+    border-radius:10px;
+  }
+  .card[data-cat="delay"] .cat-label{ color:var(--rust); }
+  .card[data-cat="confirm"] .cat-label{ color:var(--steel); }
+  .card[data-cat="alt"] .cat-label{ color:#8A6D3B; }
+  .card[data-cat="claim"] .cat-label{ color:#8B3A3A; }
+  .card[data-cat="quote"] .cat-label{ color:var(--stamp-green); }
+
+  .kr{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .en{
+    font-family:'Oswald', sans-serif;
+    font-size:19px;
+    font-weight:500;
+    color:var(--navy);
+    line-height:1.35;
+  }
+  .ex{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink);
+    background:rgba(61,107,138,0.08);
+    padding:9px 11px;
+    margin-top:10px;
+    border-left:2px solid var(--steel);
+    display:none;
+    line-height:1.5;
+  }
+  .card.revealed .ex{ display:block; }
+
+  /* practice mode: hide english until clicked */
+  body.practice .en{
+    filter:blur(6px);
+    user-select:none;
+    transition:filter .15s ease;
+  }
+  body.practice .card.revealed .en{
+    filter:blur(0);
+  }
+  body.practice .card:not(.revealed) .ex{ display:none; }
+  body.practice .card::after{
+    content:"탭하여 확인 →";
+    position:absolute;
+    right:16px;
+    bottom:14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--rust);
+    letter-spacing:0.04em;
+  }
+  body.practice .card.revealed::after{ content:""; }
+
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+  }
+
+  footer{
+    margin-top:30px;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    color:var(--muted);
+    letter-spacing:0.05em;
+  }
+
+  ::selection{ background:var(--rust); color:var(--paper); }
+
+  @media (max-width:520px){
+    .en{ font-size:17px; }
+    header{ padding:16px 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="manifest-no">MANIFEST NO. JAE-ENG-CHUNKS · REF. BUSAN→GLOBAL</div>
+      <h1>Cargo Chunk Manifest</h1>
+      <p class="subtitle">포워딩 실무에서 바로 쓰는 영어 표현 청크 151개. 카테고리별로 정리했고, 상황(한글)만 보고 청크가 바로 튀어나오는지 확인하는 연습 모드를 지원합니다.</p>
+      <div class="stats-row">
+        <span>TOTAL <b id="statTotal">151</b></span>
+        <span>SHOWING <b id="statShowing">151</b></span>
+        <span>CATEGORIES <b>5</b></span>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input id="search" type="text" placeholder="검색: 예) delay, confirm, 견적, ship... (한글/영문 모두 가능)">
+      <div class="mode-toggle">
+        <button id="modeStudy" class="active">학습 모드</button>
+        <button id="modePractice">인출 연습</button>
+      </div>
+    </div>
+
+    <div class="tags" id="tagRow">
+      <button class="tag active" data-cat="all">전체</button>
+      <button class="tag" data-cat="delay">지연/문제 통보</button>
+      <button class="tag" data-cat="confirm">확인 요청</button>
+      <button class="tag" data-cat="alt">대안 제시</button>
+      <button class="tag" data-cat="claim">클레임 대응</button>
+      <button class="tag" data-cat="quote">견적/조건 안내</button>
+    </div>
+
+    <div class="list" id="list"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">검색 결과가 없습니다. 다른 키워드로 시도해보세요.</div>
+
+    <footer>PRACTICE MODE HIDES THE ENGLISH CHUNK — TAP A CARD TO REVEAL IT AND CHECK YOUR RECALL.</footer>
+  </div>
+
+<script>
+const CATS = {
+  delay:  "지연/문제 통보",
+  confirm:"확인 요청",
+  alt:    "대안 제시",
+  claim:  "클레임 대응",
+  quote:  "견적/조건 안내"
+};
+
+const CHUNKS = [{"category": "delay", "kr": "지연 사실을 알릴 때", "en": "I'm writing to inform you that", "ex": "I'm writing to inform you that the vessel departure has been delayed by two days."}, {"category": "delay", "kr": "예상치 못한 지연이 발생했을 때", "en": "Due to an unforeseen delay in", "ex": "Due to an unforeseen delay in customs clearance, the cargo will arrive later than planned."}, {"category": "delay", "kr": "유감을 표하며 알릴 때", "en": "We regret to inform you that", "ex": "We regret to inform you that the booking has been rolled to the next sailing."}, {"category": "delay", "kr": "상황을 알려야 할 때", "en": "Please be advised that", "ex": "Please be advised that the connecting flight has been changed due to space limitations."}, {"category": "delay", "kr": "예상보다 시간이 걸릴 때", "en": "This is taking longer than expected due to", "ex": "This is taking longer than expected due to congestion at the port."}, {"category": "delay", "kr": "일정 변경을 통보할 때", "en": "There has been a change in", "ex": "There has been a change in the vessel schedule which affects your ETA."}, {"category": "delay", "kr": "불가피한 상황을 설명할 때", "en": "Due to circumstances beyond our control,", "ex": "Due to circumstances beyond our control, the shipment has been held at customs."}, {"category": "delay", "kr": "즉시 알려야 할 사안일 때", "en": "We wanted to bring to your attention that", "ex": "We wanted to bring to your attention that the container missed the cut-off."}, {"category": "delay", "kr": "일정이 미뤄졌을 때", "en": "The schedule has been pushed back by", "ex": "The schedule has been pushed back by three days due to a space shortage."}, {"category": "delay", "kr": "선사 사정으로 인한 지연", "en": "This delay is caused by the carrier's", "ex": "This delay is caused by the carrier's equipment shortage at the origin port."}, {"category": "delay", "kr": "빠른 시일 내 업데이트 약속", "en": "We will keep you updated as soon as", "ex": "We will keep you updated as soon as we receive confirmation from the shipping line."}, {"category": "delay", "kr": "선적 마감을 놓쳤을 때", "en": "Unfortunately, the cargo missed", "ex": "Unfortunately, the cargo missed the vessel cut-off and will move on the next sailing."}, {"category": "delay", "kr": "통관 지연을 설명할 때", "en": "The shipment is currently held up at", "ex": "The shipment is currently held up at customs pending additional documentation."}, {"category": "delay", "kr": "기상 악화로 인한 지연", "en": "The delay is a result of adverse weather conditions", "ex": "The delay is a result of adverse weather conditions affecting the port operations."}, {"category": "delay", "kr": "추가 시간이 필요함을 알릴 때", "en": "We will need additional time to", "ex": "We will need additional time to complete the inspection before releasing the cargo."}, {"category": "delay", "kr": "선적이 보류되었을 때", "en": "The shipment has been put on hold pending", "ex": "The shipment has been put on hold pending payment confirmation."}, {"category": "delay", "kr": "일정 확정이 늦어질 때", "en": "We are still awaiting confirmation on", "ex": "We are still awaiting confirmation on the vessel space from the carrier."}, {"category": "delay", "kr": "문제가 발생했음을 알릴 때", "en": "We have encountered an issue with", "ex": "We have encountered an issue with the booking due to a system error on the carrier's side."}, {"category": "delay", "kr": "리드타임이 길어질 때", "en": "Please note that the lead time has increased due to", "ex": "Please note that the lead time has increased due to port congestion in the region."}, {"category": "delay", "kr": "지연에 대해 사과할 때", "en": "We apologize for any inconvenience this delay may cause", "ex": "We apologize for any inconvenience this delay may cause and appreciate your understanding."}, {"category": "delay", "kr": "선박 결항을 알릴 때", "en": "The vessel has been cancelled and", "ex": "The vessel has been cancelled and the cargo will be re-booked on the following sailing."}, {"category": "delay", "kr": "부킹이 밀렸을 때", "en": "The booking has been rolled over to", "ex": "The booking has been rolled over to next week's sailing due to overbooking."}, {"category": "delay", "kr": "긴급 상황임을 알릴 때", "en": "This is a time-sensitive matter as", "ex": "This is a time-sensitive matter as the cargo needs to clear customs before the weekend."}, {"category": "delay", "kr": "원인을 조사 중일 때", "en": "We are currently looking into the cause of", "ex": "We are currently looking into the cause of the delay and will update you shortly."}, {"category": "delay", "kr": "예상 도착일이 변경됐을 때", "en": "The revised ETA is now", "ex": "The revised ETA is now three days later than originally planned."}, {"category": "delay", "kr": "서류 미비로 인한 지연", "en": "The delay is due to missing documentation, specifically", "ex": "The delay is due to missing documentation, specifically the certificate of origin."}, {"category": "delay", "kr": "우선 조치가 필요할 때", "en": "This requires immediate attention because", "ex": "This requires immediate attention because the free time is about to expire."}, {"category": "delay", "kr": "협조를 구할 때", "en": "We would appreciate your cooperation in", "ex": "We would appreciate your cooperation in expediting the document submission."}, {"category": "delay", "kr": "재확인이 필요할 때", "en": "We need to double-check with the carrier regarding", "ex": "We need to double-check with the carrier regarding the revised sailing schedule."}, {"category": "delay", "kr": "리스크를 미리 알릴 때", "en": "Please be aware that there is a risk of", "ex": "Please be aware that there is a risk of further delay if the strike continues."}, {"category": "delay", "kr": "최종 결과를 공유할 때", "en": "The final outcome of this situation is", "ex": "The final outcome of this situation is that the cargo will arrive one week late."}, {"category": "confirm", "kr": "정중하게 확인을 요청할 때", "en": "Could you please confirm", "ex": "Could you please confirm the final quantity before we issue the booking?"}, {"category": "confirm", "kr": "검토 후 확인을 요청할 때", "en": "I'd appreciate it if you could verify", "ex": "I'd appreciate it if you could verify the HS code listed on the invoice."}, {"category": "confirm", "kr": "수령 여부를 확인할 때", "en": "Please confirm receipt of", "ex": "Please confirm receipt of the shipping documents sent yesterday."}, {"category": "confirm", "kr": "가능 여부를 물을 때", "en": "Could you please advise whether", "ex": "Could you please advise whether the vessel space is still available?"}, {"category": "confirm", "kr": "세부사항을 확인할 때", "en": "Would you be able to confirm the details of", "ex": "Would you be able to confirm the details of the delivery address?"}, {"category": "confirm", "kr": "최신 정보를 요청할 때", "en": "Could you provide an update on", "ex": "Could you provide an update on the customs clearance status?"}, {"category": "confirm", "kr": "정확성을 재확인할 때", "en": "Just to confirm, is it correct that", "ex": "Just to confirm, is it correct that the cargo will be delivered on Friday?"}, {"category": "confirm", "kr": "동의 여부를 물을 때", "en": "Please let us know if you agree to", "ex": "Please let us know if you agree to the proposed schedule change."}, {"category": "confirm", "kr": "일정 확인을 요청할 때", "en": "Could you confirm the exact timing of", "ex": "Could you confirm the exact timing of the vessel's departure?"}, {"category": "confirm", "kr": "서류 확인을 요청할 때", "en": "Please review and confirm", "ex": "Please review and confirm that the packing list matches the invoice."}, {"category": "confirm", "kr": "가능 여부를 재차 확인할 때", "en": "Can you double-check whether", "ex": "Can you double-check whether the container size matches our booking request?"}, {"category": "confirm", "kr": "최종 승인을 요청할 때", "en": "We would like your confirmation before", "ex": "We would like your confirmation before proceeding with the shipment."}, {"category": "confirm", "kr": "협조 확인을 요청할 때", "en": "Please confirm you are able to", "ex": "Please confirm you are able to release the cargo by end of day."}, {"category": "confirm", "kr": "명확화를 요청할 때", "en": "Could you clarify what is meant by", "ex": "Could you clarify what is meant by the additional surcharge on the invoice?"}, {"category": "confirm", "kr": "진행 상황을 확인할 때", "en": "Can you confirm the current status of", "ex": "Can you confirm the current status of the customs inspection?"}, {"category": "confirm", "kr": "정보의 정확성을 확인할 때", "en": "We want to make sure that", "ex": "We want to make sure that the consignee information is correctly entered."}, {"category": "confirm", "kr": "일정 조율을 확인할 때", "en": "Would it work for you if", "ex": "Would it work for you if we scheduled the pickup for Monday morning?"}, {"category": "confirm", "kr": "재고 여부를 확인할 때", "en": "Could you check and confirm whether", "ex": "Could you check and confirm whether stock is available at the warehouse?"}, {"category": "confirm", "kr": "요청 수락 여부를 확인할 때", "en": "Please let us know at your earliest convenience whether", "ex": "Please let us know at your earliest convenience whether this arrangement is acceptable."}, {"category": "confirm", "kr": "필요 서류를 확인할 때", "en": "Could you confirm which documents are required for", "ex": "Could you confirm which documents are required for the customs declaration?"}, {"category": "confirm", "kr": "최종본 확인을 요청할 때", "en": "Please confirm this is the final version of", "ex": "Please confirm this is the final version of the bill of lading."}, {"category": "confirm", "kr": "수정 사항을 확인할 때", "en": "Can you confirm that the changes have been", "ex": "Can you confirm that the changes have been reflected in the updated invoice?"}, {"category": "confirm", "kr": "결제 확인을 요청할 때", "en": "Could you confirm once payment has been", "ex": "Could you confirm once payment has been processed on your end?"}, {"category": "confirm", "kr": "배송 조건 확인 요청", "en": "Please confirm the terms of delivery, specifically", "ex": "Please confirm the terms of delivery, specifically the Incoterm being applied."}, {"category": "confirm", "kr": "협의 결과 확인", "en": "Just to make sure we're aligned, could you confirm", "ex": "Just to make sure we're aligned, could you confirm the agreed freight rate?"}, {"category": "confirm", "kr": "선적 가능일 확인", "en": "Could you confirm the earliest possible date for", "ex": "Could you confirm the earliest possible date for loading?"}, {"category": "confirm", "kr": "담당자 확인 요청", "en": "Could you confirm who will be handling", "ex": "Could you confirm who will be handling this shipment on your side?"}, {"category": "confirm", "kr": "보험 여부 확인", "en": "Please confirm whether the cargo is covered by", "ex": "Please confirm whether the cargo is covered by marine insurance."}, {"category": "confirm", "kr": "최종 확답을 요청할 때", "en": "We would need a definitive answer on", "ex": "We would need a definitive answer on the booking by tomorrow noon."}, {"category": "confirm", "kr": "누락 여부 확인", "en": "Could you confirm nothing is missing from", "ex": "Could you confirm nothing is missing from the container before sealing?"}, {"category": "alt", "kr": "대안을 제시할 때", "en": "As an alternative, we could", "ex": "As an alternative, we could route the cargo through a different port of transit."}, {"category": "alt", "kr": "가능성을 물을 때", "en": "Would it be possible to", "ex": "Would it be possible to expedite the customs clearance process?"}, {"category": "alt", "kr": "다른 옵션을 제안할 때", "en": "Another option would be to", "ex": "Another option would be to split the shipment into two containers."}, {"category": "alt", "kr": "조건부 제안을 할 때", "en": "If that doesn't work for you, we could instead", "ex": "If that doesn't work for you, we could instead arrange air freight for the urgent portion."}, {"category": "alt", "kr": "고려해볼 것을 제안할 때", "en": "You might want to consider", "ex": "You might want to consider consolidating the cargo to save on freight cost."}, {"category": "alt", "kr": "차선책을 제시할 때", "en": "As a fallback option, we suggest", "ex": "As a fallback option, we suggest booking space on the following week's vessel."}, {"category": "alt", "kr": "타협안을 제안할 때", "en": "A possible compromise would be to", "ex": "A possible compromise would be to share the additional cost equally."}, {"category": "alt", "kr": "제안을 부드럽게 시작할 때", "en": "What if we were to", "ex": "What if we were to reroute the shipment via Busan instead?"}, {"category": "alt", "kr": "새로운 방법을 제안할 때", "en": "We recommend an alternative approach of", "ex": "We recommend an alternative approach of using a bonded warehouse for temporary storage."}, {"category": "alt", "kr": "다른 해결책이 있음을 알릴 때", "en": "There is another way to handle this, which is to", "ex": "There is another way to handle this, which is to apply for an early release."}, {"category": "alt", "kr": "선호도를 물을 때", "en": "Would you prefer to", "ex": "Would you prefer to have the cargo delivered directly or held at the warehouse?"}, {"category": "alt", "kr": "유연한 제안을 할 때", "en": "We are open to adjusting", "ex": "We are open to adjusting the delivery schedule if that better suits your needs."}, {"category": "alt", "kr": "실행 가능한 대안 제시", "en": "A more feasible option at this point would be to", "ex": "A more feasible option at this point would be to switch carriers for this lane."}, {"category": "alt", "kr": "제안에 대한 의견을 구할 때", "en": "Let us know if you'd like us to", "ex": "Let us know if you'd like us to explore expedited clearance options."}, {"category": "alt", "kr": "절충안을 제시할 때", "en": "To meet you halfway, we could", "ex": "To meet you halfway, we could absorb part of the demurrage cost."}, {"category": "alt", "kr": "긴급 대안을 제시할 때", "en": "Given the time constraint, we suggest", "ex": "Given the time constraint, we suggest splitting the order and air-freighting the balance."}, {"category": "alt", "kr": "비용 절감 대안 제시", "en": "In order to reduce costs, we could", "ex": "In order to reduce costs, we could combine this shipment with another consignee's cargo."}, {"category": "alt", "kr": "재검토를 제안할 때", "en": "It might be worth reconsidering", "ex": "It might be worth reconsidering the routing given the current congestion."}, {"category": "alt", "kr": "임시 조치를 제안할 때", "en": "As a temporary measure, we propose", "ex": "As a temporary measure, we propose storing the cargo at our CFS until space opens up."}, {"category": "alt", "kr": "우회 방안을 제시할 때", "en": "One way around this issue would be to", "ex": "One way around this issue would be to transship via a nearby port."}, {"category": "alt", "kr": "다른 조건을 제안할 때", "en": "We could offer different terms such as", "ex": "We could offer different terms such as extended free time at destination."}, {"category": "alt", "kr": "다음 단계를 제안할 때", "en": "Going forward, we suggest", "ex": "Going forward, we suggest booking two weeks in advance to avoid space shortages."}, {"category": "alt", "kr": "속도와 비용의 균형 제안", "en": "If speed is a priority, we recommend", "ex": "If speed is a priority, we recommend air freight despite the higher cost."}, {"category": "alt", "kr": "위험 분산 제안", "en": "To minimize risk, it may help to", "ex": "To minimize risk, it may help to split the cargo across two vessels."}, {"category": "alt", "kr": "협상 여지를 남길 때", "en": "We're flexible on this and could", "ex": "We're flexible on this and could adjust the payment terms if needed."}, {"category": "alt", "kr": "새로운 파트너 제안", "en": "We could also look into working with", "ex": "We could also look into working with a different agent at destination."}, {"category": "alt", "kr": "일정 조정 제안", "en": "If the current date is difficult, we could move it to", "ex": "If the current date is difficult, we could move it to early next week."}, {"category": "alt", "kr": "부분 이행 제안", "en": "We could proceed with a partial shipment and", "ex": "We could proceed with a partial shipment and send the remainder later."}, {"category": "alt", "kr": "제3의 방법 제안", "en": "There's a third option worth considering, which is to", "ex": "There's a third option worth considering, which is to use a different Incoterm."}, {"category": "alt", "kr": "실용적 제안", "en": "The most practical solution here would be to", "ex": "The most practical solution here would be to hold the cargo until documentation is complete."}, {"category": "claim", "kr": "우려 사항을 인지할 때", "en": "We understand your concern regarding", "ex": "We understand your concern regarding the damage found upon delivery."}, {"category": "claim", "kr": "조사 중임을 알릴 때", "en": "We're currently investigating the matter and will", "ex": "We're currently investigating the matter and will get back to you within 48 hours."}, {"category": "claim", "kr": "책임 소재를 설명할 때", "en": "Based on our findings, the issue appears to be caused by", "ex": "Based on our findings, the issue appears to be caused by mishandling at the origin warehouse."}, {"category": "claim", "kr": "불편에 대해 사과할 때", "en": "We sincerely apologize for the inconvenience caused by", "ex": "We sincerely apologize for the inconvenience caused by the mislabeled cargo."}, {"category": "claim", "kr": "해결책을 제시할 때", "en": "To resolve this matter, we propose", "ex": "To resolve this matter, we propose issuing a partial credit note."}, {"category": "claim", "kr": "추가 정보를 요청할 때", "en": "In order to process your claim, we will need", "ex": "In order to process your claim, we will need photos of the damaged cargo."}, {"category": "claim", "kr": "심각성을 인정할 때", "en": "We take this matter very seriously and", "ex": "We take this matter very seriously and are working to prevent recurrence."}, {"category": "claim", "kr": "보상 절차를 안내할 때", "en": "Please be informed that the compensation process will", "ex": "Please be informed that the compensation process will take approximately two weeks."}, {"category": "claim", "kr": "책임 범위를 설명할 때", "en": "Our liability in this case is limited to", "ex": "Our liability in this case is limited to the terms outlined in the bill of lading."}, {"category": "claim", "kr": "재발 방지책을 설명할 때", "en": "We are implementing measures to ensure", "ex": "We are implementing measures to ensure this does not happen again."}, {"category": "claim", "kr": "고객 불만을 접수할 때", "en": "Thank you for bringing this to our attention, we will", "ex": "Thank you for bringing this to our attention, we will look into it immediately."}, {"category": "claim", "kr": "손해사정 관련 안내", "en": "The surveyor's report indicates that", "ex": "The surveyor's report indicates that the damage occurred during transit."}, {"category": "claim", "kr": "클레임 접수를 확인할 때", "en": "We have received your claim regarding", "ex": "We have received your claim regarding the shortage in the shipment."}, {"category": "claim", "kr": "추가 조치가 필요할 때", "en": "We would like to request further documentation to", "ex": "We would like to request further documentation to support your claim."}, {"category": "claim", "kr": "유감 표명", "en": "We regret that this incident occurred and", "ex": "We regret that this incident occurred and appreciate your patience while we investigate."}, {"category": "claim", "kr": "결과를 통보할 때", "en": "After reviewing the case, we have concluded that", "ex": "After reviewing the case, we have concluded that the damage was pre-existing."}, {"category": "claim", "kr": "합의안을 제시할 때", "en": "As a gesture of goodwill, we would like to offer", "ex": "As a gesture of goodwill, we would like to offer a discount on your next shipment."}, {"category": "claim", "kr": "책임 회피 없이 설명할 때", "en": "While the cause is still under review, we want to assure you that", "ex": "While the cause is still under review, we want to assure you that we are prioritizing this case."}, {"category": "claim", "kr": "보험 청구 안내", "en": "You may also file a claim with", "ex": "You may also file a claim with the marine insurance provider for full coverage."}, {"category": "claim", "kr": "타임라인 안내", "en": "We expect to have a resolution within", "ex": "We expect to have a resolution within five business days."}, {"category": "claim", "kr": "책임 인정 시", "en": "We acknowledge that the error originated from", "ex": "We acknowledge that the error originated from our documentation team."}, {"category": "claim", "kr": "고객 신뢰 회복 노력", "en": "We value your business and are committed to", "ex": "We value your business and are committed to making this right."}, {"category": "claim", "kr": "정확한 사실관계 확인 요청", "en": "Could you provide more details so we can", "ex": "Could you provide more details so we can accurately assess the situation?"}, {"category": "claim", "kr": "클레임 마감 안내", "en": "Please note that claims must be submitted within", "ex": "Please note that claims must be submitted within 14 days of delivery."}, {"category": "claim", "kr": "부분 배상 제안", "en": "Given the circumstances, we can offer a partial reimbursement of", "ex": "Given the circumstances, we can offer a partial reimbursement of the freight charges."}, {"category": "claim", "kr": "면책 조항 설명", "en": "Under the terms and conditions, this type of damage is", "ex": "Under the terms and conditions, this type of damage is excluded from liability."}, {"category": "claim", "kr": "협력 요청", "en": "We would appreciate your cooperation in providing", "ex": "We would appreciate your cooperation in providing the original packing photos."}, {"category": "claim", "kr": "재발 사례 언급 시", "en": "This is not an isolated incident, and we are addressing it by", "ex": "This is not an isolated incident, and we are addressing it by auditing our handling procedures."}, {"category": "claim", "kr": "최종 답변 전달", "en": "Our final response to this claim is that", "ex": "Our final response to this claim is that we will cover the full cost of the damaged goods."}, {"category": "claim", "kr": "감사 인사와 함께 마무리", "en": "We appreciate your patience and understanding throughout", "ex": "We appreciate your patience and understanding throughout this process."}, {"category": "quote", "kr": "견적서를 첨부할 때", "en": "Please find attached our quotation for", "ex": "Please find attached our quotation for the Busan to Long Beach lane."}, {"category": "quote", "kr": "요율 조건을 설명할 때", "en": "This rate is subject to", "ex": "This rate is subject to space and equipment availability at the time of booking."}, {"category": "quote", "kr": "유효기간을 안내할 때", "en": "This quotation is valid until", "ex": "This quotation is valid until the end of this month."}, {"category": "quote", "kr": "포함 사항을 설명할 때", "en": "The quoted rate includes", "ex": "The quoted rate includes origin handling and ocean freight, but excludes destination charges."}, {"category": "quote", "kr": "제외 사항을 설명할 때", "en": "Please note that this rate does not include", "ex": "Please note that this rate does not include customs duties and taxes."}, {"category": "quote", "kr": "추가 비용을 안내할 때", "en": "An additional surcharge will apply for", "ex": "An additional surcharge will apply for overweight cargo exceeding 20 tons."}, {"category": "quote", "kr": "결제 조건을 안내할 때", "en": "Our standard payment terms are", "ex": "Our standard payment terms are net 30 days from the invoice date."}, {"category": "quote", "kr": "조건부 할인 제안", "en": "We can offer a discounted rate if", "ex": "We can offer a discounted rate if you commit to a minimum monthly volume."}, {"category": "quote", "kr": "변동 가능성을 안내할 때", "en": "Please be aware that rates are subject to change due to", "ex": "Please be aware that rates are subject to change due to fluctuating bunker surcharges."}, {"category": "quote", "kr": "세부 조건 안내", "en": "The terms and conditions of this quotation are as follows", "ex": "The terms and conditions of this quotation are as follows, please review carefully."}, {"category": "quote", "kr": "인코텀즈 명시", "en": "This quotation is based on the Incoterm", "ex": "This quotation is based on the Incoterm FOB Busan."}, {"category": "quote", "kr": "경쟁력 있는 조건 강조", "en": "We are able to offer competitive rates due to", "ex": "We are able to offer competitive rates due to our long-standing relationship with the carrier."}, {"category": "quote", "kr": "요청에 따른 맞춤 견적", "en": "Based on your requirements, we have prepared", "ex": "Based on your requirements, we have prepared a customized quotation for door-to-door service."}, {"category": "quote", "kr": "복수 옵션 제시", "en": "We have provided two options for your consideration", "ex": "We have provided two options for your consideration, one via sea and one via air."}, {"category": "quote", "kr": "최종 확정 견적 안내", "en": "This is our final and best offer for", "ex": "This is our final and best offer for the shipment given current market conditions."}, {"category": "quote", "kr": "계약 조건 언급", "en": "Under the terms of our agreement,", "ex": "Under the terms of our agreement, rates are reviewed on a quarterly basis."}, {"category": "quote", "kr": "추가 서비스 제안", "en": "We can also arrange additional services such as", "ex": "We can also arrange additional services such as cargo insurance and warehousing."}, {"category": "quote", "kr": "정산 방식 설명", "en": "Charges will be invoiced separately for", "ex": "Charges will be invoiced separately for freight, handling, and documentation fees."}, {"category": "quote", "kr": "협상 여지 안내", "en": "There may be room for negotiation depending on", "ex": "There may be room for negotiation depending on your total annual volume."}, {"category": "quote", "kr": "긴급 요율 안내", "en": "For expedited service, an express rate of", "ex": "For expedited service, an express rate of an additional 15% will apply."}, {"category": "quote", "kr": "장기계약 조건 제안", "en": "For long-term contracts, we typically offer", "ex": "For long-term contracts, we typically offer fixed rates locked in for six months."}, {"category": "quote", "kr": "위험물 관련 조건 안내", "en": "For hazardous cargo, additional charges apply for", "ex": "For hazardous cargo, additional charges apply for DG documentation and special handling."}, {"category": "quote", "kr": "견적 유효성 재확인", "en": "Please confirm your booking before the rate expires on", "ex": "Please confirm your booking before the rate expires on the 30th."}, {"category": "quote", "kr": "환율 조건 설명", "en": "This quotation is calculated based on the exchange rate of", "ex": "This quotation is calculated based on the exchange rate of 1,350 KRW per USD."}, {"category": "quote", "kr": "최소 물량 조건 안내", "en": "This rate applies only when the minimum volume of", "ex": "This rate applies only when the minimum volume of one FCL per month is met."}, {"category": "quote", "kr": "요청 반영 안내", "en": "As per your request, we have revised the quotation to reflect", "ex": "As per your request, we have revised the quotation to reflect the new delivery address."}, {"category": "quote", "kr": "세부 항목별 비용 설명", "en": "The breakdown of charges is as follows:", "ex": "The breakdown of charges is as follows: ocean freight, THC, and documentation fee."}, {"category": "quote", "kr": "최종 승인 요청", "en": "We kindly ask for your confirmation to proceed with", "ex": "We kindly ask for your confirmation to proceed with booking based on this quotation."}, {"category": "quote", "kr": "특별 조건 안내", "en": "As a valued customer, we are pleased to offer", "ex": "As a valued customer, we are pleased to offer a preferential rate on this lane."}, {"category": "quote", "kr": "조건 변경 통보", "en": "Please note that starting next month, the rate will be adjusted to", "ex": "Please note that starting next month, the rate will be adjusted to reflect the new GRI."}];
+
+let activeCat = "all";
+let query = "";
+let practiceMode = false;
+
+const listEl = document.getElementById('list');
+const emptyEl = document.getElementById('emptyState');
+const statShowing = document.getElementById('statShowing');
+const statTotal = document.getElementById('statTotal');
+statTotal.textContent = CHUNKS.length;
+
+function codeFor(i){
+  return "CH-" + String(i+1).padStart(3,'0');
+}
+
+function render(){
+  const q = query.trim().toLowerCase();
+  const filtered = CHUNKS
+    .map((c,i)=>({...c, idx:i}))
+    .filter(c => activeCat === 'all' || c.category === activeCat)
+    .filter(c => {
+      if(!q) return true;
+      return c.en.toLowerCase().includes(q) ||
+             c.ex.toLowerCase().includes(q) ||
+             c.kr.includes(q) ||
+             CATS[c.category].includes(q);
+    });
+
+  statShowing.textContent = filtered.length;
+  listEl.innerHTML = '';
+  emptyEl.style.display = filtered.length ? 'none' : 'block';
+
+  filtered.forEach(c=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.cat = c.category;
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="code">${codeFor(c.idx)}</span>
+        <span class="cat-label">${CATS[c.category]}</span>
+      </div>
+      <div class="kr">${c.kr}</div>
+      <div class="en">${c.en}</div>
+      <div class="ex">${c.ex}</div>
+    `;
+    card.addEventListener('click', ()=>{
+      card.classList.toggle('revealed');
+    });
+    listEl.appendChild(card);
+  });
+}
+
+document.getElementById('search').addEventListener('input', (e)=>{
+  query = e.target.value;
+  render();
+});
+
+document.getElementById('tagRow').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tag');
+  if(!btn) return;
+  document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = btn.dataset.cat;
+  render();
+});
+
+const modeStudy = document.getElementById('modeStudy');
+const modePractice = document.getElementById('modePractice');
+modeStudy.addEventListener('click', ()=>{
+  practiceMode = false;
+  document.body.classList.remove('practice');
+  modeStudy.classList.add('active');
+  modePractice.classList.remove('active');
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('revealed'));
+});
+modePractice.addEventListener('click', ()=>{
+  practiceMode = true;
+  document.body.classList.add('practice');
+  modePractice.classList.add('active');
+  modeStudy.classList.remove('active');
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('revealed'));
+});
+
+render();
+</script>
+</body>
+</html>

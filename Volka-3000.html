@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Volka 3000 · Word Manifest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#EAEBE4; --panel:#FFFFFF; --panel2:#F3F4ED; --line:#D6D9CF;
+  --text:#1E2A27; --muted:#6F857F; --dim:#96A7A2;
+  --amber:#B4483A; --amber-dim:#E1C6C0;
+  --go:#2E7D5B; --stop:#C0392B;
+  --board:#FAFAF7;
+  --r:10px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink); color:var(--text);
+  font-family:'Manrope','Noto Sans KR',system-ui,sans-serif;
+  font-size:15px; line-height:1.5;
+  min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input,select{font-family:inherit}
+
+/* ---------- manifest header ---------- */
+.hdr{
+  position:sticky; top:0; z-index:40;
+  background:linear-gradient(180deg,var(--ink) 78%,rgba(234,235,228,.9));
+  border-bottom:1px solid var(--line);
+  padding:10px 14px 8px;
+  backdrop-filter:blur(8px);
+}
+.hdr-top{display:flex;align-items:baseline;gap:10px}
+.mark{
+  font-family:'Barlow Condensed',sans-serif; font-weight:700;
+  font-size:21px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--amber);
+}
+.mark span{color:var(--text)}
+.tagline{
+  font-family:'IBM Plex Mono',monospace; font-size:10px;
+  color:var(--dim); letter-spacing:.14em; text-transform:uppercase;
+  margin-left:auto; white-space:nowrap;
+}
+.gauge{margin-top:9px;display:flex;align-items:center;gap:9px}
+.gauge-bar{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.gauge-fill{height:100%;width:0;background:var(--amber);transition:width .45s cubic-bezier(.2,.7,.3,1)}
+.gauge-txt{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.04em}
+.gauge-txt b{color:var(--amber);font-weight:600}
+
+/* ---------- filter row ---------- */
+.filters{display:flex;gap:6px;padding:9px 14px 0;flex-wrap:wrap;align-items:center}
+.chip{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+  letter-spacing:.08em; padding:5px 10px; border-radius:999px;
+  border:1px solid var(--line); color:var(--muted); background:var(--panel);
+  transition:.16s;
+}
+.chip.on{border-color:var(--amber);color:var(--amber);background:var(--amber-dim)}
+.chip small{opacity:.55;margin-left:4px;letter-spacing:0}
+.spacer{flex:1}
+
+/* ---------- board card ---------- */
+.stage{padding:16px 14px 100px;max-width:620px;margin:0 auto}
+.board{
+  background:var(--board); border:1px solid var(--line); border-radius:var(--r);
+  padding:22px 18px 18px; position:relative; overflow:hidden;
+  box-shadow:0 1px 3px rgba(30,42,39,.06);
+}
+.board::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent 0 3px,rgba(30,42,39,.014) 3px 4px);
+}
+.slot{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--dim);text-transform:uppercase;margin-bottom:16px;
+}
+.lvl-tag{color:var(--amber);border:1px solid var(--amber);padding:2px 7px;border-radius:4px}
+.word{
+  font-family:'Barlow Condensed',sans-serif;font-weight:600;
+  font-size:clamp(40px,12vw,62px);line-height:1.02;letter-spacing:.005em;
+  word-break:break-word;
+}
+.pos{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+  margin-top:6px;letter-spacing:.1em;
+}
+.flap{
+  margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;
+  min-height:64px;
+  transform-origin:top center;
+}
+.flap.reveal{animation:flip .34s cubic-bezier(.2,.8,.3,1)}
+@keyframes flip{from{transform:rotateX(-78deg);opacity:0}to{transform:none;opacity:1}}
+.mean{font-size:19px;font-weight:500;line-height:1.4;color:var(--amber)}
+.mean.hidden{color:transparent!important;text-shadow:0 0 13px rgba(30,42,39,.4);user-select:none}
+.ex{
+  margin-top:12px;font-size:14px;color:var(--muted);line-height:1.55;
+  border-left:2px solid var(--amber-dim);padding-left:11px;
+}
+.ex .en{color:var(--text)}
+.ex .ko{display:block;margin-top:3px;font-size:13px;color:var(--dim)}
+.ex-load{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.08em}
+
+/* ---------- controls ---------- */
+.row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.btn{
+  flex:1;min-width:78px;padding:12px 10px;border-radius:var(--r);
+  background:var(--panel);border:1px solid var(--line);
+  font-size:13px;font-weight:500;letter-spacing:.01em;transition:.14s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn:hover{background:var(--panel2);border-color:#B9BEB2}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--amber);color:#FFFFFF;border-color:var(--amber);font-weight:700}
+.btn.go{border-color:#A9CDBB;color:var(--go)}
+.btn.stop{border-color:#E3B4AE;color:var(--stop)}
+.btn.small{flex:0 0 auto;min-width:0;padding:9px 13px;font-size:12px}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.btn.on{border-color:var(--amber);color:var(--amber)}
+
+/* ---------- quiz ---------- */
+.opts{display:grid;gap:8px;margin-top:16px}
+.opt{
+  text-align:left;padding:14px 15px;border-radius:var(--r);
+  background:var(--panel);border:1px solid var(--line);font-size:15px;transition:.14s;
+}
+.opt:hover{border-color:#B9BEB2}
+.opt.correct{border-color:var(--go);background:#E9F3EE;color:var(--go)}
+.opt.wrong{border-color:var(--stop);background:#FBEBE9;color:var(--stop)}
+.opt .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin-right:9px}
+
+/* ---------- typing ---------- */
+.type-in{
+  width:100%;margin-top:16px;padding:14px 15px;border-radius:var(--r);
+  background:var(--panel);border:1px solid var(--line);color:var(--text);
+  font-size:18px;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.02em;
+}
+.type-in:focus{outline:none;border-color:var(--amber)}
+.verdict{margin-top:11px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em}
+.verdict.ok{color:var(--go)} .verdict.no{color:var(--stop)}
+
+/* ---------- list ---------- */
+.search{
+  width:100%;padding:11px 13px;border-radius:var(--r);background:var(--panel);
+  border:1px solid var(--line);color:var(--text);font-size:14px;margin-bottom:10px;
+}
+.search:focus{outline:none;border-color:var(--amber)}
+.lrow{
+  display:flex;align-items:center;gap:11px;padding:11px 4px;
+  border-bottom:1px solid var(--line);cursor:pointer;
+}
+.lrow:hover{background:var(--panel)}
+.lrow .w{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:19px;flex:0 0 auto}
+.lrow .m{color:var(--muted);font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .lv{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim)}
+.lrow.known .w{color:var(--go)}
+.count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin-bottom:8px;letter-spacing:.06em}
+
+/* ---------- stats ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.stat .n{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1}
+.stat .l{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:5px}
+.bars{margin-top:12px}
+.barrow{display:flex;align-items:center;gap:9px;margin-bottom:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+.barrow .t{width:22px;color:var(--amber)}
+.barrow .b{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.barrow .b i{display:block;height:100%;background:var(--amber);border-radius:3px}
+.barrow .v{width:76px;text-align:right;color:var(--dim)}
+
+/* ---------- nav ---------- */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  display:flex;background:rgba(250,250,247,.94);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav button{
+  flex:1;padding:11px 3px 12px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;
+  color:var(--dim);text-transform:uppercase;
+  border-top:2px solid transparent;margin-top:-1px;transition:.14s;
+}
+.nav button.on{color:var(--amber);border-top-color:var(--amber)}
+.nav button i{display:block;font-style:normal;font-size:17px;margin-bottom:3px;opacity:.9}
+
+.hide{display:none!important}
+.note{font-size:12px;color:var(--dim);margin-top:12px;line-height:1.55}
+.toast{
+  position:fixed;left:50%;bottom:78px;transform:translateX(-50%);
+  background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  padding:9px 15px;border-radius:999px;font-size:13px;z-index:80;
+  opacity:0;pointer-events:none;transition:.22s;
+}
+.toast.show{opacity:1;transform:translate(-50%,-6px)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-top">
+    <div class="mark">Volka <span>3000</span></div>
+    <div class="tagline" id="clock">WORD MANIFEST</div>
+  </div>
+  <div class="gauge">
+    <div class="gauge-bar"><div class="gauge-fill" id="gfill"></div></div>
+    <div class="gauge-txt"><b id="gnum">0</b> / <span id="gtot">0</span> CLEARED</div>
+  </div>
+</header>
+
+<div class="filters" id="filters"></div>
+
+<main class="stage">
+
+  <!-- STUDY -->
+  <section id="v-study">
+    <div class="board">
+      <div class="slot"><span id="s-idx">—</span><span class="lvl-tag" id="s-lvl">A1</span></div>
+      <div class="word" id="s-word">ready</div>
+      <div class="pos" id="s-pos"></div>
+      <div class="flap" id="s-flap">
+        <div class="mean" id="s-mean">준비된</div>
+        <div class="ex" id="s-ex" style="display:none"></div>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn" id="b-prev">← 이전</button>
+      <button class="btn primary" id="b-say">🔊 발음</button>
+      <button class="btn" id="b-next">다음 →</button>
+    </div>
+    <div class="row">
+      <button class="btn small" id="b-mask">뜻 가리기</button>
+      <button class="btn small go" id="b-known">✓ 외웠음</button>
+      <button class="btn small" id="b-weak">★ 약점</button>
+      <button class="btn small" id="b-ex">예문 만들기</button>
+    </div>
+    <div class="row">
+      <button class="btn small" id="b-auto">▶︎ 자동재생</button>
+      <button class="btn small" id="b-shuffle">🔀 섞기</button>
+      <button class="btn small" id="b-speed">속도 1.0×</button>
+    </div>
+    <p class="note">자동재생: 영어 → 잠시 멈춤 → 한글 뜻 순서로 읽어줍니다. 출퇴근·크로스핏 이동 중 화면 안 봐도 됩니다.</p>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="v-quiz" class="hide">
+    <div class="board">
+      <div class="slot"><span id="q-score">0 / 0</span><span class="lvl-tag" id="q-lvl">A1</span></div>
+      <div class="word" id="q-word">—</div>
+      <div class="pos" id="q-pos"></div>
+    </div>
+    <div class="opts" id="q-opts"></div>
+    <div class="row"><button class="btn small" id="q-say">🔊 다시 듣기</button><button class="btn small" id="q-skip">건너뛰기 →</button></div>
+  </section>
+
+  <!-- RECALL (typing) -->
+  <section id="v-recall" class="hide">
+    <div class="board">
+      <div class="slot"><span id="r-score">0 / 0</span><span class="lvl-tag" id="r-lvl">A1</span></div>
+      <div class="word" id="r-mean" style="font-family:'Manrope','Noto Sans KR',sans-serif;font-size:27px;font-weight:500">—</div>
+      <div class="pos" id="r-pos"></div>
+      <div class="flap" id="r-flap" style="min-height:0;border:none;padding-top:0"></div>
+    </div>
+    <input class="type-in" id="r-in" placeholder="영어로 입력…" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <div class="verdict" id="r-verdict"></div>
+    <div class="row">
+      <button class="btn" id="r-check">확인 (Enter)</button>
+      <button class="btn small" id="r-hint">힌트</button>
+      <button class="btn small" id="r-pass">모르겠음</button>
+    </div>
+  </section>
+
+  <!-- LISTEN -->
+  <section id="v-listen" class="hide">
+    <div class="board" style="text-align:center;padding:34px 18px">
+      <div class="slot" style="justify-content:center"><span>LISTEN &amp; PICK</span></div>
+      <button class="btn primary" id="l-play" style="margin:0 auto;max-width:190px;font-size:16px;padding:16px">🔊 듣기</button>
+      <div class="pos" id="l-score" style="margin-top:14px">0 / 0</div>
+    </div>
+    <div class="opts" id="l-opts"></div>
+  </section>
+
+  <!-- LIST -->
+  <section id="v-list" class="hide">
+    <input class="search" id="f-search" placeholder="단어 또는 뜻 검색…">
+    <div class="row" style="margin-top:0;margin-bottom:10px">
+      <button class="btn small" id="f-all">전체</button>
+      <button class="btn small" id="f-todo">미완료</button>
+      <button class="btn small" id="f-known">외운 단어</button>
+      <button class="btn small" id="f-weak">★ 약점</button>
+    </div>
+    <div class="count" id="l-count"></div>
+    <div id="l-rows"></div>
+  </section>
+
+  <!-- STATS -->
+  <section id="v-stats" class="hide">
+    <div class="grid2">
+      <div class="stat"><div class="n" id="st-known">0</div><div class="l">외운 단어</div></div>
+      <div class="stat"><div class="n" id="st-weak">0</div><div class="l">약점 단어</div></div>
+      <div class="stat"><div class="n" id="st-acc">—</div><div class="l">정답률</div></div>
+      <div class="stat"><div class="n" id="st-streak">0</div><div class="l">연속 정답</div></div>
+    </div>
+    <div class="bars" id="st-bars"></div>
+    <div class="row">
+      <button class="btn small" id="st-export">진도 내보내기</button>
+      <button class="btn small" id="st-import">불러오기</button>
+      <button class="btn small stop" id="st-reset">진도 초기화</button>
+    </div>
+    <p class="note">진도는 이 브라우저에 자동 저장됩니다. 기기를 바꿀 땐 <b>진도 내보내기</b>로 코드를 복사해서 새 기기에서 불러오세요.</p>
+  </section>
+
+</main>
+
+<nav class="nav" id="nav">
+  <button data-v="study" class="on"><i>▤</i>학습</button>
+  <button data-v="quiz"><i>◆</i>퀴즈</button>
+  <button data-v="recall"><i>✎</i>스펠링</button>
+  <button data-v="listen"><i>♪</i>듣기</button>
+  <button data-v="list"><i>≡</i>목록</button>
+  <button data-v="stats"><i>▮</i>기록</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ WORD BANK ============ */
+const RAW = {"A1":["a|하나의|det","about|~에 대하여|prep","above|~위에|prep","across|~을 가로질러|prep","act|행동하다|v","activity|활동|n","actor|배우|n","add|더하다|v","address|주소|n","adult|어른|n","afraid|두려워하는|adj","after|~후에|prep","afternoon|오후|n","again|다시|adv","age|나이|n","ago|~전에|adv","agree|동의하다|v","air|공기|n","airport|공항|n","all|모든|det","also|또한|adv","always|항상|adv","and|그리고|conj","angry|화난|adj","animal|동물|n","another|또 다른|det","answer|대답; 대답하다|n","any|어떤|det","anyone|누구든지|pron","anything|무엇이든|pron","apartment|아파트|n","apple|사과|n","April|4월|n","area|지역|n","arm|팔|n","around|주위에|prep","arrive|도착하다|v","art|예술|n","as|~로서|prep","ask|묻다|v","at|~에|prep","August|8월|n","aunt|이모, 고모|n","autumn|가을|n","away|떨어져|adv","baby|아기|n","back|뒤; 등|n","bad|나쁜|adj","bag|가방|n","ball|공|n","banana|바나나|n","band|밴드, 악단|n","bank|은행|n","bath|목욕|n","bathroom|욕실|n","be|~이다|v","beach|해변|n","beautiful|아름다운|adj","because|왜냐하면|conj","become|~이 되다|v","bed|침대|n","bedroom|침실|n","beer|맥주|n","before|~전에|prep","begin|시작하다|v","behind|~뒤에|prep","believe|믿다|v","below|~아래에|prep","best|최고의|adj","better|더 나은|adj","between|~사이에|prep","bicycle|자전거|n","big|큰|adj","bike|자전거|n","bird|새|n","birthday|생일|n","black|검은|adj","blue|파란|adj","board|판; 탑승하다|n","boat|배|n","body|몸|n","book|책|n","boot|장화, 부츠|n","bored|지루해하는|adj","boring|지루한|adj","born|태어난|adj","both|둘 다|det","bottle|병|n","box|상자|n","boy|소년|n","boyfriend|남자친구|n","bread|빵|n","break|깨다; 휴식|v","breakfast|아침 식사|n","bring|가져오다|v","brother|형제|n","brown|갈색의|adj","build|짓다|v","building|건물|n","bus|버스|n","business|사업|n","busy|바쁜|adj","but|그러나|conj","butter|버터|n","buy|사다|v","by|~에 의해|prep","cafe|카페|n","cake|케이크|n","call|부르다, 전화하다|v","camera|카메라|n","can|~할 수 있다|v","capital|수도; 자본|n","car|자동차|n","card|카드|n","care|돌봄; 신경 쓰다|n","carry|나르다|v","cat|고양이|n","catch|잡다|v","CD|시디|n","center|중심|n","century|세기|n","chair|의자|n","change|바꾸다; 변화|v","cheap|싼|adj","check|확인하다|v","cheese|치즈|n","chicken|닭, 닭고기|n","child|아이|n","chocolate|초콜릿|n","choose|고르다|v","cinema|영화관|n","city|도시|n","class|수업, 학급|n","classroom|교실|n","clean|깨끗한; 청소하다|adj","clear|분명한|adj","climb|오르다|v","clock|시계|n","close|닫다; 가까운|v","clothes|옷|n","cloud|구름|n","club|동호회, 클럽|n","coat|외투|n","coffee|커피|n","cold|추운, 차가운|adj","college|대학|n","color|색깔|n","come|오다|v","company|회사|n","computer|컴퓨터|n","concert|콘서트|n","cook|요리하다|v","cookie|과자, 쿠키|n","cool|시원한; 멋진|adj","copy|복사하다; 사본|v","corner|모서리, 모퉁이|n","correct|올바른|adj","cost|비용; 비용이 들다|n","country|나라|n","course|과정, 강좌|n","cousin|사촌|n","cow|소|n","cream|크림|n","credit card|신용카드|n","cry|울다|v","cup|컵|n","cut|자르다|v","dad|아빠|n","dance|춤추다|v","dangerous|위험한|adj","dark|어두운|adj","date|날짜|n","daughter|딸|n","day|날, 하루|n","dead|죽은|adj","December|12월|n","decide|결정하다|v","delicious|맛있는|adj","dentist|치과의사|n","describe|묘사하다|v","desk|책상|n","detail|세부 사항|n","diary|일기|n","dictionary|사전|n","die|죽다|v","different|다른|adj","difficult|어려운|adj","dinner|저녁 식사|n","dirty|더러운|adj","discuss|논의하다|v","dish|접시, 요리|n","do|하다|v","doctor|의사|n","dog|개|n","dollar|달러|n","door|문|n","down|아래로|adv","downstairs|아래층으로|adv","draw|그리다|v","dress|드레스; 옷을 입다|n","drink|마시다|v","drive|운전하다|v","driver|운전자|n","drop|떨어뜨리다|v","dry|마른|adj","during|~동안|prep","DVD|디비디|n","each|각각의|det","ear|귀|n","early|이른, 일찍|adj","east|동쪽|n","easy|쉬운|adj","eat|먹다|v","egg|계란|n","eight|여덟|num","either|둘 중 하나|det","elephant|코끼리|n","else|그 밖에|adv","email|이메일|n","empty|빈|adj","end|끝; 끝나다|n","engineer|기술자|n","English|영어|n","enjoy|즐기다|v","enough|충분한|det","enter|들어가다|v","euro|유로|n","even|심지어|adv","evening|저녁|n","event|행사|n","ever|한 번이라도|adv","every|모든|det","everybody|모든 사람|pron","everyone|모두|pron","everything|모든 것|pron","everywhere|모든 곳에|adv","exam|시험|n","example|예시|n","excited|신이 난|adj","exciting|흥미진진한|adj","excuse me|실례합니다|phr","exercise|운동; 연습|n","expensive|비싼|adj","explain|설명하다|v","eye|눈|n","face|얼굴|n","fact|사실|n","fall|떨어지다; 가을|v","family|가족|n","famous|유명한|adj","fantastic|환상적인|adj","far|먼|adj","farm|농장|n","farmer|농부|n","fast|빠른|adj","fat|뚱뚱한|adj","father|아버지|n","favorite|가장 좋아하는|adj","February|2월|n","feel|느끼다|v","festival|축제|n","few|약간의, 적은|det","field|들판, 분야|n","file|파일|n","fill|채우다|v","film|영화|n","find|찾다|v","fine|괜찮은|adj","finger|손가락|n","finish|끝내다|v","fire|불|n","first|첫 번째의|det","fish|물고기|n","five|다섯|num","flat|평평한; 아파트|adj","flight|비행, 항공편|n","floor|바닥, 층|n","flower|꽃|n","fly|날다|v","follow|따르다|v","food|음식|n","foot|발|n","football|축구|n","for|~를 위해|prep","foreign|외국의|adj","forget|잊다|v","fork|포크|n","form|양식; 형태|n","four|넷|num","free|자유로운; 무료의|adj","Friday|금요일|n","friend|친구|n","friendly|친절한|adj","from|~로부터|prep","front|앞|n","fruit|과일|n","full|가득 찬|adj","fun|재미|n","funny|웃기는|adj","furniture|가구|n","future|미래|n","game|게임, 경기|n","garden|정원|n","gas|가스, 기름|n","get|얻다|v","gift|선물|n","girl|소녀|n","girlfriend|여자친구|n","give|주다|v","glass|유리, 잔|n","glasses|안경|n","go|가다|v","goal|골, 목표|n","gold|금|n","good|좋은|adj","goodbye|안녕히|int","grandfather|할아버지|n","grandmother|할머니|n","grandparent|조부모|n","grass|풀|n","gray|회색의|adj","great|훌륭한|adj","green|초록의|adj","group|그룹|n","grow|자라다|v","guess|추측하다|v","guitar|기타|n","guy|남자, 녀석|n","hair|머리카락|n","half|절반|n","hand|손|n","happen|일어나다|v","happy|행복한|adj","hard|어려운; 단단한|adj","hat|모자|n","hate|싫어하다|v","have|가지다|v","he|그|pron","head|머리|n","health|건강|n","healthy|건강한|adj","hear|듣다|v","heart|심장, 마음|n","heavy|무거운|adj","hello|안녕하세요|int","help|돕다|v","her|그녀의|det","here|여기|adv","hers|그녀의 것|pron","hi|안녕|int","high|높은|adj","hill|언덕|n","him|그를|pron","his|그의|det","history|역사|n","hit|치다|v","hobby|취미|n","hold|잡다|v","holiday|휴일|n","home|집|n","homework|숙제|n","hope|바라다|v","horse|말|n","hospital|병원|n","hot|더운, 뜨거운|adj","hotel|호텔|n","hour|시간|n","house|집|n","how|어떻게|adv","however|그러나|adv","hundred|백|num","hungry|배고픈|adj","hurt|다치게 하다|v","husband|남편|n","I|나|pron","ice|얼음|n","ice cream|아이스크림|n","idea|생각|n","if|만약|conj","ill|아픈|adj","important|중요한|adj","in|~안에|prep","information|정보|n","inside|안에|prep","interested|관심 있는|adj","interesting|흥미로운|adj","internet|인터넷|n","interview|면접|n","into|~안으로|prep","island|섬|n","it|그것|pron","its|그것의|det","jacket|재킷|n","January|1월|n","jeans|청바지|n","job|직업|n","join|가입하다, 합류하다|v","journey|여정|n","juice|주스|n","July|7월|n","jump|뛰다|v","June|6월|n","just|단지, 방금|adv","keep|유지하다|v","key|열쇠|n","kid|아이|n","kill|죽이다|v","kilometer|킬로미터|n","kind|친절한; 종류|adj","kitchen|부엌|n","knife|칼|n","know|알다|v","lake|호수|n","lamp|램프|n","land|땅; 착륙하다|n","language|언어|n","large|큰|adj","last|마지막의; 지난|det","late|늦은|adj","later|나중에|adv","laugh|웃다|v","learn|배우다|v","leave|떠나다|v","left|왼쪽|n","leg|다리|n","lesson|수업|n","let|~하게 하다|v","letter|편지; 글자|n","library|도서관|n","life|삶|n","light|빛; 가벼운|n","like|좋아하다; ~같은|v","line|선, 줄|n","lion|사자|n","list|목록|n","listen|듣다|v","little|작은|adj","live|살다|v","long|긴|adj","look|보다|v","lose|잃다|v","lot|많음|n","loud|시끄러운|adj","love|사랑하다|v","low|낮은|adj","lucky|운 좋은|adj","lunch|점심|n","machine|기계|n","magazine|잡지|n","main|주요한|adj","make|만들다|v","man|남자|n","many|많은|det","map|지도|n","March|3월|n","market|시장|n","married|결혼한|adj","match|경기; 어울리다|n","math|수학|n","matter|문제; 중요하다|n","May|5월|n","maybe|아마도|adv","me|나를|pron","meal|식사|n","mean|의미하다|v","meat|고기|n","medicine|약|n","meet|만나다|v","meeting|회의|n","member|회원|n","menu|메뉴|n","message|메시지|n","meter|미터|n","middle|중간|n","midnight|자정|n","milk|우유|n","million|백만|num","mind|마음; 꺼리다|n","mine|나의 것|pron","minute|분|n","Miss|~양|n","mistake|실수|n","mobile|휴대전화|n","modern|현대의|adj","moment|순간|n","Monday|월요일|n","money|돈|n","monkey|원숭이|n","month|달, 월|n","moon|달|n","more|더 많은|det","morning|아침|n","most|가장 많은|det","mother|어머니|n","mountain|산|n","mouse|쥐|n","mouth|입|n","move|움직이다|v","movie|영화|n","Mr|~씨|n","Mrs|~부인|n","much|많은|det","museum|박물관|n","music|음악|n","must|~해야 한다|v","my|나의|det","name|이름|n","near|가까운|prep","need|필요하다|v","never|결코 ~않다|adv","new|새로운|adj","news|뉴스|n","newspaper|신문|n","next|다음의|det","nice|좋은, 친절한|adj","night|밤|n","nine|아홉|num","no|아니오|det","noise|소음|n","noisy|시끄러운|adj","noon|정오|n","north|북쪽|n","nose|코|n","not|~아니다|adv","note|메모|n","nothing|아무것도|pron","November|11월|n","now|지금|adv","number|숫자|n","nurse|간호사|n","ocean|바다|n","o'clock|~시|adv","October|10월|n","of|~의|prep","off|떨어져|adv","office|사무실|n","often|자주|adv","oil|기름|n","OK|괜찮은|adj","old|늙은, 오래된|adj","on|~위에|prep","once|한 번|adv","one|하나|num","onion|양파|n","online|온라인의|adj","only|오직|adv","open|열다; 열린|v","opposite|반대의|adj","or|또는|conj","orange|오렌지; 주황색|n","order|주문하다; 순서|v","other|다른|det","our|우리의|det","ours|우리의 것|pron","out|밖으로|adv","outside|밖에|prep","over|~위에; 넘어|prep","own|자신의|adj","page|페이지|n","paint|칠하다; 페인트|v","painting|그림|n","pair|한 쌍|n","paper|종이|n","parent|부모|n","park|공원; 주차하다|n","part|부분|n","particular|특정한|adj","partner|파트너|n","party|파티|n","pass|통과하다|v","passport|여권|n","past|과거|n","pay|지불하다|v","pen|펜|n","pencil|연필|n","people|사람들|n","pepper|후추|n","perfect|완벽한|adj","perhaps|아마도|adv","period|기간|n","person|사람|n","pet|반려동물|n","phone|전화|n","photo|사진|n","piano|피아노|n","picture|그림, 사진|n","piece|조각|n","pig|돼지|n","pink|분홍색의|adj","pizza|피자|n","place|장소|n","plan|계획|n","plane|비행기|n","plant|식물|n","plastic|플라스틱|n","plate|접시|n","play|놀다, 연주하다|v","player|선수|n","please|제발|adv","police|경찰|n","polite|예의 바른|adj","pool|수영장|n","poor|가난한|adj","popular|인기 있는|adj","position|위치|n","possible|가능한|adj","post|우편; 게시하다|n","potato|감자|n","practice|연습하다|v","prefer|선호하다|v","prepare|준비하다|v","present|선물; 현재의|n","pretty|예쁜|adj","price|가격|n","print|인쇄하다|v","prize|상|n","probably|아마도|adv","problem|문제|n","program|프로그램|n","project|프로젝트|n","public|공공의|adj","pull|당기다|v","purple|보라색의|adj","push|밀다|v","put|놓다|v","question|질문|n","quick|빠른|adj","quiet|조용한|adj","quite|꽤|adv","radio|라디오|n","rain|비|n","read|읽다|v","ready|준비된|adj","real|진짜의|adj","really|정말로|adv","reason|이유|n","receive|받다|v","red|빨간|adj","remember|기억하다|v","repeat|반복하다|v","report|보고서|n","restaurant|식당|n","result|결과|n","return|돌아오다|v","rice|쌀, 밥|n","rich|부유한|adj","ride|타다|v","right|오른쪽; 옳은|n","ring|반지; 울리다|n","river|강|n","road|길, 도로|n","room|방|n","round|둥근|adj","rule|규칙|n","run|달리다|v","sad|슬픈|adj","safe|안전한|adj","salad|샐러드|n","salt|소금|n","same|같은|adj","sandwich|샌드위치|n","Saturday|토요일|n","save|구하다; 저축하다|v","say|말하다|v","school|학교|n","science|과학|n","sea|바다|n","season|계절|n","seat|좌석|n","second|두 번째의; 초|det","see|보다|v","sell|팔다|v","send|보내다|v","sentence|문장|n","September|9월|n","seven|일곱|num","several|몇몇의|det","shall|~할까요|v","share|나누다|v","she|그녀|pron","sheep|양|n","shirt|셔츠|n","shoe|신발|n","shop|가게|n","shopping|쇼핑|n","short|짧은|adj","should|~해야 한다|v","show|보여주다|v","shower|샤워|n","shut|닫다|v","sick|아픈|adj","side|옆, 쪽|n","sign|표지판; 서명하다|n","silver|은|n","simple|간단한|adj","since|~이래로|prep","sing|노래하다|v","singer|가수|n","single|하나의, 독신의|adj","sister|자매|n","sit|앉다|v","six|여섯|num","size|크기|n","skirt|치마|n","sky|하늘|n","sleep|자다|v","slow|느린|adj","small|작은|adj","smile|미소짓다|v","snow|눈|n","so|그래서|conj","soccer|축구|n","sock|양말|n","sofa|소파|n","some|약간의|det","somebody|누군가|pron","someone|누군가|pron","something|무언가|pron","sometimes|때때로|adv","son|아들|n","song|노래|n","soon|곧|adv","sorry|미안한|adj","sound|소리|n","soup|수프|n","south|남쪽|n","space|공간, 우주|n","speak|말하다|v","special|특별한|adj","spell|철자를 쓰다|v","spend|쓰다, 보내다|v","spoon|숟가락|n","sport|스포츠|n","spring|봄|n","stairs|계단|n","stamp|우표|n","stand|서다|v","star|별|n","start|시작하다|v","station|역|n","stay|머무르다|v","steal|훔치다|v","still|여전히|adv","stomach|배, 위|n","stop|멈추다|v","store|가게|n","story|이야기|n","street|거리|n","strong|강한|adj","student|학생|n","study|공부하다|v","stupid|어리석은|adj","subject|과목, 주제|n","successful|성공적인|adj","sugar|설탕|n","summer|여름|n","sun|태양|n","Sunday|일요일|n","sunny|화창한|adj","supermarket|슈퍼마켓|n","sure|확신하는|adj","surprise|놀라움|n","sweater|스웨터|n","sweet|달콤한|adj","swim|수영하다|v","table|탁자|n","take|가져가다|v","talk|말하다|v","tall|키가 큰|adj","taxi|택시|n","tea|차|n","teach|가르치다|v","teacher|교사|n","team|팀|n","telephone|전화|n","television|텔레비전|n","tell|말하다|v","ten|열|num","tennis|테니스|n","terrible|끔찍한|adj","test|시험|n","than|~보다|conj","thank|감사하다|v","that|저것|det","the|그|det","theater|극장|n","their|그들의|det","theirs|그들의 것|pron","them|그들을|pron","then|그때, 그러면|adv","there|거기|adv","these|이것들|det","they|그들|pron","thing|것, 물건|n","think|생각하다|v","third|세 번째의|det","thirsty|목마른|adj","this|이것|det","those|저것들|det","thousand|천|num","three|셋|num","through|~을 통해|prep","Thursday|목요일|n","ticket|표|n","time|시간|n","tired|피곤한|adj","to|~로|prep","today|오늘|n","together|함께|adv","toilet|화장실|n","tomato|토마토|n","tomorrow|내일|n","tonight|오늘 밤|n","too|너무; 또한|adv","tooth|이, 치아|n","top|꼭대기|n","total|전체의|adj","touch|만지다|v","tourist|관광객|n","town|마을|n","traffic|교통|n","train|기차|n","travel|여행하다|v","tree|나무|n","trip|여행|n","trouble|문제|n","trousers|바지|n","true|진실한|adj","try|시도하다|v","Tuesday|화요일|n","turn|돌다; 차례|v","TV|티브이|n","twice|두 번|adv","two|둘|num","ugly|못생긴|adj","umbrella|우산|n","uncle|삼촌|n","under|~아래에|prep","understand|이해하다|v","university|대학교|n","until|~까지|prep","up|위로|adv","upstairs|위층으로|adv","us|우리를|pron","use|사용하다|v","useful|유용한|adj","usually|보통|adv","vacation|휴가|n","vegetable|채소|n","very|매우|adv","video|비디오|n","village|마을|n","visit|방문하다|v","voice|목소리|n","wait|기다리다|v","waiter|웨이터|n","wake|깨다|v","walk|걷다|v","wall|벽|n","want|원하다|v","warm|따뜻한|adj","wash|씻다|v","watch|보다; 손목시계|v","water|물|n","way|길, 방법|n","we|우리|pron","wear|입다|v","weather|날씨|n","website|웹사이트|n","Wednesday|수요일|n","week|주|n","weekend|주말|n","welcome|환영하다|v","well|잘|adv","west|서쪽|n","wet|젖은|adj","what|무엇|pron","when|언제|adv","where|어디|adv","which|어느|det","white|흰|adj","who|누구|pron","whose|누구의|det","why|왜|adv","wide|넓은|adj","wife|아내|n","will|~할 것이다|v","win|이기다|v","wind|바람|n","window|창문|n","wine|와인|n","winter|겨울|n","with|~와 함께|prep","without|~없이|prep","woman|여자|n","wonderful|훌륭한|adj","wood|나무, 목재|n","word|단어|n","work|일하다|v","worker|노동자|n","world|세계|n","worry|걱정하다|v","worse|더 나쁜|adj","write|쓰다|v","wrong|틀린|adj","year|년|n","yellow|노란|adj","yes|예|int","yesterday|어제|n","yet|아직|adv","you|너|pron","young|젊은|adj","your|너의|det","yours|너의 것|pron","zero|영|num"],"A2":["ability|능력|n","able|~할 수 있는|adj","accept|받아들이다|v","accident|사고|n","according to|~에 따르면|prep","account|계좌; 설명|n","achieve|달성하다|v","action|행동|n","active|활동적인|adj","actually|사실은|adv","advantage|장점|n","adventure|모험|n","advertisement|광고|n","advice|조언|n","advise|조언하다|v","affect|영향을 미치다|v","afford|여유가 되다|v","against|~에 반대하여|prep","agency|대행사, 기관|n","agreement|합의|n","ahead|앞에|adv","aim|목표; 겨냥하다|n","alive|살아 있는|adj","allow|허락하다|v","almost|거의|adv","alone|혼자|adj","along|~을 따라|prep","already|이미|adv","alternative|대안|n","although|비록 ~일지라도|conj","amazing|놀라운|adj","among|~사이에|prep","amount|양|n","ancient|고대의|adj","angle|각도|n","announce|발표하다|v","annoy|짜증나게 하다|v","apologize|사과하다|v","appear|나타나다|v","apply|지원하다; 적용하다|v","appointment|약속, 예약|n","approach|접근하다|v","argue|논쟁하다|v","argument|논쟁|n","army|군대|n","arrange|정리하다, 준비하다|v","arrest|체포하다|v","arrival|도착|n","article|기사|n","artist|예술가|n","ashamed|부끄러운|adj","asleep|잠든|adj","assistant|조수|n","associate|연관짓다|v","assume|가정하다|v","atmosphere|분위기, 대기|n","attach|첨부하다|v","attack|공격하다|v","attempt|시도하다|v","attend|참석하다|v","attention|주의|n","attitude|태도|n","attract|끌어당기다|v","attractive|매력적인|adj","audience|청중|n","available|이용 가능한|adj","average|평균|n","avoid|피하다|v","awake|깨어 있는|adj","award|상|n","aware|알고 있는|adj","awful|끔찍한|adj","background|배경|n","badly|나쁘게|adv","baggage|수하물|n","balance|균형|n","ban|금지하다|v","base|기반|n","basic|기본적인|adj","basis|근거, 기준|n","battery|배터리|n","battle|전투|n","bear|참다; 곰|v","beat|이기다; 치다|v","beauty|아름다움|n","behavior|행동|n","belief|믿음|n","belong|속하다|v","bend|구부리다|v","benefit|이익|n","beside|~옆에|prep","beyond|~너머|prep","bill|청구서|n","bit|조금|n","bite|물다|v","blame|비난하다|v","blank|빈|adj","blood|피|n","blow|불다|v","boil|끓이다|v","bomb|폭탄|n","bone|뼈|n","border|국경|n","borrow|빌리다|v","boss|상사|n","bottom|바닥|n","brain|뇌|n","branch|가지, 지점|n","brave|용감한|adj","breath|숨|n","breathe|숨쉬다|v","bridge|다리|n","bright|밝은|adj","brilliant|훌륭한|adj","broad|넓은|adj","broken|고장난|adj","brush|솔; 닦다|n","budget|예산|n","burn|타다|v","bury|묻다|v","cancel|취소하다|v","candidate|후보자|n","capable|능력 있는|adj","care about|~에 신경 쓰다|phr","career|경력|n","careful|조심스러운|adj","carefully|조심스럽게|adv","cash|현금|n","cause|원인; 야기하다|n","ceiling|천장|n","celebrate|축하하다|v","certain|확실한|adj","certainly|확실히|adv","chain|사슬|n","challenge|도전|n","chance|기회|n","character|성격, 등장인물|n","charge|요금; 청구하다|n","charity|자선단체|n","chart|도표|n","chat|잡담하다|v","cheat|속이다|v","chemical|화학의|adj","chest|가슴|n","chief|주요한; 우두머리|adj","choice|선택|n","church|교회|n","circle|원|n","citizen|시민|n","claim|주장하다|v","clearly|분명히|adv","clever|영리한|adj","click|클릭하다|v","client|고객|n","climate|기후|n","close to|~에 가까운|phr","cloth|천|n","coach|코치|n","coast|해안|n","code|암호, 코드|n","collect|모으다|v","collection|수집품|n","combine|결합하다|v","comfortable|편안한|adj","comment|의견|n","committee|위원회|n","common|흔한|adj","communicate|의사소통하다|v","community|공동체|n","compare|비교하다|v","compete|경쟁하다|v","competition|경쟁, 대회|n","complain|불평하다|v","complete|완성하다; 완전한|v","completely|완전히|adv","complicated|복잡한|adj","concentrate|집중하다|v","concern|걱정|n","condition|상태, 조건|n","conference|회의|n","confidence|자신감|n","confident|자신 있는|adj","confused|혼란스러운|adj","connect|연결하다|v","connection|연결|n","consider|고려하다|v","consist|구성되다|v","constant|끊임없는|adj","contact|연락하다|v","contain|포함하다|v","content|내용|n","continue|계속하다|v","contract|계약|n","contrast|대조|n","control|통제하다|v","conversation|대화|n","convince|설득하다|v","correctly|올바르게|adv","cotton|면|n","cough|기침하다|v","count|세다|v","couple|한 쌍, 커플|n","courage|용기|n","court|법정, 코트|n","cover|덮다|v","crash|충돌하다|v","crazy|미친|adj","create|창조하다|v","creature|생물|n","crime|범죄|n","criminal|범죄자|n","crisis|위기|n","cross|건너다|v","crowd|군중|n","cruel|잔인한|adj","cultural|문화의|adj","culture|문화|n","cure|치료하다|v","curious|호기심 있는|adj","current|현재의|adj","curtain|커튼|n","custom|관습|n","customer|고객|n","cycle|주기; 자전거를 타다|n","daily|매일의|adj","damage|손상|n","danger|위험|n","deal|거래|n","death|죽음|n","debate|토론|n","debt|빚|n","decision|결정|n","declare|선언하다|v","decrease|감소하다|v","deep|깊은|adj","defeat|패배시키다|v","defend|방어하다|v","define|정의하다|v","degree|정도, 학위|n","delay|지연|n","deliver|배달하다|v","demand|요구하다|v","department|부서|n","depend|의존하다|v","description|설명|n","desert|사막|n","deserve|받을 만하다|v","design|디자인하다|v","desire|욕망|n","despite|~에도 불구하고|prep","destroy|파괴하다|v","determine|결정하다|v","develop|개발하다|v","development|개발|n","device|장치|n","difference|차이|n","difficulty|어려움|n","dig|파다|v","digital|디지털의|adj","direct|직접적인|adj","direction|방향|n","directly|직접|adv","director|이사, 감독|n","disagree|동의하지 않다|v","disappear|사라지다|v","disappointed|실망한|adj","disaster|재난|n","discount|할인|n","discover|발견하다|v","discussion|논의|n","disease|질병|n","distance|거리|n","distant|먼|adj","divide|나누다|v","document|문서|n","double|두 배의|adj","doubt|의심|n","download|내려받다|v","dozen|다스, 열둘|n","drama|드라마|n","dream|꿈|n","drug|약, 마약|n","due|~때문에; 예정인|adj","dust|먼지|n","duty|의무|n","each other|서로|pron","earn|벌다|v","earth|지구|n","edge|가장자리|n","edition|판|n","educate|교육하다|v","education|교육|n","effect|효과|n","effective|효과적인|adj","effort|노력|n","elderly|나이 든|adj","elect|선출하다|v","election|선거|n","electric|전기의|adj","electricity|전기|n","electronic|전자의|adj","emergency|비상사태|n","emotion|감정|n","employ|고용하다|v","employee|직원|n","employer|고용주|n","enable|가능하게 하다|v","encourage|격려하다|v","energy|에너지|n","engine|엔진|n","enormous|거대한|adj","entertainment|오락|n","entrance|입구|n","environment|환경|n","equal|동등한|adj","equipment|장비|n","error|오류|n","escape|탈출하다|v","especially|특히|adv","essential|필수적인|adj","establish|설립하다|v","estimate|추정하다|v","European|유럽의|adj","eventually|결국|adv","evidence|증거|n","exact|정확한|adj","exactly|정확히|adv","examine|검사하다|v","excellent|훌륭한|adj","except|~을 제외하고|prep","exchange|교환하다|v","exist|존재하다|v","expect|예상하다|v","experience|경험|n","experiment|실험|n","expert|전문가|n","explanation|설명|n","explore|탐험하다|v","export|수출하다|v","express|표현하다|v","expression|표현|n","extra|추가의|adj","extremely|극도로|adv","fail|실패하다|v","failure|실패|n","fair|공정한|adj","fairly|꽤|adv","faith|믿음|n","false|거짓의|adj","familiar|친숙한|adj","fashion|패션|n","fault|잘못|n","favor|호의|n","fear|두려움|n","feature|특징|n","feed|먹이다|v","feeling|감정|n","female|여성의|adj","fence|울타리|n","fewer|더 적은|det","fight|싸우다|v","figure|수치, 인물|n","final|마지막의|adj","finally|마침내|adv","finance|재정|n","financial|재정의|adj","fit|맞다; 건강한|v","fix|고치다|v","flag|깃발|n","flavor|맛|n","flood|홍수|n","flow|흐르다|v","focus|집중하다|v","fold|접다|v","force|힘; 강요하다|n","forecast|예보|n","forest|숲|n","forever|영원히|adv","forgive|용서하다|v","formal|공식적인|adj","former|이전의|adj","fortunately|다행히|adv","forward|앞으로|adv","frame|틀|n","freedom|자유|n","freeze|얼다|v","frequent|잦은|adj","fresh|신선한|adj","frighten|겁주다|v","frozen|얼어붙은|adj","fuel|연료|n","function|기능|n","fund|자금|n","further|더 나아가|adv","gain|얻다|v","gap|틈, 격차|n","gate|문|n","gather|모으다|v","general|일반적인|adj","generally|일반적으로|adv","generation|세대|n","gentle|부드러운|adj","gently|부드럽게|adv","gesture|몸짓|n","giant|거대한|adj","glad|기쁜|adj","glove|장갑|n","goods|상품|n","government|정부|n","grade|성적, 등급|n","gradually|점차|adv","graduate|졸업하다|v","grand|웅장한|adj","grant|보조금; 승인하다|n","grateful|감사하는|adj","greet|인사하다|v","ground|땅|n","growth|성장|n","guarantee|보장하다|v","guard|경비|n","guest|손님|n","guide|안내하다|v","guilty|죄책감의, 유죄의|adj","gun|총|n","habit|습관|n","hall|복도, 홀|n","handle|다루다|v","hang|걸다|v","harbor|항구|n","hardly|거의 ~않다|adv","harm|해치다|v","heat|열|n","height|높이|n","hell|지옥|n","helpful|도움이 되는|adj","hero|영웅|n","hide|숨다|v","highly|매우|adv","hire|고용하다|v","historical|역사적인|adj","hole|구멍|n","honest|정직한|adj","honor|명예|n","horrible|끔찍한|adj","host|주최자|n","huge|거대한|adj","human|인간|n","humor|유머|n","hunt|사냥하다|v","hurry|서두르다|v","ideal|이상적인|adj","identify|확인하다|v","ignore|무시하다|v","illegal|불법의|adj","illness|병|n","image|이미지|n","imagine|상상하다|v","immediately|즉시|adv","impact|영향|n","import|수입하다|v","impossible|불가능한|adj","impress|감명을 주다|v","impression|인상|n","improve|개선하다|v","improvement|개선|n","include|포함하다|v","including|~을 포함하여|prep","income|소득|n","increase|증가하다|v","independent|독립적인|adj","indicate|나타내다|v","individual|개인|n","industry|산업|n","influence|영향|n","inform|알리다|v","informal|비공식적인|adj","initial|처음의|adj","injure|다치게 하다|v","injury|부상|n","insect|곤충|n","insist|주장하다|v","instead|대신에|adv","instruction|지시|n","instrument|악기, 도구|n","insurance|보험|n","intelligent|똑똑한|adj","intend|의도하다|v","intention|의도|n","international|국제적인|adj","introduce|소개하다|v","invent|발명하다|v","invest|투자하다|v","investigate|조사하다|v","invitation|초대|n","invite|초대하다|v","involve|포함하다, 관련시키다|v","iron|철; 다리미|n","issue|문제, 사안|n","item|항목|n","jewelry|보석|n","joke|농담|n","journalist|기자|n","judge|판사; 판단하다|n","justice|정의|n","kick|차다|v","knock|두드리다|v","knowledge|지식|n","label|라벨|n","labor|노동|n","lack|부족|n","ladder|사다리|n","lady|숙녀|n","lately|최근에|adv","latest|최신의|adj","laugh at|~을 비웃다|phr","law|법|n","lawyer|변호사|n","layer|층|n","lead|이끌다|v","leader|지도자|n","leaf|잎|n","league|리그|n","lean|기대다|v","least|가장 적은|det","leather|가죽|n","legal|합법적인|adj","lend|빌려주다|v","length|길이|n","level|수준|n","license|면허|n","lie|눕다; 거짓말하다|v","lift|들어올리다|v","likely|~할 것 같은|adj","limit|한계|n","link|연결|n","liquid|액체|n","literature|문학|n","load|짐; 싣다|n","loan|대출|n","local|지역의|adj","locate|위치시키다|v","location|위치|n","lock|잠그다|v","logical|논리적인|adj","lonely|외로운|adj","loose|느슨한|adj","lorry|화물차|n","loss|손실|n","lovely|사랑스러운|adj","luck|운|n","luggage|짐|n","lung|폐|n","mad|화난, 미친|adj","mail|우편|n","maintain|유지하다|v","major|주요한|adj","majority|다수|n","male|남성의|adj","manage|관리하다|v","management|경영|n","manager|관리자|n","manner|방식, 태도|n","manufacture|제조하다|v","mark|표시하다|v","marriage|결혼|n","marry|결혼하다|v","mass|덩어리, 대중|n","master|주인; 숙달하다|n","material|재료|n","maximum|최대의|adj","meaning|의미|n","measure|측정하다|v","media|매체|n","medical|의료의|adj","medium|중간의|adj","memory|기억|n","mental|정신의|adj","mention|언급하다|v","mess|엉망|n","metal|금속|n","method|방법|n","military|군사의|adj","minimum|최소의|adj","minister|장관|n","minor|작은, 부차적인|adj","mirror|거울|n","missing|없어진|adj","mix|섞다|v","mixture|혼합물|n","model|모형, 모델|n","mood|기분|n","mostly|주로|adv","motor|모터|n","mud|진흙|n","murder|살인|n","muscle|근육|n","narrow|좁은|adj","nation|국가|n","national|국가의|adj","native|원주민의, 모국의|adj","natural|자연의|adj","naturally|자연스럽게|adv","nature|자연|n","nearly|거의|adv","necessary|필요한|adj","neck|목|n","needle|바늘|n","negative|부정적인|adj","neighbor|이웃|n","neither|둘 다 아닌|det","nervous|긴장한|adj","network|네트워크|n","nevertheless|그럼에도 불구하고|adv","normal|정상적인|adj","normally|보통|adv","notice|알아채다|v","novel|소설|n","nowhere|아무데도|adv","nuclear|핵의|adj","obey|복종하다|v","object|물체|n","observe|관찰하다|v","obtain|얻다|v","obvious|명백한|adj","obviously|명백히|adv","occasion|경우|n","occur|발생하다|v","odd|이상한|adj","offer|제안하다|v","officer|장교, 경관|n","official|공식적인|adj","onto|~위로|prep","operate|작동하다|v","operation|수술, 운영|n","opinion|의견|n","opportunity|기회|n","oppose|반대하다|v","option|선택권|n","ordinary|평범한|adj","organization|조직|n","organize|조직하다|v","original|원래의|adj","otherwise|그렇지 않으면|adv","outdoor|야외의|adj","oven|오븐|n","overall|전반적인|adj","owe|빚지다|v","owner|주인|n","oxygen|산소|n","pack|싸다|v","package|소포, 포장|n","pain|고통|n","painful|고통스러운|adj","palace|궁전|n","pale|창백한|adj","panel|패널|n","panic|공황|n","parking|주차|n","parliament|의회|n","partly|부분적으로|adv","passenger|승객|n","patient|환자; 참을성 있는|n","pattern|무늬, 패턴|n","peace|평화|n","per|~당|prep","percent|퍼센트|n","perfectly|완벽하게|adv","perform|공연하다, 수행하다|v","performance|공연, 성과|n","permanent|영구적인|adj","permission|허가|n","persuade|설득하다|v","physical|신체의|adj","pick|고르다|v","pile|더미|n","pilot|조종사|n","pipe|파이프|n","pitch|경기장; 던지다|n","plain|평범한|adj","planet|행성|n","plenty|풍부함|n","plus|더하기|prep","pocket|주머니|n","poem|시|n","point|점, 요점|n","poison|독|n","policy|정책|n","political|정치의|adj","politician|정치인|n","politics|정치|n","pollution|오염|n","population|인구|n","port|항구|n","portion|부분|n","positive|긍정적인|adj","possibility|가능성|n","possibly|아마도|adv","pot|냄비|n","potential|잠재력|n","pound|파운드|n","poverty|가난|n","powder|가루|n","power|힘, 전력|n","powerful|강력한|adj","practical|실용적인|adj","praise|칭찬하다|v","predict|예측하다|v","pregnant|임신한|adj","presence|존재|n","president|대통령|n","press|누르다|v","pressure|압력|n","pretend|~인 척하다|v","prevent|막다|v","previous|이전의|adj","primary|주요한|adj","prime|주된|adj","prince|왕자|n","principle|원칙|n","prison|감옥|n","private|사적인|adj","probable|있음직한|adj","procedure|절차|n","process|과정|n","produce|생산하다|v","product|제품|n","production|생산|n","profession|직업|n","professional|전문적인|adj","professor|교수|n","profit|이익|n","progress|진전|n","promise|약속하다|v","promote|승진시키다, 홍보하다|v","pronounce|발음하다|v","proof|증거|n","proper|적절한|adj","properly|제대로|adv","property|재산, 부동산|n","proposal|제안|n","propose|제안하다|v","protect|보호하다|v","protection|보호|n","protest|항의하다|v","proud|자랑스러운|adj","prove|증명하다|v","provide|제공하다|v","publish|출판하다|v","punish|벌하다|v","purchase|구매하다|v","pure|순수한|adj","purpose|목적|n","qualification|자격|n","quality|품질|n","quantity|양|n","quarter|4분의 1|n","queen|여왕|n","quickly|빨리|adv","quietly|조용히|adv","race|경주; 인종|n","raise|올리다|v","range|범위|n","rapid|빠른|adj","rare|드문|adj","rarely|드물게|adv","rate|비율, 요금|n","rather|오히려, 꽤|adv","raw|날것의|adj","reach|도달하다|v","react|반응하다|v","reaction|반응|n","realize|깨닫다|v","reasonable|합리적인|adj","receipt|영수증|n","recent|최근의|adj","recently|최근에|adv","recognize|알아보다|v","recommend|추천하다|v","record|기록하다|v","recover|회복하다|v","reduce|줄이다|v","refer|언급하다|v","reflect|반영하다|v","refuse|거절하다|v","regard|여기다|v","region|지역|n","register|등록하다|v","regular|규칙적인|adj","regularly|정기적으로|adv","reject|거부하다|v","relate|관련시키다|v","relationship|관계|n","relative|친척|n","relax|쉬다|v","release|풀어주다, 출시하다|v","relevant|관련 있는|adj","reliable|믿을 만한|adj","relief|안도|n","religion|종교|n","rely|의지하다|v","remain|남아 있다|v","remind|상기시키다|v","remove|제거하다|v","rent|임대하다|v","repair|수리하다|v","replace|교체하다|v","reply|대답하다|v","represent|대표하다|v","reputation|평판|n","request|요청하다|v","require|요구하다|v","rescue|구조하다|v","research|연구|n","reservation|예약|n","resource|자원|n","respect|존경하다|v","respond|응답하다|v","response|응답|n","responsibility|책임|n","responsible|책임 있는|adj","rest|휴식|n","retire|은퇴하다|v","reveal|드러내다|v","review|검토하다|v","reward|보상|n","rhythm|리듬|n","risk|위험|n","roast|굽다|v","rock|바위|n","role|역할|n","roll|구르다|v","roof|지붕|n","root|뿌리|n","rope|밧줄|n","rough|거친|adj","route|경로|n","routine|일상|n","row|줄|n","royal|왕실의|adj","rub|문지르다|v","rubber|고무|n","rubbish|쓰레기|n","rude|무례한|adj","rugby|럭비|n","ruin|망치다|v","rush|서두르다|v","sail|항해하다|v","salary|급여|n","sale|판매|n","sample|견본|n","sand|모래|n","satisfied|만족한|adj","sauce|소스|n","scale|규모, 저울|n","scared|겁먹은|adj","scene|장면|n","schedule|일정|n","scheme|계획|n","score|점수|n","scream|비명 지르다|v","screen|화면|n","search|검색하다|v","secret|비밀|n","secretary|비서|n","section|부분|n","sector|부문|n","secure|안전한|adj","security|보안|n","seek|찾다|v","seem|~인 것 같다|v","select|선택하다|v","selection|선택|n","sense|감각, 의미|n","sensible|분별 있는|adj","sensitive|민감한|adj","separate|분리하다|v","series|시리즈|n","serious|심각한|adj","seriously|심각하게|adv","serve|제공하다|v","service|서비스|n","session|기간, 세션|n","set|놓다; 세트|v","settle|정착하다, 해결하다|v","shade|그늘|n","shadow|그림자|n","shake|흔들다|v","shame|수치|n","shape|모양|n","sharp|날카로운|adj","sheet|시트, 장|n","shelf|선반|n","shell|껍데기|n","shift|이동, 교대|n","shine|빛나다|v","ship|배; 선적하다|n","shock|충격|n","shoot|쏘다|v","shore|해안|n","shot|발사, 슛|n","shoulder|어깨|n","shout|외치다|v","sight|시야, 광경|n","signal|신호|n","significant|중요한|adj","silence|침묵|n","silent|조용한|adj","silk|비단|n","silly|어리석은|adj","similar|비슷한|adj","simply|단순히|adv","sincere|진실한|adj","site|장소, 부지|n","situation|상황|n","skill|기술|n","skin|피부|n","slice|조각|n","slide|미끄러지다|v","slight|약간의|adj","slightly|약간|adv","slip|미끄러지다|v","slowly|천천히|adv","smart|똑똑한|adj","smell|냄새|n","smoke|연기; 담배 피우다|n","smooth|매끄러운|adj","snake|뱀|n","society|사회|n","soft|부드러운|adj","software|소프트웨어|n","soil|흙|n","soldier|군인|n","solid|고체의, 단단한|adj","solution|해결책|n","solve|해결하다|v","somehow|어떻게든|adv","somewhere|어딘가|adv","sort|종류; 분류하다|n","soul|영혼|n","source|출처|n","southern|남쪽의|adj","spare|여분의|adj","speaker|연설자|n","specific|구체적인|adj","speech|연설|n","speed|속도|n","spelling|철자|n","spice|향신료|n","spirit|정신|n","split|나누다|v","spot|지점, 얼룩|n","spread|퍼지다|v","square|정사각형|n","stable|안정된|adj","staff|직원|n","stage|무대, 단계|n","standard|기준|n","state|상태; 진술하다|n","statement|진술|n","status|지위|n","steady|꾸준한|adj","steel|강철|n","step|단계, 걸음|n","stick|막대기; 붙이다|n","sticky|끈적한|adj","stiff|뻣뻣한|adj","stock|재고, 주식|n","stone|돌|n","storage|보관|n","storm|폭풍|n","straight|곧은|adj","strange|이상한|adj","stranger|낯선 사람|n","strategy|전략|n","stream|개울, 흐름|n","strength|힘|n","stress|스트레스|n","stretch|늘이다|v","strict|엄격한|adj","strike|치다; 파업|v","string|끈|n","strongly|강하게|adv","structure|구조|n","struggle|투쟁하다|v","stuff|물건|n","style|양식|n","succeed|성공하다|v","success|성공|n","sudden|갑작스러운|adj","suddenly|갑자기|adv","suffer|고통받다|v","sufficient|충분한|adj","suggest|제안하다|v","suggestion|제안|n","suit|정장; 어울리다|n","suitable|적합한|adj","sum|합계|n","summary|요약|n","supply|공급하다|v","support|지원하다|v","suppose|가정하다|v","surface|표면|n","surprised|놀란|adj","surround|둘러싸다|v","survey|조사|n","survive|살아남다|v","suspect|의심하다|v","swear|맹세하다|v","sweep|쓸다|v","swing|흔들다|v","switch|전환하다|v","symbol|상징|n","sympathy|동정|n","system|체계|n","tail|꼬리|n","talent|재능|n","tank|탱크|n","tape|테이프|n","target|목표|n","task|과제|n","taste|맛|n","tax|세금|n","technical|기술적인|adj","technique|기법|n","technology|기술|n","temperature|온도|n","temporary|임시의|adj","tend|경향이 있다|v","tension|긴장|n","tent|텐트|n","term|용어, 기간|n","terribly|끔찍하게|adv","text|본문, 문자|n","theme|주제|n","theory|이론|n","therefore|그러므로|adv","thick|두꺼운|adj","thin|얇은|adj","threat|위협|n","threaten|위협하다|v","throat|목구멍|n","throughout|~내내|prep","throw|던지다|v","thumb|엄지|n","tie|묶다; 넥타이|v","tight|꽉 끼는|adj","till|~까지|prep","tiny|아주 작은|adj","tip|팁, 조언|n","title|제목|n","tool|도구|n","topic|주제|n","totally|완전히|adv","tough|힘든, 질긴|adj","tour|여행|n","towel|수건|n","tower|탑|n","track|길, 자취|n","trade|무역|n","tradition|전통|n","traditional|전통적인|adj","transfer|이전하다|v","transport|운송하다|v","trap|덫|n","treat|다루다, 치료하다|v","treatment|치료|n","trial|재판, 시험|n","trick|속임수|n","trust|신뢰하다|v","truth|진실|n","tube|관|n","tune|곡조|n","tunnel|터널|n","twin|쌍둥이|n","type|유형; 타자치다|n","typical|전형적인|adj","tyre|타이어|n","unable|~할 수 없는|adj","uncomfortable|불편한|adj","underground|지하의|adj","unemployed|실직한|adj","unfortunately|불행히도|adv","unhappy|불행한|adj","uniform|제복|n","union|조합|n","unique|독특한|adj","unit|단위|n","unless|~하지 않는 한|conj","unlike|~와 달리|prep","unlikely|~할 것 같지 않은|adj","unnecessary|불필요한|adj","unusual|특이한|adj","update|갱신하다|v","upset|속상한|adj","upon|~위에|prep","urgent|긴급한|adj","useless|쓸모없는|adj","user|사용자|n","usual|보통의|adj","valley|계곡|n","valuable|가치 있는|adj","value|가치|n","variety|다양성|n","various|다양한|adj","vary|다르다|v","vehicle|차량|n","version|판, 버전|n","victim|피해자|n","victory|승리|n","view|견해, 전망|n","violence|폭력|n","virus|바이러스|n","visitor|방문객|n","volume|부피, 음량|n","vote|투표하다|v","wage|임금|n","waist|허리|n","war|전쟁|n","warn|경고하다|v","warning|경고|n","waste|낭비하다|v","wave|파도; 흔들다|n","weak|약한|adj","wealth|부|n","weapon|무기|n","wedding|결혼식|n","weigh|무게가 나가다|v","weight|무게|n","wheel|바퀴|n","whenever|언제든지|conj","wherever|어디든지|conj","whether|~인지 아닌지|conj","while|~하는 동안|conj","whole|전체의|adj","whom|누구를|pron","wild|야생의|adj","willing|기꺼이 하는|adj","wing|날개|n","wire|철사|n","wise|현명한|adj","wish|바라다|v","within|~이내에|prep","witness|목격자|n","wonder|궁금해하다|v","wooden|나무로 된|adj","wool|양털|n","worth|~의 가치가 있는|adj","wrap|싸다|v","yard|마당|n","youth|청춘|n","zone|구역|n"],"B1":["abandon|버리다, 포기하다|v","absolute|절대적인|adj","absolutely|절대적으로|adv","absorb|흡수하다|v","abstract|추상적인|adj","academic|학문의|adj","accent|억양|n","acceptable|받아들일 만한|adj","access|접근|n","accompany|동반하다|v","accomplish|성취하다|v","accurate|정확한|adj","accuse|고발하다|v","acknowledge|인정하다|v","acquire|습득하다|v","adapt|적응하다|v","addition|추가|n","additional|추가의|adj","adequate|적절한|adj","adjust|조정하다|v","administration|행정|n","admire|존경하다|v","admit|인정하다|v","adopt|채택하다, 입양하다|v","advance|전진하다|v","advanced|고급의|adj","advertise|광고하다|v","advocate|옹호하다|v","affair|일, 사건|n","afterward|나중에|adv","agent|대리인|n","aggressive|공격적인|adj","agriculture|농업|n","aid|원조|n","alarm|경보|n","alcohol|술|n","alliance|동맹|n","allocate|할당하다|v","alter|바꾸다|v","ambition|야망|n","ambitious|야심 찬|adj","amount to|~에 이르다|phr","analyse|분석하다|v","analysis|분석|n","anger|분노|n","anniversary|기념일|n","anticipate|예상하다|v","anxiety|불안|n","anxious|불안한|adj","apart|떨어져|adv","apparent|명백한|adj","apparently|보아하니|adv","appeal|호소하다|v","appliance|가전제품|n","application|지원, 응용|n","appreciate|감사하다, 진가를 알다|v","appropriate|적절한|adj","approval|승인|n","approve|승인하다|v","approximately|대략|adv","architect|건축가|n","architecture|건축|n","arise|발생하다|v","armed|무장한|adj","arrangement|배열, 준비|n","aspect|측면|n","assess|평가하다|v","assessment|평가|n","asset|자산|n","assign|배정하다|v","assist|돕다|v","assistance|도움|n","association|협회|n","assurance|보증|n","assure|보장하다|v","athlete|운동선수|n","attain|달성하다|v","attribute|~의 탓으로 돌리다|v","audio|음향의|adj","authority|권한, 당국|n","automatic|자동의|adj","autonomy|자율성|n","awareness|인식|n","bacteria|박테리아|n","balanced|균형 잡힌|adj","barrier|장벽|n","basement|지하실|n","basically|기본적으로|adv","bay|만|n","bearing|영향, 관계|n","beneath|~아래에|prep","beneficial|유익한|adj","bias|편견|n","bid|입찰하다|v","bind|묶다|v","biology|생물학|n","bitter|쓴, 쓰라린|adj","blend|섞다|v","block|막다|v","boost|끌어올리다|v","bound|~할 수밖에 없는|adj","boundary|경계|n","breach|위반|n","breakdown|고장, 분석|n","breakthrough|돌파구|n","breed|기르다, 번식하다|v","brief|간단한|adj","briefly|간단히|adv","broadcast|방송하다|v","bulk|대량|n","bunch|다발|n","burden|부담|n","bureau|사무국|n","calculate|계산하다|v","campaign|캠페인|n","canal|운하|n","capacity|용량, 수용력|n","capture|포착하다|v","carbon|탄소|n","cargo|화물|n","carrier|운송업체|n","category|범주|n","caution|주의|n","cease|중단하다|v","cell|세포|n","census|인구조사|n","certificate|증명서|n","championship|선수권|n","channel|경로, 채널|n","chapter|장|n","characteristic|특징|n","chase|쫓다|v","chemistry|화학|n","circuit|회로|n","circumstance|상황|n","cite|인용하다|v","civil|시민의|adj","civilization|문명|n","clarify|명확히 하다|v","classic|고전적인|adj","classify|분류하다|v","clause|조항|n","clue|단서|n","cluster|무리|n","coalition|연합|n","coincidence|우연의 일치|n","collapse|붕괴하다|v","colleague|동료|n","collective|집단의|adj","column|기둥, 칼럼|n","combination|조합|n","comfort|위안|n","command|명령|n","commercial|상업의|adj","commission|위원회, 수수료|n","commit|저지르다, 헌신하다|v","commitment|헌신|n","commodity|상품|n","compensate|보상하다|v","competent|유능한|adj","competitive|경쟁력 있는|adj","competitor|경쟁자|n","compile|편집하다|v","complex|복잡한|adj","complicate|복잡하게 하다|v","component|구성 요소|n","compose|구성하다|v","compound|화합물|n","comprehensive|포괄적인|adj","compromise|타협|n","conceal|숨기다|v","concept|개념|n","conclude|결론짓다|v","conclusion|결론|n","concrete|구체적인|adj","conduct|수행하다|v","confer|협의하다|v","confess|고백하다|v","configure|구성하다|v","confirm|확인하다|v","conflict|갈등|n","confront|직면하다|v","confusion|혼란|n","congress|의회|n","conscious|의식하는|adj","consensus|합의|n","consent|동의|n","consequence|결과|n","conservative|보수적인|adj","considerable|상당한|adj","consideration|고려|n","consistent|일관된|adj","constitute|구성하다|v","constraint|제약|n","construct|건설하다|v","construction|건설|n","consult|상담하다|v","consultant|컨설턴트|n","consume|소비하다|v","consumer|소비자|n","consumption|소비|n","contemporary|현대의|adj","contest|경쟁|n","context|맥락|n","continent|대륙|n","continuous|계속되는|adj","contractor|계약자|n","contradiction|모순|n","contribute|기여하다|v","contribution|기여|n","controversial|논란이 많은|adj","convenient|편리한|adj","convention|관례, 대회|n","conventional|전통적인|adj","conversion|전환|n","convert|전환하다|v","conviction|신념, 유죄판결|n","cooperate|협력하다|v","cooperation|협력|n","coordinate|조정하다|v","core|핵심|n","corporate|기업의|adj","corporation|법인|n","correspond|일치하다, 서신하다|v","corrupt|부패한|adj","counsel|조언|n","counter|반대하다|v","counterpart|상대방|n","critic|비평가|n","critical|비판적인, 중요한|adj","criticism|비판|n","criticize|비판하다|v","crucial|결정적인|adj","crude|원유의, 조잡한|adj","currency|통화|n","curriculum|교육과정|n","deadline|마감일|n","deal with|~을 처리하다|phr","decade|십 년|n","decent|괜찮은|adj","decline|감소하다|v","dedicate|헌신하다|v","deduce|추론하다|v","deem|여기다|v","defect|결함|n","defense|방어|n","deficit|적자|n","definite|확실한|adj","definitely|확실히|adv","definition|정의|n","delegate|위임하다|v","deliberate|의도적인|adj","delicate|섬세한|adj","delight|기쁨|n","delivery|배달|n","demonstrate|입증하다|v","denial|부인|n","dense|밀집한|adj","deny|부인하다|v","depart|출발하다|v","departure|출발|n","dependent|의존적인|adj","deploy|배치하다|v","deposit|보증금, 예금|n","depression|우울, 불황|n","derive|유래하다|v","descend|내려가다|v","designate|지정하다|v","desperate|필사적인|adj","destination|목적지|n","detect|감지하다|v","deteriorate|악화되다|v","devote|바치다|v","diagnose|진단하다|v","diagram|도표|n","differ|다르다|v","dimension|차원|n","diminish|줄어들다|v","diploma|졸업장|n","diplomatic|외교의|adj","disability|장애|n","discipline|규율|n","disclose|공개하다|v","discourage|낙담시키다|v","dismiss|해고하다, 묵살하다|v","disorder|장애, 무질서|n","displace|대체하다|v","display|전시하다|v","dispose|처분하다|v","dispute|분쟁|n","disrupt|방해하다|v","dissolve|녹다, 해산하다|v","distinct|뚜렷한|adj","distinguish|구별하다|v","distribute|분배하다|v","distribution|분배, 유통|n","district|지구|n","disturb|방해하다|v","diverse|다양한|adj","diversity|다양성|n","divorce|이혼|n","domain|영역|n","domestic|국내의|adj","dominant|지배적인|adj","dominate|지배하다|v","donate|기부하다|v","draft|초안|n","dramatic|극적인|adj","drift|표류하다|v","duration|지속 기간|n","dynamic|역동적인|adj","eager|열망하는|adj","ease|편안함; 완화하다|n","economic|경제의|adj","economy|경제|n","edit|편집하다|v","efficiency|효율성|n","efficient|효율적인|adj","elaborate|정교한|adj","element|요소|n","eliminate|제거하다|v","elsewhere|다른 곳에|adv","embarrassed|당황한|adj","embrace|받아들이다|v","emerge|나타나다|v","emphasis|강조|n","emphasize|강조하다|v","empire|제국|n","enclose|동봉하다|v","encounter|마주치다|v","endure|견디다|v","enforce|시행하다|v","engage|참여하다|v","enhance|향상시키다|v","enquiry|문의|n","ensure|보장하다|v","enterprise|기업|n","entertain|즐겁게 하다|v","enthusiasm|열정|n","entire|전체의|adj","entirely|전적으로|adv","entitle|자격을 주다|v","entity|실체|n","equally|동등하게|adv","equation|방정식|n","equipped|장비를 갖춘|adj","equivalent|동등한|adj","era|시대|n","essentially|본질적으로|adv","establishment|설립, 기관|n","estate|재산, 부동산|n","ethical|윤리적인|adj","ethnic|민족의|adj","evaluate|평가하다|v","evident|명백한|adj","evolution|진화|n","evolve|진화하다|v","exaggerate|과장하다|v","exceed|초과하다|v","exception|예외|n","excess|초과|n","exclude|제외하다|v","exclusive|독점적인|adj","execute|실행하다|v","executive|임원|n","exhaust|고갈시키다|v","exhibit|전시하다|v","exhibition|전시회|n","expand|확장하다|v","expansion|확장|n","expectation|기대|n","expense|비용|n","expertise|전문성|n","expire|만료되다|v","explicit|명시적인|adj","exploit|이용하다, 착취하다|v","exposure|노출|n","extend|연장하다|v","extension|확장|n","extensive|광범위한|adj","extent|정도|n","external|외부의|adj","extract|추출하다|v","extraordinary|비범한|adj","extreme|극단적인|adj","facilitate|촉진하다|v","facility|시설|n","factor|요인|n","faculty|학부, 교수진|n","fare|요금|n","fascinating|매혹적인|adj","fatal|치명적인|adj","feasible|실현 가능한|adj","federal|연방의|adj","fee|수수료|n","fiction|소설|n","fierce|사나운|adj","finding|발견, 조사 결과|n","firm|회사; 단단한|n","flexible|유연한|adj","fluent|유창한|adj","forbid|금지하다|v","formation|형성|n","formula|공식|n","forth|앞으로|adv","foundation|기초, 재단|n","fraction|일부, 분수|n","framework|틀|n","fraud|사기|n","frequency|빈도|n","frustrated|좌절한|adj","fulfil|이행하다|v","fundamental|근본적인|adj","funding|자금 조달|n","furthermore|게다가|adv","gene|유전자|n","generate|생성하다|v","genetic|유전의|adj","genuine|진짜의|adj","globe|지구|n","glance|힐끗 보다|v","grab|움켜쥐다|v","grain|곡물|n","grasp|파악하다|v","grave|무덤; 심각한|n","grief|슬픔|n","grip|꽉 잡다|v","guidance|지도|n","guideline|지침|n","halt|멈추다|v","handful|한 줌|n","harsh|가혹한|adj","harvest|수확|n","hazard|위험 요소|n","heading|제목|n","heal|치유하다|v","heritage|유산|n","hesitate|주저하다|v","hierarchy|위계|n","highlight|강조하다|v","hollow|속이 빈|adj","horizon|지평선|n","hostile|적대적인|adj","household|가구|n","housing|주택|n","identical|동일한|adj","identity|정체성|n","ideology|이념|n","ignorance|무지|n","illustrate|설명하다, 예시하다|v","imitate|모방하다|v","immediate|즉각적인|adj","immigrant|이민자|n","immune|면역의|adj","implement|시행하다|v","implication|함의|n","imply|암시하다|v","impose|부과하다|v","impressive|인상적인|adj","incentive|장려책|n","incident|사건|n","incline|기울다|v","incorporate|통합하다|v","indeed|정말로|adv","index|지수, 색인|n","indication|표시|n","indirect|간접적인|adj","inevitable|불가피한|adj","infection|감염|n","infer|추론하다|v","inflation|인플레이션|n","infrastructure|기반시설|n","inherent|내재된|adj","inherit|물려받다|v","inhibit|억제하다|v","initiate|착수하다|v","initiative|주도권, 계획|n","inject|주입하다|v","innovation|혁신|n","input|투입|n","inquiry|조사, 문의|n","insight|통찰|n","inspect|검사하다|v","inspire|영감을 주다|v","install|설치하다|v","instance|사례|n","instant|즉각적인|adj","institute|기관|n","institution|기관, 제도|n","integrate|통합하다|v","integrity|성실, 온전함|n","intellectual|지적인|adj","intense|강렬한|adj","intensity|강도|n","interaction|상호작용|n","interfere|간섭하다|v","interior|내부의|adj","intermediate|중급의|adj","internal|내부의|adj","interpret|해석하다|v","interpretation|해석|n","interval|간격|n","intervention|개입|n","intimate|친밀한|adj","invasion|침략|n","inventory|재고|n","investigation|조사|n","investment|투자|n","investor|투자자|n","invisible|보이지 않는|adj","invoice|송장|n","involvement|관여|n","isolate|고립시키다|v","isolation|고립|n","journal|학술지, 일지|n","judgment|판단|n","junction|교차점|n","justify|정당화하다|v","keen|열심인|adj","labour|노동|n","landscape|풍경|n","launch|출시하다|v","leadership|리더십|n","leak|새다|v","lease|임대차 계약|n","lecture|강의|n","legislation|법률|n","legitimate|합법적인|adj","liability|책임, 부채|n","liberal|자유주의의|adj","liberty|자유|n","lifestyle|생활 방식|n","likewise|마찬가지로|adv","limitation|한계|n","literacy|문해력|n","literally|문자 그대로|adv","logic|논리|n","loyal|충실한|adj","magnitude|규모|n","mainstream|주류|n","maintenance|유지 보수|n","mandatory|의무적인|adj","manipulate|조작하다|v","manual|수동의; 설명서|adj","margin|여백, 마진|n","marine|해양의|adj","massive|거대한|adj","mature|성숙한|adj","mechanism|기제, 장치|n","mediate|중재하다|v","medieval|중세의|adj","merchant|상인|n","mere|단순한|adj","merely|단지|adv","merge|합병하다|v","migration|이주|n","mild|온화한|adj","minimal|최소의|adj","minimize|최소화하다|v","minority|소수|n","miracle|기적|n","mission|임무|n","mobility|이동성|n","mode|방식|n","moderate|적당한|adj","modify|수정하다|v","module|모듈|n","molecule|분자|n","momentum|추진력|n","monitor|감시하다|v","monopoly|독점|n","moral|도덕적인|adj","mortgage|주택담보대출|n","motivate|동기를 부여하다|v","motivation|동기|n","motive|동기|n","mount|오르다, 증가하다|v","multiple|다수의|adj","mutual|상호의|adj","myth|신화|n","narrative|이야기|n","neglect|소홀히 하다|v","negotiate|협상하다|v","negotiation|협상|n","nerve|신경|n","neutral|중립의|adj","niche|틈새|n","nonetheless|그럼에도 불구하고|adv","norm|규범|n","notion|개념|n","notably|특히|adv","notify|통지하다|v","nowadays|요즘|adv","nuisance|성가신 것|n","numerous|많은|adj","objective|목표; 객관적인|n","obligation|의무|n","occupation|직업, 점령|n","occupy|차지하다|v","occurrence|발생|n","odds|가능성, 확률|n","offence|위반, 공격|n","offset|상쇄하다|v","ongoing|진행 중인|adj","operator|운영자|n","opponent|상대|n","optimistic|낙관적인|adj","orientation|방향, 오리엔테이션|n","originate|비롯되다|v","outcome|결과|n","outline|개요|n","outlook|전망|n","output|산출|n","outstanding|뛰어난, 미결제의|adj","overcome|극복하다|v","overlook|간과하다|v","overseas|해외의|adj","overtake|추월하다|v","overwhelming|압도적인|adj","ownership|소유권|n","parallel|평행한|adj","parameter|매개변수|n","participant|참가자|n","participate|참여하다|v","particle|입자|n","passion|열정|n","passive|수동적인|adj","patent|특허|n","peak|정점|n","peer|또래|n","penalty|벌금, 처벌|n","pension|연금|n","perceive|인식하다|v","perception|인식|n","permit|허가하다|v","persist|지속하다|v","perspective|관점|n","phase|단계|n","phenomenon|현상|n","philosophy|철학|n","phrase|구절|n","pioneer|개척자|n","plot|줄거리, 음모|n","plug|플러그, 마개|n","poll|여론조사|n","portfolio|포트폴리오|n","portray|묘사하다|v","pose|제기하다|v","possess|소유하다|v","practically|실질적으로|adv","precede|앞서다|v","precise|정확한|adj","precisely|정확히|adv","predecessor|전임자|n","prediction|예측|n","preference|선호|n","prejudice|편견|n","preliminary|예비의|adj","premise|전제|n","premium|할증료, 고급의|n","presentation|발표|n","preserve|보존하다|v","prevail|우세하다|v","principal|주요한|adj","prior|이전의|adj","priority|우선순위|n","privilege|특권|n","proceed|진행하다|v","proceedings|절차|n","proclaim|선언하다|v","productive|생산적인|adj","productivity|생산성|n","profile|프로필|n","profound|심오한|adj","prohibit|금지하다|v","prominent|저명한|adj","prompt|촉발하다|v","proportion|비율|n","prospect|전망|n","protocol|규약|n","province|주, 지방|n","provision|조항, 공급|n","publication|출판|n","pursue|추구하다|v","qualify|자격을 얻다|v","qualitative|질적인|adj","quantitative|양적인|adj","quota|할당량|n","quote|인용하다|v","radical|급진적인|adj","random|무작위의|adj","ratio|비율|n","rational|합리적인|adj","readily|손쉽게|adv","realistic|현실적인|adj","reality|현실|n","realm|영역|n","reasoning|추론|n","reassure|안심시키다|v","rebuild|재건하다|v","recall|기억해내다|v","recession|경기 침체|n","recipient|수령인|n","reckon|생각하다, 추산하다|v","recruit|모집하다|v","reduction|감소|n","refine|정제하다|v","reform|개혁|n","refund|환불|n","regime|정권|n","regulate|규제하다|v","regulation|규정|n","reinforce|강화하다|v","relevance|관련성|n","reliability|신뢰성|n","reluctant|꺼리는|adj","remainder|나머지|n","remarkable|주목할 만한|adj","render|만들다, 제공하다|v","renew|갱신하다|v","rental|임대|n","repetition|반복|n","replacement|대체|n","representative|대표자|n","requirement|요구 사항|n","reside|거주하다|v","resident|거주자|n","resign|사임하다|v","resist|저항하다|v","resistance|저항|n","resolution|해결, 결의|n","resolve|해결하다|v","respective|각각의|adj","restore|복원하다|v","restrain|억제하다|v","restrict|제한하다|v","restriction|제한|n","retail|소매|n","retain|보유하다|v","retrieve|되찾다|v","revenue|수익|n","reverse|뒤집다|v","revise|개정하다|v","revision|수정|n","revolution|혁명|n","rigid|엄격한, 뻣뻣한|adj","rival|경쟁자|n","robust|튼튼한|adj","rural|시골의|adj","sacrifice|희생하다|v","sanction|제재|n","satellite|위성|n","satisfaction|만족|n","scandal|스캔들|n","scarce|부족한|adj","scenario|시나리오|n","scholar|학자|n","scope|범위|n","segment|부분|n","seize|붙잡다|v","sequence|순서|n","setting|환경, 설정|n","severe|심각한|adj","shallow|얕은|adj","shareholder|주주|n","shed|없애다, 흘리다|v","shelter|피난처|n","shortage|부족|n","significance|중요성|n","significantly|상당히|adv","similarly|비슷하게|adv","simulate|모의 실험하다|v","simultaneously|동시에|adv","sincerely|진심으로|adv","slogan|구호|n","sole|유일한|adj","solely|오로지|adv","sophisticated|정교한|adj","sovereignty|주권|n","span|기간, 범위|n","specialist|전문가|n","specify|명시하다|v","spectrum|범위, 스펙트럼|n","speculate|추측하다|v","sphere|영역, 구|n","sponsor|후원하다|v","stability|안정성|n","stake|지분, 이해관계|n","statistic|통계|n","statistics|통계학|n","steadily|꾸준히|adv","stem|비롯되다|v","stimulate|자극하다|v","strain|긴장, 부담|n","strategic|전략적인|adj","strengthen|강화하다|v","strive|노력하다|v","structural|구조적인|adj","subsequent|이후의|adj","subsequently|그 후에|adv","subsidy|보조금|n","substance|물질|n","substantial|상당한|adj","substitute|대체하다|v","subtle|미묘한|adj","succession|연속, 계승|n","sufficiently|충분히|adv","summit|정상|n","superior|우수한|adj","supervise|감독하다|v","supplement|보충하다|v","supplier|공급업체|n","surgery|수술|n","surplus|잉여|n","surrender|항복하다|v","suspend|중단하다|v","sustain|지속하다|v","sustainable|지속 가능한|adj","symptom|증상|n","synthesis|합성|n","tackle|다루다|v","tariff|관세|n","temporarily|일시적으로|adv","tenant|세입자|n","tendency|경향|n","terminal|터미널|n","terminate|종료하다|v","terrain|지형|n","territory|영토|n","testify|증언하다|v","theoretical|이론적인|adj","thereby|그렇게 함으로써|adv","thesis|논문, 명제|n","thorough|철저한|adj","threshold|문턱, 기준점|n","thrive|번영하다|v","tolerate|참다|v","trace|추적하다|v","trail|자취|n","trait|특성|n","transaction|거래|n","transform|변형하다|v","transition|전환|n","transmit|전송하다|v","transparent|투명한|adj","tremendous|엄청난|adj","tribe|부족|n","trigger|촉발하다|v","triumph|승리|n","tropical|열대의|adj","ultimate|궁극적인|adj","ultimately|궁극적으로|adv","undergo|겪다|v","undermine|약화시키다|v","undertake|착수하다|v","unify|통합하다|v","universal|보편적인|adj","upgrade|개선하다|v","urban|도시의|adj","urge|촉구하다|v","utility|공공시설, 유용성|n","utilize|활용하다|v","vacuum|진공|n","valid|유효한|adj","variable|변수|n","variation|변화|n","vast|광대한|adj","venture|벤처, 모험|n","venue|장소|n","verify|검증하다|v","vessel|선박, 그릇|n","via|~를 통해|prep","viable|실행 가능한|adj","vice|부-, 악덕|n","vicious|악랄한|adj","viewpoint|관점|n","violate|위반하다|v","virtual|가상의|adj","virtually|사실상|adv","virtue|미덕|n","visible|보이는|adj","vision|시력, 비전|n","visual|시각의|adj","vital|필수적인|adj","vocabulary|어휘|n","voluntary|자발적인|adj","volunteer|자원봉사자|n","vulnerable|취약한|adj","warehouse|창고|n","warrant|정당화하다|v","warranty|품질보증|n","welfare|복지|n","whereas|반면에|conj","whereby|그것에 의하여|adv","widespread|널리 퍼진|adj","withdraw|철회하다, 인출하다|v","workforce|노동력|n","workshop|워크숍|n","yield|산출하다, 양보하다|v"],"B2":["abolish|폐지하다|v","abrupt|갑작스러운|adj","absence|부재|n","absurd|터무니없는|adj","abundant|풍부한|adj","accelerate|가속하다|v","accessible|접근 가능한|adj","accommodate|수용하다|v","accommodation|숙박|n","accountability|책임성|n","accumulate|축적하다|v","accusation|비난|n","acute|급성의, 예리한|adj","adhere|고수하다|v","adjacent|인접한|adj","adjustment|조정|n","administer|관리하다|v","admission|입장, 인정|n","adverse|불리한|adj","advocacy|옹호|n","aesthetic|미적인|adj","affiliate|제휴하다|v","affirm|확언하다|v","aftermath|여파|n","agenda|의제|n","aggregate|총계|n","agony|고통|n","alienate|소외시키다|v","align|정렬하다|v","allege|주장하다|v","allegiance|충성|n","alleviate|완화하다|v","allocation|할당|n","allowance|수당|n","ally|동맹|n","altitude|고도|n","ambiguous|모호한|adj","amend|수정하다|v","amendment|개정안|n","amplify|증폭하다|v","analogy|유추|n","analyst|분석가|n","anchor|닻; 고정하다|n","anomaly|이례|n","antique|골동품|n","apparatus|장치|n","appraisal|평가|n","apprehend|체포하다, 이해하다|v","arbitrary|임의적인|adj","arc|호, 곡선|n","archive|기록보관소|n","arena|경기장, 무대|n","articulate|명확히 표현하다|v","ascend|올라가다|v","aspiration|열망|n","assemble|조립하다, 모이다|v","assembly|집회, 조립|n","assert|주장하다|v","assertion|주장|n","assimilate|동화하다|v","astonishing|놀라운|adj","attorney|변호사|n","audit|감사|n","auction|경매|n","augment|늘리다|v","authentic|진짜의|adj","authorize|승인하다|v","autonomous|자율적인|adj","avert|피하다|v","backlash|반발|n","bail|보석금|n","ballot|투표용지|n","bankrupt|파산한|adj","barren|불모의|adj","batch|묶음, 배치|n","belated|뒤늦은|adj","benchmark|기준점|n","benevolent|자애로운|adj","betray|배신하다|v","beverage|음료|n","bilateral|양자간의|adj","blueprint|청사진|n","bolster|강화하다|v","booming|호황인|adj","bottleneck|병목|n","boycott|불매운동|n","brevity|간결함|n","bribe|뇌물|n","brink|가장자리, 직전|n","brochure|안내책자|n","brutal|잔혹한|adj","buffer|완충 장치|n","bureaucracy|관료제|n","bypass|우회하다|v","calamity|재난|n","calibrate|보정하다|v","candid|솔직한|adj","capitalize|자본화하다, 활용하다|v","carve|조각하다|v","casualty|사상자|n","catalyst|촉매|n","cater|음식을 공급하다, 부응하다|v","cede|양도하다|v","certify|증명하다|v","charter|헌장, 전세|n","chronic|만성적인|adj","chronological|연대순의|adj","circulate|순환하다|v","clarity|명확성|n","clash|충돌하다|v","coefficient|계수|n","cognitive|인지의|adj","coherent|일관성 있는|adj","coincide|일치하다|v","collateral|담보|n","collide|충돌하다|v","colossal|거대한|adj","commence|시작하다|v","commend|칭찬하다|v","communal|공동의|adj","compassion|연민|n","compel|강요하다|v","compelling|설득력 있는|adj","compensation|보상|n","competence|역량|n","compliance|준수|n","comply|준수하다|v","comprehend|이해하다|v","comprise|구성하다|v","conceive|생각해내다|v","concede|인정하다, 양보하다|v","conceptual|개념적인|adj","concession|양보|n","concise|간결한|adj","condemn|비난하다|v","confidential|기밀의|adj","confine|제한하다|v","conform|따르다|v","congestion|혼잡|n","conjunction|결합|n","consecutive|연속적인|adj","consignment|위탁 화물|n","consolidate|통합하다|v","conspiracy|음모|n","constituent|구성 요소|n","contaminate|오염시키다|v","contemplate|숙고하다|v","contempt|경멸|n","contend|주장하다, 다투다|v","contingency|비상사태|n","continual|끊임없는|adj","contour|윤곽|n","contradict|모순되다|v","converge|수렴하다|v","convey|전달하다|v","convict|유죄를 선고하다|v","cordial|다정한|adj","correlate|상관관계가 있다|v","correlation|상관관계|n","corrode|부식하다|v","counterfeit|위조의|adj","covenant|계약|n","credible|믿을 만한|adj","credential|자격 증명|n","criteria|기준|n","criterion|기준|n","cumulative|누적되는|adj","curb|억제하다|v","custody|보관, 양육권|n","customs|세관|n","deceive|속이다|v","decisive|결정적인|adj","deduct|공제하다|v","default|기본값, 채무불이행|n","defer|연기하다|v","deficiency|결핍|n","defiance|반항|n","degrade|저하시키다|v","deliberately|고의로|adv","delinquent|연체된|adj","demolish|철거하다|v","demonstration|시위, 시연|n","denote|나타내다|v","denounce|비난하다|v","depict|묘사하다|v","deplete|고갈시키다|v","deprive|박탈하다|v","deregulate|규제를 풀다|v","descendant|후손|n","designation|지정|n","despair|절망|n","detain|구금하다|v","deter|저지하다|v","detrimental|해로운|adj","deviate|벗어나다|v","devise|고안하다|v","diagnosis|진단|n","dictate|지시하다|v","differentiate|구별하다|v","dilemma|딜레마|n","diligent|성실한|adj","disadvantage|불리한 점|n","discard|버리다|v","discern|식별하다|v","discharge|방출하다, 하역하다|v","disclosure|공개|n","discreet|신중한|adj","discrepancy|불일치|n","discretion|재량|n","discriminate|차별하다|v","disguise|위장하다|v","dismantle|해체하다|v","dispatch|발송하다|v","disperse|흩어지다|v","disposal|처분|n","dissent|반대|n","distort|왜곡하다|v","diverge|갈라지다|v","divert|전환하다|v","docile|온순한|adj","doctrine|교리|n","documentation|서류|n","downturn|하락|n","drastic|과감한|adj","dubious|의심스러운|adj","durable|내구성 있는|adj","dwell|거주하다|v","eccentric|괴짜의|adj","eclipse|일식; 능가하다|n","elevate|높이다|v","elicit|끌어내다|v","eligible|자격 있는|adj","eloquent|웅변의|adj","embargo|금수 조치|n","embed|끼워 넣다|v","embody|구현하다|v","eminent|저명한|adj","empirical|경험적인|adj","enact|제정하다|v","encompass|아우르다|v","endorse|지지하다|v","endowment|기부금|n","enlighten|계몽하다|v","enrol|등록하다|v","entail|수반하다|v","entrepreneur|기업가|n","envisage|구상하다|v","epidemic|전염병|n","equilibrium|평형|n","equity|자기자본, 형평|n","eradicate|근절하다|v","erode|침식하다|v","erratic|불규칙한|adj","escalate|격화되다|v","esteem|존경|n","eternal|영원한|adj","evacuate|대피시키다|v","evoke|불러일으키다|v","exacerbate|악화시키다|v","excerpt|발췌|n","exclusion|배제|n","excursion|여행|n","exempt|면제된|adj","exemption|면제|n","exert|발휘하다|v","exhaustive|철저한|adj","exile|망명|n","expedite|신속히 처리하다|v","expenditure|지출|n","explicitly|명시적으로|adv","exploitation|착취|n","exponential|기하급수적인|adj","extrinsic|외적인|adj","fabricate|조작하다|v","fallacy|오류|n","famine|기근|n","feasibility|실현 가능성|n","federation|연맹|n","felony|중죄|n","fiscal|재정의|adj","flaw|결함|n","fluctuate|변동하다|v","forfeit|몰수당하다|v","formidable|강력한, 만만찮은|adj","forthcoming|다가오는|adj","fortify|강화하다|v","fossil|화석|n","foster|육성하다|v","fraught|가득한, 걱정스러운|adj","freight|화물|n","friction|마찰|n","frontier|국경, 최전선|n","fugitive|도망자|n","futile|헛된|adj","garment|의류|n","generic|일반적인|adj","genocide|대량학살|n","germane|관련 있는|adj","glimpse|언뜻 봄|n","gloomy|우울한|adj","grievance|불만|n","gross|총계의|adj","groundwork|기초 작업|n","grumble|투덜대다|v","hamper|방해하다|v","harass|괴롭히다|v","harmonize|조화시키다|v","haul|운반하다|v","hazardous|위험한|adj","hectic|정신없이 바쁜|adj","hedge|위험을 회피하다|v","heir|상속인|n","hemisphere|반구|n","hinder|방해하다|v","hindsight|뒤늦은 깨달음|n","hoard|비축하다|v","homogeneous|동질의|adj","hostility|적대감|n","humane|인도적인|adj","hurdle|장애물|n","hybrid|혼합의|adj","hypothesis|가설|n","illicit|불법의|adj","imminent|임박한|adj","immerse|몰두하다|v","impair|손상시키다|v","impartial|공정한|adj","impede|방해하다|v","imperative|필수적인|adj","implicit|암묵적인|adj","impoverish|빈곤하게 하다|v","imprison|투옥하다|v","inadequate|부적절한|adj","inaugurate|취임시키다|v","incentivize|장려하다|v","incidence|발생률|n","incidental|부수적인|adj","inclination|성향|n","incompatible|양립할 수 없는|adj","incur|초래하다|v","indefinite|무기한의|adj","indemnity|배상|n","indigenous|토착의|adj","indignant|분개한|adj","indispensable|필수불가결한|adj","induce|유도하다|v","indulge|탐닉하다|v","inequality|불평등|n","inertia|관성, 타성|n","infinite|무한한|adj","inflict|가하다|v","influx|유입|n","infringe|침해하다|v","ingenious|기발한|adj","inhabit|거주하다|v","innate|타고난|adj","innovative|혁신적인|adj","insolvent|지급 불능의|adj","inspection|검사|n","instability|불안정|n","instil|주입하다|v","institutional|제도적인|adj","insulate|절연하다|v","intact|온전한|adj","intangible|무형의|adj","integral|필수적인|adj","integration|통합|n","intensify|강화하다|v","interim|잠정적인|adj","interrogate|심문하다|v","intersection|교차점|n","intervene|개입하다|v","intricate|복잡한|adj","intrinsic|본질적인|adj","intuition|직관|n","invalid|무효인|adj","invariably|변함없이|adv","invoke|발동하다|v","irrelevant|관련 없는|adj","irreversible|되돌릴 수 없는|adj","jeopardize|위태롭게 하다|v","jurisdiction|관할권|n","juvenile|청소년의|adj","kin|친척|n","lapse|실수, 경과|n","latent|잠재적인|adj","lateral|측면의|adj","lavish|호화로운|adj","legacy|유산|n","legislature|입법부|n","lenient|관대한|adj","lethal|치명적인|adj","leverage|지렛대, 레버리지|n","liable|책임이 있는|adj","liaison|연락, 협력|n","lieu|대신|n","linger|머무르다|v","liquidate|청산하다|v","literal|문자 그대로의|adj","litigation|소송|n","livelihood|생계|n","lucrative|수익성 있는|adj","lure|유혹하다|v","magnify|확대하다|v","malfunction|오작동|n","mandate|위임, 명령|n","manifest|명백한|adj","manifold|다양한|adj","manuscript|원고|n","marginal|미미한, 한계의|adj","maritime|해상의|adj","mask|가리다|v","mediocre|평범한|adj","menace|위협|n","merger|합병|n","meticulous|꼼꼼한|adj","migrate|이주하다|v","milestone|이정표|n","mitigate|완화하다|v","mobilize|동원하다|v","momentous|중대한|adj","monetary|통화의|adj","monumental|기념비적인|adj","morale|사기|n","mortality|사망률|n","municipal|시의|adj","mutation|돌연변이|n","narrate|서술하다|v","nascent|초기의|adj","negligence|과실|n","negligible|무시할 만한|adj","nominal|명목상의|adj","nominate|지명하다|v","notorious|악명 높은|adj","novelty|참신함|n","nurture|양육하다|v","oblige|의무를 지우다|v","obscure|모호한|adj","obsolete|구식의|adj","obstacle|장애물|n","omit|생략하다|v","onset|시작|n","opaque|불투명한|adj","optimal|최적의|adj","orchestrate|조직하다|v","ordeal|시련|n","outbreak|발발|n","outlet|출구, 판로|n","outrage|분노|n","outset|시작|n","outsource|외주를 주다|v","overhaul|정비하다|v","overhead|간접비|n","override|무효화하다|v","oversee|감독하다|v","paradigm|패러다임|n","paradox|역설|n","paramount|가장 중요한|adj","parliamentary|의회의|adj","partial|부분적인|adj","patch|조각, 패치|n","pathway|경로|n","patronage|후원|n","peculiar|특이한|adj","pending|미결의|adj","penetrate|침투하다|v","perceptive|통찰력 있는|adj","peril|위험|n","periodic|주기적인|adj","perpetual|영구적인|adj","persistent|끈질긴|adj","pertinent|적절한|adj","pervasive|만연한|adj","petition|청원|n","pharmaceutical|제약의|adj","pinpoint|정확히 집어내다|v","plausible|그럴듯한|adj","pledge|서약하다|v","plummet|급락하다|v","poised|준비된|adj","ponder|숙고하다|v","populate|거주하다|v","posture|자세|n","practitioner|종사자|n","preach|설교하다|v","precaution|예방책|n","precedent|선례|n","precipitate|촉발하다|v","preclude|배제하다|v","predominant|지배적인|adj","preferential|우대의|adj","prelude|서곡|n","premature|시기상조의|adj","prerequisite|전제 조건|n","prescribe|처방하다|v","presume|추정하다|v","prevalent|널리 퍼진|adj","proactive|선제적인|adj","proficiency|숙련도|n","profitability|수익성|n","projection|예상, 투영|n","proliferate|급증하다|v","prolong|연장하다|v","propel|추진하다|v","propensity|성향|n","proponent|지지자|n","proprietary|독점적인|adj","prosecute|기소하다|v","prospective|장래의|adj","prosperity|번영|n","protagonist|주인공|n","provisional|잠정적인|adj","proximity|근접|n","prudent|신중한|adj","pseudonym|가명|n","punctual|시간을 지키는|adj","quantify|수량화하다|v","quarantine|격리|n","query|질의|n","quest|탐구|n","radiate|방사하다|v","ratify|비준하다|v","rationale|근거|n","reap|거두다|v","rebate|환급|n","rebuke|질책하다|v","recede|물러나다|v","reciprocal|상호간의|adj","reconcile|조화시키다, 화해하다|v","recur|재발하다|v","redeem|되찾다, 상환하다|v","redundant|불필요한, 정리해고된|adj","refrain|삼가다|v","refute|반박하다|v","regress|퇴보하다|v","reimburse|상환하다|v","reiterate|되풀이하다|v","relentless|끈질긴|adj","relinquish|포기하다|v","remedy|치유책|n","reminiscent|연상시키는|adj","remittance|송금|n","remuneration|보수|n","renaissance|부흥|n","renowned|저명한|adj","repeal|폐지하다|v","repercussion|영향, 파장|n","replicate|복제하다|v","repository|저장소|n","reprimand|견책하다|v","resent|분개하다|v","residual|잔여의|adj","resilient|회복력 있는|adj","restrictive|제한적인|adj","resume|재개하다|v","resurgence|부활|n","retaliate|보복하다|v","retention|보유|n","retrospect|회고|n","revamp|개조하다|v","revert|되돌아가다|v","revitalize|활성화하다|v","rhetoric|수사학|n","rigorous|엄격한|adj","rivalry|경쟁|n","roster|명단|n","rudimentary|기초적인|adj","sabotage|방해하다|v","salient|두드러진|adj","salvage|구조하다|v","sanctuary|피난처|n","saturate|포화시키다|v","scarcity|희소성|n","scrutiny|면밀한 조사|n","seamless|매끄러운|adj","secular|세속의|adj","sedentary|앉아 있는|adj","seldom|드물게|adv","semantic|의미론의|adj","serene|고요한|adj","setback|차질|n","sever|끊다|v","shipment|선적, 화물|n","shortfall|부족분|n","shrewd|기민한|adj","shrink|줄어들다|v","siege|포위|n","skeptical|회의적인|adj","slump|급감|n","solicit|간청하다|v","solvent|지급 능력이 있는|adj","sparse|드문|adj","spearhead|앞장서다|v","specimen|표본|n","speculative|투기적인|adj","spontaneous|자발적인|adj","sporadic|산발적인|adj","stagnant|정체된|adj","stakeholder|이해관계자|n","staple|주요 산물|n","static|정적인|adj","statutory|법에 명시된|adj","stern|엄격한|adj","stipulate|규정하다|v","straightforward|간단한|adj","streamline|간소화하다|v","strenuous|힘든|adj","stringent|엄격한|adj","subdue|진압하다|v","subject to|~의 대상인|phr","submit|제출하다|v","subordinate|하급의|adj","subscribe|구독하다|v","subsidiary|자회사|n","subsist|생존하다|v","succumb|굴복하다|v","supersede|대체하다|v","supervision|감독|n","supplementary|보충의|adj","suppress|억압하다|v","surge|급증|n","surveillance|감시|n","susceptible|취약한|adj","sustainability|지속가능성|n","swift|신속한|adj","syndrome|증후군|n","synthesize|합성하다|v","systematic|체계적인|adj","tactic|전술|n","tangible|유형의|adj","tedious|지루한|adj","temper|기질; 완화하다|n","tenacious|끈기 있는|adj","tentative|잠정적인|adj","tenure|재임 기간|n","testimony|증언|n","thereafter|그 이후|adv","thrust|밀어붙이다|v","tolerance|관용|n","toll|통행료, 사상자 수|n","torment|괴롭히다|v","trademark|상표|n","trajectory|궤적|n","tranquil|고요한|adj","transcend|초월하다|v","transcript|사본, 성적증명서|n","transient|일시적인|adj","transparency|투명성|n","traverse|가로지르다|v","treaty|조약|n","tribunal|재판소|n","tributary|지류|n","trivial|사소한|adj","turbulent|격동의|adj","turnover|매출액, 이직률|n","unanimous|만장일치의|adj","uncover|밝혀내다|v","underlying|근본적인|adj","underpin|뒷받침하다|v","undertaking|사업, 약속|n","undoubtedly|의심할 여지 없이|adv","unfold|펼쳐지다|v","unilateral|일방적인|adj","unprecedented|전례 없는|adj","unveil|공개하다|v","uphold|지지하다|v","upheaval|격변|n","utmost|최대의|adj","vacate|비우다|v","vague|모호한|adj","validate|입증하다|v","vanish|사라지다|v","verdict|평결|n","versatile|다재다능한|adj","vested|기득의|adj","veto|거부권|n","vibrant|활기찬|adj","vigilant|경계하는|adj","vigorous|활발한|adj","vindicate|정당성을 입증하다|v","violation|위반|n","viral|바이러스성의, 확산되는|adj","virtue of|~덕분에|phr","visualize|시각화하다|v","vocation|천직|n","volatile|변동성이 큰|adj","vow|맹세하다|v","waive|포기하다|v","wary|경계하는|adj","weary|지친|adj","whereabouts|소재|n","wholesale|도매의|adj","wield|휘두르다|v","withhold|보류하다|v","withstand|견디다|v","yearn|갈망하다|v","zeal|열정|n"]};
+
+const WORDS = [];
+for (const lv of ['A1','A2','B1','B2']) {
+  for (const line of (RAW[lv]||[])) {
+    const [w,m,p] = line.split('|');
+    WORDS.push({w, m, p:p||'', lv});
+  }
+}
+
+/* ============ STORAGE ============ */
+const store = (()=> {
+  const has = (typeof window!=='undefined' && window.storage && window.storage.get);
+  const mem = {};
+  return {
+    async get(k){
+      if(has){ try{ const r=await window.storage.get(k); return r?r.value:null; }catch(e){ return null; } }
+      try{ return localStorage.getItem(k); }catch(e){ return mem[k]??null; }
+    },
+    async set(k,v){
+      if(has){ try{ await window.storage.set(k,v); return; }catch(e){} }
+      try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; }
+    }
+  };
+})();
+
+const S = { known:{}, weak:{}, ex:{}, right:0, wrong:0, streak:0, best:0 };
+const KEY = 'Volka3000:v1';
+let saveT=null;
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>store.set(KEY, JSON.stringify(S)), 350); }
+async function load(){
+  const raw = await store.get(KEY);
+  if(raw){ try{ Object.assign(S, JSON.parse(raw)); }catch(e){} }
+}
+
+/* ============ STATE ============ */
+let levels = new Set(['A1','A2','B1','B2']);
+let pool = [], idx = 0, masked = false, speed = 1.0, auto = false, autoT = null;
+let view = 'study';
+let listFilter = 'all';
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+function rebuild(){
+  pool = WORDS.filter(x => levels.has(x.lv));
+  if(!pool.length) pool = WORDS.slice();
+  idx = 0;
+  renderAll();
+}
+function cur(){ return pool[idx] || WORDS[0]; }
+
+/* ============ TTS ============ */
+let voice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v=>/en-US/i.test(v.lang) && /Samantha|Google US|Ava|Zira/i.test(v.name))
+       || vs.find(v=>/en-US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+if(typeof speechSynthesis!=='undefined'){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text, opt={}){
+  if(typeof speechSynthesis==='undefined') return Promise.resolve();
+  return new Promise(res=>{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = opt.ko ? 'ko-KR' : 'en-US';
+    if(!opt.ko && voice) u.voice = voice;
+    u.rate = opt.ko ? 1.05 : speed;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+  });
+}
+function sayWord(){ speechSynthesis.cancel(); say(cur().w); }
+
+/* ============ STUDY ============ */
+function renderStudy(){
+  const c = cur();
+  $('#s-idx').textContent = `${idx+1} / ${pool.length}`;
+  $('#s-lvl').textContent = c.lv;
+  $('#s-word').textContent = c.w;
+  $('#s-pos').textContent = c.p ? POS[c.p]||c.p : '';
+  const m = $('#s-mean');
+  m.textContent = c.m;
+  m.classList.toggle('hidden', masked);
+  $('#b-known').classList.toggle('on', !!S.known[c.w]);
+  $('#b-weak').classList.toggle('on', !!S.weak[c.w]);
+  const ex = $('#s-ex');
+  if(S.ex[c.w]){
+    ex.style.display='';
+    ex.innerHTML = `<span class="en">${esc(S.ex[c.w].en)}</span><span class="ko">${esc(S.ex[c.w].ko)}</span>`;
+  } else { ex.style.display='none'; ex.innerHTML=''; }
+  const f = $('#s-flap');
+  f.classList.remove('reveal'); void f.offsetWidth; f.classList.add('reveal');
+}
+const POS = {n:'noun 명사',v:'verb 동사',adj:'adjective 형용사',adv:'adverb 부사',
+  prep:'preposition 전치사',conj:'conjunction 접속사',pron:'pronoun 대명사',
+  det:'determiner 한정사',num:'number 수사',phr:'phrase 표현',int:'interjection 감탄사'};
+
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function move(d){ idx = (idx + d + pool.length) % pool.length; renderStudy(); }
+
+$('#b-next').onclick = ()=>move(1);
+$('#b-prev').onclick = ()=>move(-1);
+$('#b-say').onclick = sayWord;
+$('#b-mask').onclick = e=>{ masked=!masked; e.target.textContent = masked?'뜻 보이기':'뜻 가리기'; e.target.classList.toggle('on',masked); renderStudy(); };
+$('#b-known').onclick = ()=>{ const w=cur().w; S.known[w]?delete S.known[w]:S.known[w]=1; save(); renderStudy(); gauge(); };
+$('#b-weak').onclick = ()=>{ const w=cur().w; S.weak[w]?delete S.weak[w]:S.weak[w]=1; save(); renderStudy(); };
+$('#b-shuffle').onclick = ()=>{ for(let i=pool.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[pool[i],pool[j]]=[pool[j],pool[i]];} idx=0; renderStudy(); toast('순서를 섞었습니다'); };
+$('#b-speed').onclick = e=>{ speed = speed>=1.2 ? 0.75 : +(speed+0.15).toFixed(2); e.target.textContent = `속도 ${speed.toFixed(2)}×`; };
+
+$('#b-auto').onclick = e=>{
+  auto = !auto;
+  e.target.textContent = auto ? '⏸ 정지' : '▶︎ 자동재생';
+  e.target.classList.toggle('on', auto);
+  if(auto) autoLoop(); else { clearTimeout(autoT); speechSynthesis.cancel(); }
+};
+async function autoLoop(){
+  while(auto){
+    renderStudy();
+    await say(cur().w);
+    if(!auto) break;
+    await wait(900);
+    if(!auto) break;
+    await say(cur().m, {ko:true});
+    if(!auto) break;
+    await wait(500);
+    idx = (idx+1) % pool.length;
+  }
+}
+const wait = ms => new Promise(r=>{ autoT = setTimeout(r, ms); });
+
+/* ---- AI example sentence ---- */
+$('#b-ex').onclick = async ()=>{
+  const c = cur(), ex = $('#s-ex');
+  ex.style.display=''; ex.innerHTML = '<span class="ex-load">GENERATING…</span>';
+  try{
+    const res = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model:"claude-sonnet-4-6", max_tokens:1000,
+        messages:[{role:"user",content:
+`Write ONE short natural English example sentence (max 12 words) using the word "${c.w}" (${c.lv} level, meaning: ${c.m}), plus its Korean translation.
+Respond with ONLY raw JSON, no markdown, no preamble: {"en":"...","ko":"..."}`}]
+      })
+    });
+    const data = await res.json();
+    const txt = data.content.filter(b=>b.type==='text').map(b=>b.text).join('').replace(/```json|```/g,'').trim();
+    const o = JSON.parse(txt);
+    S.ex[c.w] = {en:o.en, ko:o.ko}; save();
+    renderStudy();
+  }catch(err){
+    ex.innerHTML = '<span class="ex-load">예문 생성은 Claude 앱 안에서만 됩니다. 저장된 예문은 그대로 볼 수 있어요.</span>';
+  }
+};
+
+/* ============ QUIZ ============ */
+let qw=null, qLock=false;
+function newQuiz(){
+  qLock=false;
+  qw = pick();
+  $('#q-word').textContent = qw.w;
+  $('#q-lvl').textContent = qw.lv;
+  $('#q-pos').textContent = qw.p ? POS[qw.p]||qw.p : '';
+  $('#q-score').textContent = `${S.right} / ${S.right+S.wrong}`;
+  const opts = [qw, ...sample(4, qw)].sort(()=>Math.random()-.5);
+  $('#q-opts').innerHTML = opts.map((o,i)=>
+    `<button class="opt" data-w="${esc(o.w)}"><span class="k">${'ABCD'[i]}</span>${esc(o.m)}</button>`).join('');
+  $$('#q-opts .opt').forEach(b=> b.onclick = ()=>answerQuiz(b));
+  say(qw.w);
+}
+function answerQuiz(btn){
+  if(qLock) return; qLock=true;
+  const ok = btn.dataset.w === qw.w;
+  btn.classList.add(ok?'correct':'wrong');
+  if(!ok) $$('#q-opts .opt').find(b=>b.dataset.w===qw.w)?.classList.add('correct');
+  score(ok, qw.w);
+  $('#q-score').textContent = `${S.right} / ${S.right+S.wrong}`;
+  setTimeout(newQuiz, ok?680:1500);
+}
+$('#q-say').onclick = ()=> qw && say(qw.w);
+$('#q-skip').onclick = ()=> newQuiz();
+
+function pick(){
+  const weak = pool.filter(x=>S.weak[x.w]);
+  const todo = pool.filter(x=>!S.known[x.w]);
+  const src = (weak.length && Math.random()<0.35) ? weak : (todo.length? todo : pool);
+  return src[(Math.random()*src.length)|0];
+}
+function sample(n, not){
+  const out=[], seen=new Set([not.w]);
+  let guard=0;
+  while(out.length<n && guard++<400){
+    const c = pool[(Math.random()*pool.length)|0];
+    if(seen.has(c.w)) continue;
+    seen.add(c.w); out.push(c);
+  }
+  return out;
+}
+function score(ok, w){
+  if(ok){ S.right++; S.streak++; S.best=Math.max(S.best,S.streak); if(S.weak[w]) delete S.weak[w]; }
+  else { S.wrong++; S.streak=0; S.weak[w]=1; }
+  save();
+}
+
+/* ============ RECALL ============ */
+let rw=null;
+function newRecall(){
+  rw = pick();
+  $('#r-mean').textContent = rw.m;
+  $('#r-lvl').textContent = rw.lv;
+  $('#r-pos').textContent = rw.p ? POS[rw.p]||rw.p : '';
+  $('#r-score').textContent = `${S.right} / ${S.right+S.wrong}`;
+  $('#r-flap').textContent = '';
+  $('#r-in').value=''; $('#r-verdict').textContent='';
+  $('#r-in').focus();
+}
+function checkRecall(){
+  if(!rw) return;
+  const v = $('#r-in').value.trim().toLowerCase();
+  if(!v) return;
+  const ok = v === rw.w.toLowerCase();
+  score(ok, rw.w);
+  const el = $('#r-verdict');
+  el.className = 'verdict ' + (ok?'ok':'no');
+  el.textContent = ok ? '✓ 정답' : `✗ 정답: ${rw.w}`;
+  $('#r-flap').innerHTML = `<div class="word" style="font-size:34px">${esc(rw.w)}</div>`;
+  say(rw.w);
+  setTimeout(newRecall, ok?900:2100);
+}
+$('#r-check').onclick = checkRecall;
+$('#r-in').addEventListener('keydown', e=>{ if(e.key==='Enter') checkRecall(); });
+$('#r-hint').onclick = ()=>{
+  if(!rw) return;
+  const n = Math.max(1, Math.ceil(rw.w.length/3));
+  $('#r-flap').innerHTML = `<div class="pos">${esc(rw.w.slice(0,n))}${'·'.repeat(rw.w.length-n)}</div>`;
+};
+$('#r-pass').onclick = ()=>{ if(!rw) return; score(false, rw.w); $('#r-verdict').className='verdict no'; $('#r-verdict').textContent=`정답: ${rw.w}`; say(rw.w); setTimeout(newRecall,1600); };
+
+/* ============ LISTEN ============ */
+let lw=null, lLock=false;
+function newListen(){
+  lLock=false;
+  lw = pick();
+  $('#l-score').textContent = `${S.right} / ${S.right+S.wrong}`;
+  const opts = [lw, ...sample(3, lw)].sort(()=>Math.random()-.5);
+  $('#l-opts').innerHTML = opts.map(o=>
+    `<button class="opt" data-w="${esc(o.w)}"><b style="font-family:'Barlow Condensed',sans-serif;font-size:19px">${esc(o.w)}</b> <span style="color:var(--dim);font-size:13px">${esc(o.m)}</span></button>`).join('');
+  $$('#l-opts .opt').forEach(b=> b.onclick = ()=>{
+    if(lLock) return; lLock=true;
+    const ok = b.dataset.w===lw.w;
+    b.classList.add(ok?'correct':'wrong');
+    if(!ok) $$('#l-opts .opt').find(x=>x.dataset.w===lw.w)?.classList.add('correct');
+    score(ok, lw.w);
+    setTimeout(newListen, ok?700:1500);
+  });
+  setTimeout(()=>say(lw.w), 220);
+}
+$('#l-play').onclick = ()=> lw && say(lw.w);
+
+/* ============ LIST ============ */
+function renderList(){
+  const q = $('#f-search').value.trim().toLowerCase();
+  let rows = pool;
+  if(listFilter==='known') rows = rows.filter(x=>S.known[x.w]);
+  if(listFilter==='todo')  rows = rows.filter(x=>!S.known[x.w]);
+  if(listFilter==='weak')  rows = rows.filter(x=>S.weak[x.w]);
+  if(q) rows = rows.filter(x=> x.w.toLowerCase().includes(q) || x.m.includes(q));
+  $('#l-count').textContent = `${rows.length.toLocaleString()} WORDS`;
+  const slice = rows.slice(0,400);
+  $('#l-rows').innerHTML = slice.map(x=>
+    `<div class="lrow ${S.known[x.w]?'known':''}" data-w="${esc(x.w)}">
+       <span class="w">${esc(x.w)}</span>
+       <span class="m">${esc(x.m)}</span>
+       ${S.weak[x.w]?'<span class="lv" style="color:var(--stop)">★</span>':''}
+       <span class="lv">${x.lv}</span>
+     </div>`).join('') + (rows.length>400?`<div class="note">첫 400개만 표시했습니다. 검색으로 좁혀보세요.</div>`:'');
+  $$('#l-rows .lrow').forEach(r=> r.onclick = ()=>{
+    const w = r.dataset.w;
+    const i = pool.findIndex(x=>x.w===w);
+    if(i>=0){ idx=i; switchView('study'); }
+    say(w);
+  });
+}
+$('#f-search').addEventListener('input', renderList);
+[['f-all','all'],['f-todo','todo'],['f-known','known'],['f-weak','weak']].forEach(([id,f])=>{
+  $('#'+id).onclick = ()=>{ listFilter=f; $$('#v-list .btn.small').forEach(b=>b.classList.remove('on')); $('#'+id).classList.add('on'); renderList(); };
+});
+
+/* ============ STATS ============ */
+function renderStats(){
+  const k = Object.keys(S.known).length;
+  $('#st-known').textContent = k.toLocaleString();
+  $('#st-weak').textContent = Object.keys(S.weak).length;
+  const tot = S.right+S.wrong;
+  $('#st-acc').textContent = tot ? Math.round(S.right/tot*100)+'%' : '—';
+  $('#st-streak').textContent = S.streak + (S.best?` / ${S.best}`:'');
+  $('#st-bars').innerHTML = ['A1','A2','B1','B2'].map(lv=>{
+    const all = WORDS.filter(x=>x.lv===lv);
+    const done = all.filter(x=>S.known[x.w]).length;
+    const pct = all.length? done/all.length*100 : 0;
+    return `<div class="barrow"><span class="t">${lv}</span><span class="b"><i style="width:${pct}%"></i></span><span class="v">${done}/${all.length}</span></div>`;
+  }).join('');
+}
+$('#st-reset').onclick = ()=>{
+  if(!confirm('외운 단어·약점·정답률 기록이 모두 지워집니다. 계속할까요?')) return;
+  S.known={}; S.weak={}; S.ex={}; S.right=0; S.wrong=0; S.streak=0; S.best=0;
+  save(); renderAll(); toast('진도를 초기화했습니다');
+};
+$('#st-export').onclick = ()=>{
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  prompt('아래 코드를 복사해서 다른 기기에서 불러오기 하세요:', code);
+};
+$('#st-import').onclick = ()=>{
+  const code = prompt('내보내기 코드를 붙여넣으세요:');
+  if(!code) return;
+  try{ Object.assign(S, JSON.parse(decodeURIComponent(escape(atob(code.trim()))))); save(); renderAll(); toast('진도를 불러왔습니다'); }
+  catch(e){ toast('코드를 읽을 수 없습니다'); }
+};
+
+/* ============ SHELL ============ */
+function gauge(){
+  const k = pool.filter(x=>S.known[x.w]).length;
+  $('#gnum').textContent = k.toLocaleString();
+  $('#gtot').textContent = pool.length.toLocaleString();
+  $('#gfill').style.width = (pool.length? k/pool.length*100 : 0)+'%';
+}
+function renderAll(){ gauge(); renderStudy(); renderList(); renderStats(); }
+
+function switchView(v){
+  view = v;
+  auto = false; clearTimeout(autoT); speechSynthesis.cancel();
+  $('#b-auto').textContent='▶︎ 자동재생'; $('#b-auto').classList.remove('on');
+  ['study','quiz','recall','listen','list','stats'].forEach(x=> $('#v-'+x).classList.toggle('hide', x!==v));
+  $$('#nav button').forEach(b=> b.classList.toggle('on', b.dataset.v===v));
+  if(v==='quiz') newQuiz();
+  if(v==='recall') newRecall();
+  if(v==='listen') newListen();
+  if(v==='list') renderList();
+  if(v==='stats') renderStats();
+  if(v==='study') renderStudy();
+  window.scrollTo({top:0});
+}
+$$('#nav button').forEach(b=> b.onclick = ()=>switchView(b.dataset.v));
+
+function buildFilters(){
+  const f = $('#filters');
+  f.innerHTML = ['A1','A2','B1','B2'].map(lv=>{
+    const n = WORDS.filter(x=>x.lv===lv).length;
+    return `<button class="chip on" data-lv="${lv}">${lv}<small>${n}</small></button>`;
+  }).join('') + `<span class="spacer"></span><button class="chip" id="only-todo">미완료만</button>`;
+  $$('#filters .chip[data-lv]').forEach(c=> c.onclick = ()=>{
+    const lv = c.dataset.lv;
+    levels.has(lv) ? levels.delete(lv) : levels.add(lv);
+    if(!levels.size) levels.add(lv);
+    $$('#filters .chip[data-lv]').forEach(x=> x.classList.toggle('on', levels.has(x.dataset.lv)));
+    rebuild();
+  });
+  $('#only-todo').onclick = e=>{
+    e.target.classList.toggle('on');
+    rebuild();
+    if(e.target.classList.contains('on')){
+      pool = pool.filter(x=>!S.known[x.w]);
+      if(!pool.length){ pool = WORDS.filter(x=>levels.has(x.lv)); toast('미완료 단어가 없습니다'); e.target.classList.remove('on'); }
+      idx=0; renderAll();
+    }
+  };
+}
+
+let toastT;
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1900);
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(view!=='study') return;
+  if(e.key==='ArrowRight'){ move(1); }
+  if(e.key==='ArrowLeft'){ move(-1); }
+  if(e.key===' '){ e.preventDefault(); sayWord(); }
+});
+
+$('#clock').textContent = `${WORDS.length.toLocaleString()} ENTRIES`;
+
+(async ()=>{ await load(); buildFilters(); rebuild(); })();
+</script>
+</body>
+</html>

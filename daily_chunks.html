@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAY IT BACK — 일상회화 영어 청크 200</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#E6EBE7;
+    --ink:#1C2624;
+    --teal:#1E5F5B;
+    --plum:#6B3A5B;
+    --amber:#B4762A;
+    --slate:#41565F;
+    --rose:#9E3B4A;
+    --muted:#6E7C78;
+    --card:#FCFDFC;
+    --line:#C6D0CB;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:26px 18px 70px;}
+
+  /* ---- hero: a conversation turn ---- */
+  header{margin-bottom:26px;}
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-weight:800;
+    font-size:clamp(32px,7vw,54px);
+    line-height:0.98;
+    letter-spacing:-0.02em;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  h1 em{font-style:normal;color:var(--teal);}
+  .lede{
+    font-size:14.5px;
+    line-height:1.6;
+    color:var(--muted);
+    max-width:56ch;
+    margin:14px 0 18px;
+  }
+  .meter{
+    display:flex;align-items:center;gap:2px;height:26px;margin-bottom:16px;
+  }
+  .meter i{
+    display:block;width:3px;background:var(--teal);opacity:.45;border-radius:2px;
+  }
+  .counts{
+    display:flex;gap:16px;flex-wrap:wrap;
+    font-family:'Space Mono',monospace;font-size:12px;color:var(--slate);
+  }
+  .counts b{color:var(--plum);font-size:14px;}
+
+  /* ---- controls ---- */
+  .bar{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 14px;}
+  #search{
+    flex:1 1 210px;font-family:'Space Mono',monospace;font-size:13px;
+    padding:11px 13px;border:1.5px solid var(--ink);border-radius:3px;
+    background:var(--card);color:var(--ink);outline:none;
+  }
+  #search:focus{border-color:var(--teal);}
+  .seg{display:flex;border:1.5px solid var(--ink);border-radius:3px;overflow:hidden;}
+  .seg button{
+    background:var(--card);border:0;padding:11px 14px;cursor:pointer;
+    font-family:'Space Mono',monospace;font-size:12px;color:var(--ink);
+  }
+  .seg button.on{background:var(--ink);color:var(--bg);}
+  .btn-shuffle{
+    border:1.5px solid var(--ink);border-radius:3px;background:var(--card);
+    padding:11px 15px;cursor:pointer;font-family:'Space Mono',monospace;font-size:12px;color:var(--ink);
+  }
+  .btn-shuffle:hover{background:var(--amber);border-color:var(--amber);color:#fff;}
+
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px;}
+  .tag{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;
+    padding:7px 13px;border:1.5px solid var(--line);border-radius:20px;
+    background:var(--card);color:var(--slate);cursor:pointer;
+  }
+  .tag:hover{border-color:var(--slate);}
+  .tag.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+
+  /* ---- cards ---- */
+  .list{display:flex;flex-direction:column;gap:9px;}
+  .card{
+    position:relative;background:var(--card);
+    border:1px solid var(--line);border-radius:5px;
+    padding:15px 17px 15px 19px;cursor:pointer;
+    transition:border-color .12s ease;
+  }
+  .card:hover{border-color:var(--slate);}
+  .card::before{
+    content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:3px;
+  }
+  .card[data-c="small"]::before{background:var(--teal);}
+  .card[data-c="opinion"]::before{background:var(--plum);}
+  .card[data-c="ask"]::before{background:var(--amber);}
+  .card[data-c="react"]::before{background:var(--rose);}
+  .card[data-c="explain"]::before{background:var(--slate);}
+  .card[data-c="plan"]::before{background:#3F7A4A;}
+  .card[data-c="manage"]::before{background:#7A5C2E;}
+
+  .row1{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:7px;}
+  .idx{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:0.06em;}
+  .badge{
+    font-size:10.5px;font-weight:600;letter-spacing:0.03em;
+    padding:3px 9px;border-radius:12px;background:rgba(0,0,0,0.05);color:var(--slate);white-space:nowrap;
+  }
+  .kr{font-size:13px;color:var(--muted);margin-bottom:5px;}
+  .en{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:19.5px;line-height:1.3;letter-spacing:-0.01em;color:var(--ink);
+  }
+  .ex{
+    display:none;margin-top:11px;padding:10px 12px;border-radius:4px;
+    background:rgba(30,95,91,0.07);border-left:2px solid var(--teal);
+    font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.55;color:var(--ink);
+  }
+  .card.open .ex{display:block;}
+  .speak{
+    position:absolute;right:13px;bottom:12px;border:0;background:transparent;
+    cursor:pointer;font-size:15px;opacity:.4;padding:4px;
+  }
+  .speak:hover{opacity:1;}
+
+  body.recall .en{filter:blur(7px);user-select:none;transition:filter .14s ease;}
+  body.recall .card.open .en{filter:blur(0);}
+  body.recall .card:not(.open) .ex{display:none;}
+  body.recall .card:not(.open) .speak{display:none;}
+  body.recall .card:not(.open)::after{
+    content:"먼저 말해보고 → 탭";
+    position:absolute;right:15px;bottom:13px;
+    font-family:'Space Mono',monospace;font-size:10px;color:var(--plum);
+  }
+
+  .none{text-align:center;padding:46px 20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px;}
+  footer{margin-top:30px;text-align:center;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:0.06em;}
+  ::selection{background:var(--plum);color:#fff;}
+  @media(max-width:520px){.en{font-size:17.5px;}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Everyday English · Chunk Set 02 · for 제이</div>
+    <h1>Say It <em>Back</em></h1>
+    <div class="meter" id="meter"></div>
+    <p class="lede">일상 대화에서 가장 자주 쓰이는 표현 덩어리 200개. 한글 상황을 먼저 보고 영어가 입에서 바로 나오는지 확인하세요. 인식이 아니라 인출을 훈련하는 게 목적입니다.</p>
+    <div class="counts">
+      <span>TOTAL <b id="cTotal">200</b></span>
+      <span>SHOWING <b id="cShow">200</b></span>
+      <span>SETS <b>7</b></span>
+    </div>
+  </header>
+
+  <div class="bar">
+    <input id="search" type="text" placeholder="검색 — 예) weekend, 부탁, agree, 놀랐...">
+    <div class="seg">
+      <button id="mStudy" class="on">학습</button>
+      <button id="mRecall">인출 연습</button>
+    </div>
+    <button class="btn-shuffle" id="shuffle">↻ 섞기</button>
+  </div>
+
+  <div class="tags" id="tags"></div>
+  <div class="list" id="list"></div>
+  <div class="none" id="none" style="display:none;">검색 결과가 없습니다.</div>
+
+  <footer>TAP A CARD TO REVEAL · 🔊 TO HEAR IT · SHUFFLE TO BREAK ORDER-MEMORY</footer>
+</div>
+
+<script>
+const CATS={
+  small:"인사 & 잡담", opinion:"의견 & 동의/반대", ask:"요청 & 제안",
+  react:"감정 & 반응", explain:"설명 & 부연", plan:"약속 & 일정", manage:"대화 관리 & 마무리"
+};
+const DATA=[{"category": "small", "kr": "오랜만에 만났을 때", "en": "It's been a while, hasn't it?", "ex": "Hey, it's been a while, hasn't it? How have you been?"}, {"category": "small", "kr": "요즘 어떻게 지내는지 물을 때", "en": "What have you been up to lately?", "ex": "What have you been up to lately? Anything exciting?"}, {"category": "small", "kr": "가볍게 안부를 물을 때", "en": "How's everything going?", "ex": "How's everything going on your end?"}, {"category": "small", "kr": "주말 얘기를 꺼낼 때", "en": "How was your weekend?", "ex": "How was your weekend? Did you do anything fun?"}, {"category": "small", "kr": "별일 없었다고 답할 때", "en": "Nothing much, just the usual.", "ex": "Nothing much, just the usual — work and gym, mostly."}, {"category": "small", "kr": "바빴다고 말할 때", "en": "I've been swamped with", "ex": "I've been swamped with work for the past couple of weeks."}, {"category": "small", "kr": "날씨로 대화를 시작할 때", "en": "Can you believe this weather?", "ex": "Can you believe this weather? It was freezing yesterday."}, {"category": "small", "kr": "우연히 마주쳤을 때", "en": "Fancy running into you here!", "ex": "Fancy running into you here! I didn't know you lived nearby."}, {"category": "small", "kr": "이름을 다시 물을 때", "en": "Sorry, I didn't catch your name.", "ex": "Sorry, I didn't catch your name — could you say it again?"}, {"category": "small", "kr": "처음 만났을 때", "en": "Nice to finally put a face to the name.", "ex": "Nice to finally put a face to the name — I've heard a lot about you."}, {"category": "small", "kr": "공통점을 찾았을 때", "en": "Oh, same here!", "ex": "You're into CrossFit? Oh, same here!"}, {"category": "small", "kr": "대화를 이어갈 때", "en": "Speaking of which,", "ex": "Speaking of which, did you hear about the new gym opening downtown?"}, {"category": "small", "kr": "화제를 바꿀 때", "en": "By the way,", "ex": "By the way, are you still working at the same company?"}, {"category": "small", "kr": "근황을 짧게 전할 때", "en": "Not too bad, actually.", "ex": "Not too bad, actually — things have been pretty steady."}, {"category": "small", "kr": "피곤하다고 말할 때", "en": "I'm running on empty today.", "ex": "I barely slept last night, so I'm running on empty today."}, {"category": "small", "kr": "주말 계획을 물을 때", "en": "Got any plans for the weekend?", "ex": "Got any plans for the weekend, or are you just taking it easy?"}, {"category": "small", "kr": "가볍게 칭찬할 때", "en": "You look great, by the way.", "ex": "You look great, by the way — have you been working out?"}, {"category": "small", "kr": "시간이 빨리 갔다고 말할 때", "en": "Time really flies, doesn't it?", "ex": "It's already July? Time really flies, doesn't it?"}, {"category": "small", "kr": "서로 아는 사람 얘기할 때", "en": "How's she doing these days?", "ex": "I ran into your sister last week. How's she doing these days?"}, {"category": "small", "kr": "가볍게 맞장구칠 때", "en": "Tell me about it.", "ex": "Traffic was brutal this morning. — Tell me about it."}, {"category": "small", "kr": "근황이 그저 그럴 때", "en": "Can't complain.", "ex": "How's work? — Can't complain, it's been manageable."}, {"category": "small", "kr": "새로운 소식을 전할 때", "en": "Guess what?", "ex": "Guess what? I finally passed the certification exam."}, {"category": "small", "kr": "대화 마무리로 넘어갈 때", "en": "Anyway, I should get going.", "ex": "Anyway, I should get going — I've got a call in ten minutes."}, {"category": "small", "kr": "다시 보자고 할 때", "en": "Let's catch up soon.", "ex": "Let's catch up soon — maybe grab coffee next week?"}, {"category": "small", "kr": "인사를 전해달라고 할 때", "en": "Say hi to your family for me.", "ex": "Say hi to your family for me, will you?"}, {"category": "small", "kr": "가볍게 헤어질 때", "en": "Take care, see you around.", "ex": "Alright, take care, see you around."}, {"category": "small", "kr": "만나서 좋았다고 할 때", "en": "It was great catching up.", "ex": "It was great catching up — we should do this more often."}, {"category": "small", "kr": "상대 말에 관심 보일 때", "en": "That sounds interesting, tell me more.", "ex": "You moved to Atlanta? That sounds interesting, tell me more."}, {"category": "small", "kr": "가볍게 놀랄 때", "en": "No way, really?", "ex": "You ran a marathon last month? No way, really?"}, {"category": "small", "kr": "공감하며 웃을 때", "en": "That's so relatable.", "ex": "Waking up at 5 for the gym? That's so relatable."}, {"category": "opinion", "kr": "의견을 말할 때", "en": "If you ask me,", "ex": "If you ask me, the second option makes a lot more sense."}, {"category": "opinion", "kr": "개인적 견해를 밝힐 때", "en": "The way I see it,", "ex": "The way I see it, we should wait a bit longer before deciding."}, {"category": "opinion", "kr": "조심스럽게 의견을 낼 때", "en": "I might be wrong, but", "ex": "I might be wrong, but I think the schedule is too tight."}, {"category": "opinion", "kr": "강하게 동의할 때", "en": "I couldn't agree more.", "ex": "You're right about that — I couldn't agree more."}, {"category": "opinion", "kr": "부분적으로 동의할 때", "en": "I see your point, but", "ex": "I see your point, but I'd approach it a little differently."}, {"category": "opinion", "kr": "정중히 반대할 때", "en": "I'm not sure I agree with that.", "ex": "I'm not sure I agree with that — the numbers suggest otherwise."}, {"category": "opinion", "kr": "다른 관점을 제시할 때", "en": "Have you considered it from", "ex": "Have you considered it from the customer's perspective?"}, {"category": "opinion", "kr": "확신할 때", "en": "I'm pretty confident that", "ex": "I'm pretty confident that this approach will work."}, {"category": "opinion", "kr": "잘 모르겠을 때", "en": "I'm on the fence about", "ex": "I'm on the fence about whether to take the offer."}, {"category": "opinion", "kr": "생각할 시간이 필요할 때", "en": "Let me sleep on it.", "ex": "That's a big decision — let me sleep on it."}, {"category": "opinion", "kr": "솔직히 말할 때", "en": "To be perfectly honest,", "ex": "To be perfectly honest, I don't think it's worth the money."}, {"category": "opinion", "kr": "동의를 구할 때", "en": "Don't you think so?", "ex": "That place is way overpriced. Don't you think so?"}, {"category": "opinion", "kr": "논점을 정리할 때", "en": "At the end of the day,", "ex": "At the end of the day, it comes down to what you actually want."}, {"category": "opinion", "kr": "상대 의견을 존중할 때", "en": "That's a fair point.", "ex": "That's a fair point — I hadn't thought of it that way."}, {"category": "opinion", "kr": "우선순위를 말할 때", "en": "What matters most to me is", "ex": "What matters most to me is having a stable routine."}, {"category": "opinion", "kr": "강하게 반대할 때", "en": "I really don't think that's a good idea.", "ex": "I really don't think that's a good idea, given the timing."}, {"category": "opinion", "kr": "가정해서 말할 때", "en": "If it were up to me,", "ex": "If it were up to me, I'd start with the smaller project first."}, {"category": "opinion", "kr": "확실하지 않을 때", "en": "I'd have to look into it more.", "ex": "I'd have to look into it more before giving you an answer."}, {"category": "opinion", "kr": "경험에 근거해 말할 때", "en": "From my experience,", "ex": "From my experience, it usually takes longer than people expect."}, {"category": "opinion", "kr": "타협점을 찾을 때", "en": "Maybe there's a middle ground here.", "ex": "Maybe there's a middle ground here that works for both of us."}, {"category": "opinion", "kr": "우려를 표할 때", "en": "My only concern is", "ex": "My only concern is whether we'll have enough time."}, {"category": "opinion", "kr": "장단점을 말할 때", "en": "There are pros and cons to", "ex": "There are pros and cons to both options, honestly."}, {"category": "opinion", "kr": "결론을 내릴 때", "en": "All things considered,", "ex": "All things considered, I'd go with the first one."}, {"category": "opinion", "kr": "생각이 바뀌었을 때", "en": "I've changed my mind about", "ex": "I've changed my mind about moving — I think I'll stay another year."}, {"category": "opinion", "kr": "확신 없이 추측할 때", "en": "My guess is that", "ex": "My guess is that they'll postpone it again."}, {"category": "opinion", "kr": "상대에게 판단을 맡길 때", "en": "It's really up to you.", "ex": "Either way works for me — it's really up to you."}, {"category": "opinion", "kr": "일반적인 견해를 말할 때", "en": "Generally speaking,", "ex": "Generally speaking, it's better to start early than to rush later."}, {"category": "opinion", "kr": "예외를 인정할 때", "en": "That said,", "ex": "It's usually reliable. That said, there have been a few issues lately."}, {"category": "opinion", "kr": "이해가 안 될 때", "en": "I don't quite follow.", "ex": "Sorry, I don't quite follow — could you explain that again?"}, {"category": "opinion", "kr": "받아들일 때", "en": "Fair enough.", "ex": "You've got a point there. Fair enough."}, {"category": "ask", "kr": "부탁할 때", "en": "Would you mind if I", "ex": "Would you mind if I borrowed your charger for a second?"}, {"category": "ask", "kr": "도움을 요청할 때", "en": "Could you give me a hand with", "ex": "Could you give me a hand with moving this table?"}, {"category": "ask", "kr": "정중히 부탁할 때", "en": "I was wondering if you could", "ex": "I was wondering if you could take a look at this for me."}, {"category": "ask", "kr": "제안할 때", "en": "How about we", "ex": "How about we grab lunch after the meeting?"}, {"category": "ask", "kr": "가볍게 권할 때", "en": "You should definitely try", "ex": "You should definitely try that new ramen place downtown."}, {"category": "ask", "kr": "함께 하자고 할 때", "en": "Do you want to join us?", "ex": "We're heading to the gym later — do you want to join us?"}, {"category": "ask", "kr": "허락을 구할 때", "en": "Is it okay if I", "ex": "Is it okay if I leave a bit early today?"}, {"category": "ask", "kr": "추천을 요청할 때", "en": "Any recommendations for", "ex": "Any recommendations for a good place to eat around here?"}, {"category": "ask", "kr": "조언을 구할 때", "en": "What would you do in my situation?", "ex": "I'm not sure what to do — what would you do in my situation?"}, {"category": "ask", "kr": "확인을 부탁할 때", "en": "Could you double-check", "ex": "Could you double-check the address before we head out?"}, {"category": "ask", "kr": "다시 말해달라고 할 때", "en": "Could you say that again?", "ex": "Sorry, it's a bit loud in here — could you say that again?"}, {"category": "ask", "kr": "천천히 말해달라고 할 때", "en": "Could you slow down a bit?", "ex": "Could you slow down a bit? I want to make sure I got that right."}, {"category": "ask", "kr": "설명을 요청할 때", "en": "What do you mean by", "ex": "What do you mean by 'flexible schedule' exactly?"}, {"category": "ask", "kr": "시간을 물을 때", "en": "Do you have a minute?", "ex": "Do you have a minute? I wanted to ask you something."}, {"category": "ask", "kr": "부담 없이 제안할 때", "en": "Feel free to", "ex": "Feel free to reach out if you have any questions."}, {"category": "ask", "kr": "의향을 물을 때", "en": "Would you be interested in", "ex": "Would you be interested in joining our weekend run?"}, {"category": "ask", "kr": "부탁을 미리 알릴 때", "en": "I have a favor to ask.", "ex": "Hey, I have a favor to ask — are you free this Saturday?"}, {"category": "ask", "kr": "함께 결정하자고 할 때", "en": "Why don't we", "ex": "Why don't we decide after we hear back from them?"}, {"category": "ask", "kr": "일정 조율을 요청할 때", "en": "Does Thursday work for you?", "ex": "Does Thursday work for you, or is another day better?"}, {"category": "ask", "kr": "대신 해달라고 할 때", "en": "Could you cover for me", "ex": "Could you cover for me while I step out for a bit?"}, {"category": "ask", "kr": "물건을 빌릴 때", "en": "Can I borrow your", "ex": "Can I borrow your pen for a second?"}, {"category": "ask", "kr": "제안을 부드럽게 할 때", "en": "It might be worth trying", "ex": "It might be worth trying a different route to avoid traffic."}, {"category": "ask", "kr": "의견을 물을 때", "en": "What do you think about", "ex": "What do you think about moving the meeting to next week?"}, {"category": "ask", "kr": "선택지를 제시할 때", "en": "We could either", "ex": "We could either take the bus or just walk — it's not far."}, {"category": "ask", "kr": "미리 양해를 구할 때", "en": "I hope you don't mind, but", "ex": "I hope you don't mind, but I might be a few minutes late."}, {"category": "ask", "kr": "부담 주지 않으려 할 때", "en": "No pressure, but", "ex": "No pressure, but let me know if you'd like to come along."}, {"category": "ask", "kr": "재촉하지 않고 물을 때", "en": "Whenever you get a chance,", "ex": "Whenever you get a chance, could you send me that link?"}, {"category": "ask", "kr": "긴급하게 요청할 때", "en": "Sorry to bother you, but", "ex": "Sorry to bother you, but I really need this by this afternoon."}, {"category": "ask", "kr": "함께 하자고 초대할 때", "en": "You're more than welcome to", "ex": "You're more than welcome to stay for dinner."}, {"category": "ask", "kr": "요청을 명확히 할 때", "en": "Just to be clear, you'd like me to", "ex": "Just to be clear, you'd like me to send it by Friday, right?"}, {"category": "react", "kr": "놀랐을 때", "en": "You've got to be kidding me.", "ex": "They cancelled it again? You've got to be kidding me."}, {"category": "react", "kr": "기쁠 때", "en": "That's fantastic news!", "ex": "You got the job? That's fantastic news!"}, {"category": "react", "kr": "실망했을 때", "en": "That's a bummer.", "ex": "The trip got cancelled? That's a bummer."}, {"category": "react", "kr": "안타까울 때", "en": "I'm sorry to hear that.", "ex": "I'm sorry to hear that — let me know if I can help."}, {"category": "react", "kr": "공감할 때", "en": "I know exactly what you mean.", "ex": "I know exactly what you mean — I went through the same thing."}, {"category": "react", "kr": "감탄할 때", "en": "That's impressive.", "ex": "You built that yourself? That's impressive."}, {"category": "react", "kr": "안심시킬 때", "en": "Don't worry about it.", "ex": "Don't worry about it — these things happen."}, {"category": "react", "kr": "격려할 때", "en": "You've got this.", "ex": "It's a tough exam, but you've got this."}, {"category": "react", "kr": "화가 났을 때", "en": "That's so frustrating.", "ex": "They still haven't replied? That's so frustrating."}, {"category": "react", "kr": "지쳤을 때", "en": "I'm burned out.", "ex": "Honestly, I'm burned out — I need a real break."}, {"category": "react", "kr": "기대될 때", "en": "I'm really looking forward to", "ex": "I'm really looking forward to the trip next month."}, {"category": "react", "kr": "긴장될 때", "en": "I'm a bit nervous about", "ex": "I'm a bit nervous about the interview tomorrow."}, {"category": "react", "kr": "안도할 때", "en": "What a relief.", "ex": "It finally cleared customs — what a relief."}, {"category": "react", "kr": "고마울 때", "en": "I really appreciate it.", "ex": "Thanks for covering for me, I really appreciate it."}, {"category": "react", "kr": "미안할 때", "en": "My bad, that was on me.", "ex": "My bad, that was on me — I should have double-checked."}, {"category": "react", "kr": "이해가 될 때", "en": "That makes sense.", "ex": "Oh, that makes sense now that you explain it."}, {"category": "react", "kr": "믿기지 않을 때", "en": "I can't believe it.", "ex": "I can't believe it's already been a year."}, {"category": "react", "kr": "부담될 때", "en": "That's a lot to take in.", "ex": "That's a lot to take in — give me a moment."}, {"category": "react", "kr": "위로할 때", "en": "Hang in there.", "ex": "It'll get better — hang in there."}, {"category": "react", "kr": "자랑스러울 때", "en": "I'm really proud of you.", "ex": "You stuck with it the whole year — I'm really proud of you."}, {"category": "react", "kr": "짜증날 때", "en": "It's driving me crazy.", "ex": "This noise is driving me crazy."}, {"category": "react", "kr": "부러울 때", "en": "I'm so jealous.", "ex": "You're going to Japan? I'm so jealous."}, {"category": "react", "kr": "궁금할 때", "en": "I'm curious about", "ex": "I'm curious about how you got into that field."}, {"category": "react", "kr": "확신이 안 설 때", "en": "I have mixed feelings about", "ex": "I have mixed feelings about moving abroad."}, {"category": "react", "kr": "혼란스러울 때", "en": "I'm a bit confused about", "ex": "I'm a bit confused about what they actually decided."}, {"category": "react", "kr": "가볍게 웃어넘길 때", "en": "That's hilarious.", "ex": "He said that with a straight face? That's hilarious."}, {"category": "react", "kr": "지루할 때", "en": "It was kind of a drag.", "ex": "The meeting ran three hours — it was kind of a drag."}, {"category": "react", "kr": "충격받았을 때", "en": "I was completely caught off guard.", "ex": "When they announced it, I was completely caught off guard."}, {"category": "react", "kr": "만족스러울 때", "en": "I'm really happy with how it turned out.", "ex": "I'm really happy with how the project turned out."}, {"category": "react", "kr": "후회할 때", "en": "I wish I had", "ex": "I wish I had started saving earlier."}, {"category": "explain", "kr": "이유를 설명할 때", "en": "The reason is that", "ex": "The reason is that we didn't get approval in time."}, {"category": "explain", "kr": "예를 들 때", "en": "For instance,", "ex": "For instance, last month we had the same issue with a different supplier."}, {"category": "explain", "kr": "다시 정리해서 말할 때", "en": "In other words,", "ex": "In other words, we need to start over from scratch."}, {"category": "explain", "kr": "요약할 때", "en": "To sum it up,", "ex": "To sum it up, we're behind schedule but still on budget."}, {"category": "explain", "kr": "핵심을 짚을 때", "en": "The bottom line is", "ex": "The bottom line is we can't afford another delay."}, {"category": "explain", "kr": "과정을 설명할 때", "en": "What happened was", "ex": "What happened was the system went down right before submission."}, {"category": "explain", "kr": "결과를 말할 때", "en": "As a result,", "ex": "As a result, we had to push everything back by a week."}, {"category": "explain", "kr": "대조할 때", "en": "On the other hand,", "ex": "It's expensive. On the other hand, it lasts much longer."}, {"category": "explain", "kr": "덧붙일 때", "en": "On top of that,", "ex": "The flight was delayed, and on top of that, my luggage got lost."}, {"category": "explain", "kr": "조건을 붙일 때", "en": "As long as", "ex": "As long as we get approval by Friday, we should be fine."}, {"category": "explain", "kr": "예외를 말할 때", "en": "Except for", "ex": "Everything went smoothly except for the last-minute paperwork."}, {"category": "explain", "kr": "순서를 말할 때", "en": "First off,", "ex": "First off, let me explain how the process usually works."}, {"category": "explain", "kr": "결론으로 넘어갈 때", "en": "So basically,", "ex": "So basically, we're waiting on their confirmation."}, {"category": "explain", "kr": "비교할 때", "en": "Compared to", "ex": "Compared to last year, business has picked up quite a bit."}, {"category": "explain", "kr": "강조할 때", "en": "The thing is,", "ex": "The thing is, nobody told us about the change until yesterday."}, {"category": "explain", "kr": "배경을 설명할 때", "en": "To give you some context,", "ex": "To give you some context, this client has been with us for five years."}, {"category": "explain", "kr": "덧붙여 명확히 할 때", "en": "What I mean is", "ex": "What I mean is we should focus on quality over speed."}, {"category": "explain", "kr": "가능성을 말할 때", "en": "There's a chance that", "ex": "There's a chance that the schedule will shift again."}, {"category": "explain", "kr": "관계를 설명할 때", "en": "That's why", "ex": "The road was closed, that's why I was late."}, {"category": "explain", "kr": "일반화할 때", "en": "More often than not,", "ex": "More often than not, these issues resolve themselves."}, {"category": "explain", "kr": "구체화할 때", "en": "To be more specific,", "ex": "To be more specific, we need three more people on the team."}, {"category": "explain", "kr": "가정할 때", "en": "Let's say", "ex": "Let's say we finish early — what would we do with the extra time?"}, {"category": "explain", "kr": "차이를 설명할 때", "en": "The difference is that", "ex": "The difference is that this one comes with a warranty."}, {"category": "explain", "kr": "정정할 때", "en": "Actually, let me rephrase that.", "ex": "Actually, let me rephrase that — it wasn't cancelled, just postponed."}, {"category": "explain", "kr": "인용할 때", "en": "According to", "ex": "According to the manager, the decision was made last week."}, {"category": "explain", "kr": "확신 없이 설명할 때", "en": "As far as I know,", "ex": "As far as I know, they haven't announced anything yet."}, {"category": "explain", "kr": "결론을 미룰 때", "en": "It depends on", "ex": "It depends on how much time we have left."}, {"category": "explain", "kr": "간단히 말할 때", "en": "Long story short,", "ex": "Long story short, we ended up staying an extra night."}, {"category": "explain", "kr": "예상과 다를 때", "en": "It turned out that", "ex": "It turned out that the meeting had been moved to Thursday."}, {"category": "explain", "kr": "덧붙여 설명할 때", "en": "Not to mention", "ex": "The place is beautiful, not to mention surprisingly affordable."}, {"category": "plan", "kr": "약속을 잡을 때", "en": "Let's set up a time to", "ex": "Let's set up a time to go over the details."}, {"category": "plan", "kr": "일정을 물을 때", "en": "When are you free?", "ex": "When are you free next week? I'd love to catch up."}, {"category": "plan", "kr": "일정을 확정할 때", "en": "Let's lock it in for", "ex": "Let's lock it in for Saturday at 2 then."}, {"category": "plan", "kr": "일정을 변경할 때", "en": "Would it be possible to reschedule?", "ex": "Something came up — would it be possible to reschedule?"}, {"category": "plan", "kr": "약속을 취소할 때", "en": "I'm afraid I'll have to cancel", "ex": "I'm afraid I'll have to cancel our plans for tonight."}, {"category": "plan", "kr": "늦는다고 알릴 때", "en": "I'm running about ten minutes behind.", "ex": "Traffic is bad — I'm running about ten minutes behind."}, {"category": "plan", "kr": "장소를 정할 때", "en": "Where should we meet?", "ex": "Where should we meet — your place or the cafe?"}, {"category": "plan", "kr": "확정을 미룰 때", "en": "Let me get back to you on that.", "ex": "I'm not sure about my schedule yet — let me get back to you on that."}, {"category": "plan", "kr": "가능한 시간을 제안할 때", "en": "I'm free anytime after", "ex": "I'm free anytime after 6 on weekdays."}, {"category": "plan", "kr": "일정을 앞당길 때", "en": "Could we move it up to", "ex": "Could we move it up to Wednesday instead?"}, {"category": "plan", "kr": "일정을 미룰 때", "en": "Could we push it back to", "ex": "Could we push it back to next week?"}, {"category": "plan", "kr": "확인 문자를 보낼 때", "en": "Just confirming we're still on for", "ex": "Just confirming we're still on for dinner tomorrow."}, {"category": "plan", "kr": "시간을 확인할 때", "en": "What time works best for you?", "ex": "What time works best for you on Friday?"}, {"category": "plan", "kr": "미리 알릴 때", "en": "Heads up —", "ex": "Heads up — I might be a bit late to the meeting."}, {"category": "plan", "kr": "일정이 꽉 찼을 때", "en": "My schedule is pretty packed this week.", "ex": "My schedule is pretty packed this week — how about next Monday?"}, {"category": "plan", "kr": "여유가 있을 때", "en": "I've got some free time on", "ex": "I've got some free time on Thursday afternoon."}, {"category": "plan", "kr": "함께 갈 때", "en": "I'll swing by and pick you up.", "ex": "I'll swing by and pick you up around seven."}, {"category": "plan", "kr": "약속을 지킬 때", "en": "I'll be there.", "ex": "Count me in — I'll be there."}, {"category": "plan", "kr": "잠정적으로 정할 때", "en": "Let's tentatively say", "ex": "Let's tentatively say Saturday, and confirm on Friday."}, {"category": "plan", "kr": "일정을 다시 확인할 때", "en": "Just to confirm the time,", "ex": "Just to confirm the time, we're meeting at 3, right?"}, {"category": "plan", "kr": "급하게 취소할 때", "en": "Something came up, so", "ex": "Something came up, so I won't be able to make it tonight."}, {"category": "plan", "kr": "다음으로 미룰 때", "en": "Let's take a rain check.", "ex": "I can't make it tonight — let's take a rain check."}, {"category": "plan", "kr": "장소를 바꿀 때", "en": "Would you mind if we changed the venue to", "ex": "Would you mind if we changed the venue to somewhere closer?"}, {"category": "plan", "kr": "일정을 마무리할 때", "en": "So we're all set for", "ex": "So we're all set for Saturday at noon."}, {"category": "plan", "kr": "미리 준비를 부탁할 때", "en": "Could you bring", "ex": "Could you bring your laptop just in case?"}, {"category": "manage", "kr": "생각할 시간을 벌 때", "en": "Let me think for a second.", "ex": "That's a good question — let me think for a second."}, {"category": "manage", "kr": "말을 고를 때", "en": "How do I put this...", "ex": "How do I put this... it's complicated."}, {"category": "manage", "kr": "끼어들 때", "en": "Sorry to interrupt, but", "ex": "Sorry to interrupt, but I think there's been a misunderstanding."}, {"category": "manage", "kr": "말을 되돌릴 때", "en": "Where was I?", "ex": "Sorry, where was I? Oh right, the schedule."}, {"category": "manage", "kr": "본론으로 들어갈 때", "en": "Let's get straight to the point.", "ex": "We don't have much time, so let's get straight to the point."}, {"category": "manage", "kr": "말을 마무리할 때", "en": "That's about it.", "ex": "So that's about it — any questions?"}, {"category": "manage", "kr": "확인하며 넘어갈 때", "en": "Does that make sense so far?", "ex": "Does that make sense so far, or should I go over it again?"}, {"category": "manage", "kr": "잘 안 들릴 때", "en": "You're breaking up a bit.", "ex": "Sorry, you're breaking up a bit — could you repeat that?"}, {"category": "manage", "kr": "잠시 기다려 달라고 할 때", "en": "Give me a second.", "ex": "Give me a second, I'm just pulling up the file."}, {"category": "manage", "kr": "화제를 되돌릴 때", "en": "Going back to what you said earlier,", "ex": "Going back to what you said earlier, I think you had a point."}, {"category": "manage", "kr": "말을 정리할 때", "en": "Let me put it another way.", "ex": "Let me put it another way — it's about timing, not cost."}, {"category": "manage", "kr": "다음 단계를 정할 때", "en": "So what's the next step?", "ex": "Alright, so what's the next step from here?"}, {"category": "manage", "kr": "동의를 확인할 때", "en": "Are we on the same page?", "ex": "Just want to make sure — are we on the same page?"}, {"category": "manage", "kr": "대화를 끝낼 때", "en": "I'll let you go.", "ex": "I know you're busy, so I'll let you go."}, {"category": "manage", "kr": "나중에 얘기하자고 할 때", "en": "Let's pick this up later.", "ex": "We're running out of time — let's pick this up later."}, {"category": "manage", "kr": "감사 인사로 마무리할 때", "en": "Thanks again for your time.", "ex": "Thanks again for your time — it was really helpful."}, {"category": "manage", "kr": "연락하겠다고 할 때", "en": "I'll keep you posted.", "ex": "Once I hear back, I'll keep you posted."}, {"category": "manage", "kr": "확실히 못 박을 때", "en": "Just so we're clear,", "ex": "Just so we're clear, the deadline is Friday, not Monday."}, {"category": "manage", "kr": "화제를 넘길 때", "en": "Anyway, moving on —", "ex": "Anyway, moving on — what about the budget?"}, {"category": "manage", "kr": "잘못 말했을 때", "en": "Sorry, I misspoke.", "ex": "Sorry, I misspoke — I meant Tuesday, not Thursday."}, {"category": "manage", "kr": "확인 요청하며 끝낼 때", "en": "Let me know either way.", "ex": "Whatever you decide, just let me know either way."}, {"category": "manage", "kr": "여운을 남길 때", "en": "We'll see how it goes.", "ex": "It's hard to say right now — we'll see how it goes."}, {"category": "manage", "kr": "빨리 마무리할 때", "en": "I'll keep it short.", "ex": "I know we're short on time, so I'll keep it short."}, {"category": "manage", "kr": "다시 묻고 싶을 때", "en": "One more thing —", "ex": "One more thing — did you ever hear back from them?"}, {"category": "manage", "kr": "마지막 인사할 때", "en": "Talk to you soon.", "ex": "Alright, talk to you soon. Have a good one."}];
+DATA.forEach((d,i)=>d.n=i+1);
+
+let cat="all", q="", order=[...DATA];
+const listEl=document.getElementById('list'), noneEl=document.getElementById('none');
+document.getElementById('cTotal').textContent=DATA.length;
+
+// waveform signature
+const meter=document.getElementById('meter');
+for(let i=0;i<64;i++){
+  const b=document.createElement('i');
+  b.style.height=(5+Math.abs(Math.sin(i*0.55))*20).toFixed(0)+'px';
+  b.style.opacity=(0.18+Math.abs(Math.sin(i*0.55))*0.5).toFixed(2);
+  meter.appendChild(b);
+}
+
+// tags
+const tagsEl=document.getElementById('tags');
+const mk=(k,label)=>{const b=document.createElement('button');b.className='tag'+(k==='all'?' on':'');b.dataset.c=k;b.textContent=label;return b;};
+tagsEl.appendChild(mk('all','전체'));
+Object.entries(CATS).forEach(([k,v])=>tagsEl.appendChild(mk(k,v)));
+
+function speak(t,e){
+  e.stopPropagation();
+  try{ window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=0.92;
+    window.speechSynthesis.speak(u);
+  }catch(err){}
+}
+
+function render(){
+  const s=q.trim().toLowerCase();
+  const out=order.filter(d=>cat==='all'||d.category===cat)
+    .filter(d=>!s||d.en.toLowerCase().includes(s)||d.ex.toLowerCase().includes(s)||d.kr.includes(s)||CATS[d.category].includes(s));
+  document.getElementById('cShow').textContent=out.length;
+  noneEl.style.display=out.length?'none':'block';
+  listEl.innerHTML='';
+  out.forEach(d=>{
+    const c=document.createElement('div');
+    c.className='card'; c.dataset.c=d.category;
+    c.innerHTML=`<div class="row1"><span class="idx">${String(d.n).padStart(3,'0')}</span>
+      <span class="badge">${CATS[d.category]}</span></div>
+      <div class="kr">${d.kr}</div>
+      <div class="en">${d.en}</div>
+      <div class="ex">${d.ex}</div>
+      <button class="speak" title="발음 듣기">🔊</button>`;
+    c.addEventListener('click',()=>c.classList.toggle('open'));
+    c.querySelector('.speak').addEventListener('click',e=>speak(d.ex,e));
+    listEl.appendChild(c);
+  });
+}
+
+document.getElementById('search').addEventListener('input',e=>{q=e.target.value;render();});
+tagsEl.addEventListener('click',e=>{
+  const b=e.target.closest('.tag'); if(!b)return;
+  document.querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));
+  b.classList.add('on'); cat=b.dataset.c; render();
+});
+const mS=document.getElementById('mStudy'), mR=document.getElementById('mRecall');
+mS.addEventListener('click',()=>{document.body.classList.remove('recall');mS.classList.add('on');mR.classList.remove('on');render();});
+mR.addEventListener('click',()=>{document.body.classList.add('recall');mR.classList.add('on');mS.classList.remove('on');render();});
+document.getElementById('shuffle').addEventListener('click',()=>{
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+});
+
+render();
+</script>
+</body>
+</html>
