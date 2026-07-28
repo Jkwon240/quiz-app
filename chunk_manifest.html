@@ -355,11 +355,10 @@
 <body>
 
   <div class="syncbar">
-    <span class="sync-status" id="syncStatus">SYNC · 로컬 저장 중</span>
-    <button id="btnLogin">구글 로그인</button>
-    <button id="btnLogout">로그아웃</button>
-    <button id="btnLoad">불러오기</button>
-    <button id="btnSave" class="primary">진행 상황 저장</button>
+    <span class="sync-status" id="syncStatus">SYNC · 로그인하면 기기 간 동기화</span>
+    <button onclick="loginWithGoogle()">구글 로그인</button>
+    <button onclick="logoutGoogle()">로그아웃</button>
+    <button onclick="syncToCloud()" class="primary">진행 상황 저장</button>
   </div>
 
   <div class="wrap">
@@ -525,89 +524,72 @@ updateMasteredCount();
 render();
 </script>
 
-<!-- ============ Firebase 동기화 ============ -->
+<!-- Firebase SDK 및 자동 동기화 스크립트 -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc }
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  // ⚠️ index.html(퀴즈앱)에 있는 실제 값으로 4곳을 교체하세요.
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  // 1. Firebase 설정
   const firebaseConfig = {
-    apiKey:            "PASTE_API_KEY",
-    authDomain:        "my-quiz-app-cba37.firebaseapp.com",
-    projectId:         "my-quiz-app-cba37",
-    storageBucket:     "my-quiz-app-cba37.appspot.com",
-    messagingSenderId: "PASTE_SENDER_ID",
-    appId:             "PASTE_APP_ID"
+    apiKey: "AIzaSyAuObaVSgZc1gn6o_5xQLMoKOTLDA3revI",
+    authDomain: "my-quiz-app-cba37.firebaseapp.com",
+    projectId: "my-quiz-app-cba37",
+    storageBucket: "my-quiz-app-cba37.firebasestorage.app",
+    messagingSenderId: "887111619087",
+    appId: "1:887111619087:web:89595958154019d594097a",
+    measurementId: "G-PB098T31CW"
   };
-
-  const STORE_KEY = 'cargo_chunks_v1';
-  const statusEl = document.getElementById('syncStatus');
-  const btnLogin  = document.getElementById('btnLogin');
-  const btnLogout = document.getElementById('btnLogout');
-  const btnSave   = document.getElementById('btnSave');
-  const btnLoad   = document.getElementById('btnLoad');
-
-  function setStatus(text, cls){
-    statusEl.textContent = text;
-    statusEl.className = 'sync-status' + (cls ? ' ' + cls : '');
-  }
-
-  // 설정값이 아직 자리표시자면 동기화 기능을 잠급니다.
-  const configured = !Object.values(firebaseConfig).some(v => String(v).startsWith('PASTE_'));
-  if(!configured){
-    setStatus('SYNC 미설정 · 로컬 저장만 동작', 'warn');
-    [btnLogin, btnLogout, btnSave, btnLoad].forEach(b => b.disabled = true);
-  } else {
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-    let currentUser = null;
-
-    onAuthStateChanged(auth, user => {
-      currentUser = user;
-      if(user){
-        setStatus('SYNC 연결됨 · ' + (user.email || user.uid.slice(0,8)), 'on');
-      } else {
-        setStatus('SYNC · 로그인하면 기기 간 동기화', '');
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+  // 2. 로그인 감지 및 클라우드 동기화
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      console.log("로그인됨:", user.displayName);
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        Object.keys(data).forEach(key => {
+          localStorage.setItem(key, JSON.stringify(data[key]));
+        });
+        console.log("기기 동기화 완료!");
       }
-    });
+    }
+  });
+  // 3. 진행상황 저장 함수
+  window.syncToCloud = async function() {
+    if (auth.currentUser) {
+      const localData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try {
+          localData[key] = JSON.parse(localStorage.getItem(key));
+        } catch(e) {
+          localData[key] = localStorage.getItem(key);
+        }
+      }
+      await setDoc(doc(db, "users", auth.currentUser.uid), localData);
+      alert("진행 상황이 클라우드에 저장되었습니다!");
+    } else {
+      alert("먼저 구글 로그인을 해주세요!");
+    }
+  };
+  window.loginWithGoogle = () => signInWithPopup(auth, provider);
+  window.logoutGoogle = () => signOut(auth);
 
-    btnLogin.addEventListener('click', async ()=>{
-      try { await signInWithPopup(auth, provider); }
-      catch(err){ alert('로그인 실패: ' + err.message); }
-    });
-
-    btnLogout.addEventListener('click', async ()=>{
-      try { await signOut(auth); }
-      catch(err){ alert('로그아웃 실패: ' + err.message); }
-    });
-
-    btnSave.addEventListener('click', async ()=>{
-      if(!currentUser){ alert('먼저 구글 로그인을 해주세요.'); return; }
-      try {
-        const data = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-        await setDoc(doc(db, 'users', currentUser.uid),
-                     { chunkData: data, chunkUpdatedAt: Date.now() },
-                     { merge: true });
-        setStatus('SYNC 저장 완료 · ' + Object.keys(data).length + '개', 'on');
-      } catch(e){ alert('저장 실패: ' + e.message); }
-    });
-
-    btnLoad.addEventListener('click', async ()=>{
-      if(!currentUser){ alert('먼저 구글 로그인을 해주세요.'); return; }
-      try {
-        const snap = await getDoc(doc(db, 'users', currentUser.uid));
-        const data = snap.exists() ? (snap.data().chunkData || {}) : {};
-        if(!Object.keys(data).length){ alert('클라우드에 저장된 기록이 없습니다.'); return; }
-        localStorage.setItem(STORE_KEY, JSON.stringify(data));
-        location.reload();
-      } catch(e){ alert('불러오기 실패: ' + e.message); }
-    });
-  }
+  // 4. 상단 SYNC 상태 표시줄 갱신 (진행 상황 표시용, 저장/로그인 로직에는 관여하지 않음)
+  const statusEl = document.getElementById('syncStatus');
+  onAuthStateChanged(auth, (user) => {
+    if (!statusEl) return;
+    if (user) {
+      statusEl.textContent = 'SYNC 연결됨 · ' + (user.email || user.displayName || user.uid.slice(0,8));
+      statusEl.className = 'sync-status on';
+    } else {
+      statusEl.textContent = 'SYNC · 로그인하면 기기 간 동기화';
+      statusEl.className = 'sync-status';
+    }
+  });
 </script>
 </body>
 </html>
