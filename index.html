@@ -2510,7 +2510,10 @@ init();
     }
   };
 
-  window.loginWithGoogle = () => signInWithPopup(auth, provider);
+  window.loginWithGoogle = () => signInWithPopup(auth, provider).then(() => {
+  alert("구글 로그인 성공!");
+  location.reload(); // 로그인 성공 시 자동으로 화면 새로고침
+});
   window.logoutGoogle = () => signOut(auth);
 </script>
 </html>
